@@ -1,5 +1,4 @@
 # Summary
 
 * Getting Started
-* VkInstance
 
