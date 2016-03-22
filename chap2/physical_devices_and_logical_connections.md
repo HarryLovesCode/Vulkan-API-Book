@@ -152,10 +152,18 @@ fprintf(stdout, "Driver Version:	%d\n", physicalProperties.driverVersion);
 As I mentioned before, the API version is encoded. There are three macros that will help make it human readable...
 
 ```cpp
-VK_VERSION_MAJOR(API_VERSION);
-VK_VERSION_MINOR(API_VERSION);
-VK_VERSION_PATCH(API_VERSION);
+#define VK_VERSION_MAJOR(version) ((uint32_t)(version) >> 22)
+#define VK_VERSION_MINOR(version) (((uint32_t)(version) >> 12) & 0x3ff)
+#define VK_VERSION_PATCH(version) ((uint32_t)(version) & 0xfff)
 ```
 
+Thus, to output the API version, you can use this line...
+
+```cpp
+fprintf(stdout, "API Version:		%d.%d.%d\n", 
+        VK_VERSION_MAJOR(physicalProperties.apiVersion),
+        VK_VERSION_MINOR(physicalProperties.apiVersion),
+        VK_VERSION_PATCH(physicalProperties.apiVersion));
+```
 
 
