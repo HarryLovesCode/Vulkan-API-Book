@@ -212,7 +212,7 @@ You'll note that we create a `float` array with a single value. Each value in th
 
 The parent of `VkDeviceQueueCreateInfo` is `VkDeviceCreateInfo`. You can find more information [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkDeviceCreateInfo) and the definition is included below...
 
-```
+```cpp
 typedef struct VkDeviceCreateInfo {
     // The type of this structure
     VkStructureType                    sType;
