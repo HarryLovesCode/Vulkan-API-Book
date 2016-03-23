@@ -144,7 +144,7 @@ for (uint32_t i = 0; i < deviceCount; i++) {
 We can output some of the information we thought to be useful using this piece of code...
 
 ```cpp
-fprintf(stdout, "Device Name:		%d\n", physicalProperties.deviceName);
+fprintf(stdout, "Device Name:		%s\n", physicalProperties.deviceName);
 fprintf(stdout, "Device Type:		%d\n", physicalProperties.deviceType);
 fprintf(stdout, "Driver Version:	%d\n", physicalProperties.driverVersion);
 ```
