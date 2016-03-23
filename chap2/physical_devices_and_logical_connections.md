@@ -166,4 +166,99 @@ fprintf(stdout, "API Version:		%d.%d.%d\n",
         VK_VERSION_PATCH(physicalProperties.apiVersion));
 ```
 
+# `VkDeviceQueueCreateInfo`
 
+The next step is to create a device using `vkCreateDevice`. However, in order to do that, we must have a `VkDeviceCreateInfo` object. And, as you may have guessed having seen the specification, we need a `VkDeviceQueueCreateInfo` object. You can find the documentation for this object [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkDeviceQueueCreateInfo). Let's look at the definition...
+
+```cpp
+typedef struct VkDeviceQueueCreateInfo {
+    // The type of this structure
+    VkStructureType             sType;
+    // NULL or a pointer to an extension-specific structure
+    const void*                 pNext;
+    // Reserved for future use
+    VkDeviceQueueCreateFlags    flags;
+    // An unsigned integer indicating the index of the queue family to 
+    // create on this device. This index corresponds to the index of an
+    // element of the pQueueFamilyProperties array that was returned by
+    // vkGetPhysicalDeviceQueueFamilyProperties
+    uint32_t                    queueFamilyIndex;
+    // An unsigned integer specifying the number of queues to create 
+    // in the queue family indicated by queueFamilyIndex.
+    uint32_t                    queueCount;
+    // An array of queueCount normalized floating point values, 
+    // specifying priorities of work that will be submitted to each
+    // created queue.
+    const float*                pQueuePriorities;
+} VkDeviceQueueCreateInfo;
+```
+
+Following the usage guidelines outlined in the specification, creating a `VkDeviceQueueCreateInfo` object looks like this...
+
+```cpp
+float priorities[] = { 1.0f };
+VkDeviceQueueCreateInfo queueInfo{};
+queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+queueInfo.pNext = NULL;
+queueInfo.flags = 0;
+queueInfo.queueFamilyIndex = 0;
+queueInfo.queueCount = 1;
+queueInfo.pQueuePriorities = &priorities[0];
+```
+
+You'll note that we create a `float` array with a single value. Each value in that array will tell the implementation the priority of the queue. Values must be between `0.0` and `1.0`. Certain implementations will give higher-priority queues more processing time. However, this is not necessarily true because the specification doesn't require this behavior.
+
+# `VkDeviceCreateInfo`
+
+The parent of `VkDeviceQueueCreateInfo` is `VkDeviceCreateInfo`. You can find more information [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkDeviceCreateInfo) and the definition is included below...
+
+```
+typedef struct VkDeviceCreateInfo {
+    // The type of this structure
+    VkStructureType                    sType;
+    // NULL or a pointer to an extension-specific structure
+    const void*                        pNext;
+    // Reserved for future use
+    VkDeviceCreateFlags                flags;
+    // The unsigned integer size of the pQueueCreateInfos array
+    uint32_t                           queueCreateInfoCount;
+    // A pointer to an array of VkDeviceQueueCreateInfo structures 
+    // describing the queues that are requested to be created along 
+    // with the logical device
+    const VkDeviceQueueCreateInfo*     pQueueCreateInfos;
+    // The number of device layers to enable
+    uint32_t                           enabledLayerCount;
+    // A pointer to an array of enabledLayerCount null-terminated 
+    // UTF-8 strings containing the names of layers to enable for 
+    // the created device
+    const char* const*                 ppEnabledLayerNames;
+    // The number of device extensions to enable
+    uint32_t                           enabledExtensionCount;
+    // A pointer to an array of enabledExtensionCount null-terminated 
+    // UTF-8 strings containing the names of extensions to enable for
+    // the created device
+    const char* const*                 ppEnabledExtensionNames;
+    // NULL or a pointer to a VkPhysicalDeviceFeatures structure that 
+    // contains boolean indicators of all the features to be enabled
+    const VkPhysicalDeviceFeatures*    pEnabledFeatures;
+} VkDeviceCreateInfo;
+```
+
+Following the usage guidelines outlined in the specification, creating a `VkDeviceCreateInfo` object looks like this...
+
+```cpp
+std::vector<const char *> enabledExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+VkDeviceCreateInfo deviceInfo{};
+deviceInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+deviceInfo.pNext = NULL;
+deviceInfo.flags = 0;
+deviceInfo.queueCreateInfoCount = 1;
+deviceInfo.pQueueCreateInfos = &queueInfo;
+deviceInfo.enabledExtensionCount = enabledExtensions.size();
+deviceInfo.ppEnabledExtensionNames = enabledExtensions.data();
+deviceInfo.pEnabledFeatures = NULL;
+```
+
+# The Swap Chain
+
+You might have noticed that in the section before, we made use of this value: `VK_KHR_SWAPCHAIN_EXTENSION_NAME`. So, what *is* a swap chain? It is essentially an **array of images** ready to be presented. It's primary use has to do with frame rate control. An example of using two buffers is called **double buffering**. The GPU renders completely to a single frame and then displays it. Once it has finished drawing the first frame, it begins drawing the second frame. This occurs even if we're rendering above the rate we're supposed to. Assuming we're rendering faster than the monitor can display our images, we would then wait and **flip** the second buffer onto the screen. By flipping the image onto the screen buffer during the **vertical blanking interval**, we can write our data while the monitor is blank and when it refreshes, our image appears on the screen. Other techniques such as **triple buffering** exist.
