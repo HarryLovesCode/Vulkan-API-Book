@@ -32,7 +32,7 @@ We should handle two possible issues. First, `result != VK_SUCCESS` means our ca
 
 ```cpp
 if (result != VK_SUCCESS) {
-    fprintf(stderr, "vkEnumeratePhysicalDevices failed: %d\n", result);
+    fprintf(stderr, "Failed to enumerate physical devices: %d\n", result);
     exit(EXIT_FAILURE);
 }
 
@@ -49,7 +49,7 @@ std::vector<VkPhysicalDevice> physicalDevices(deviceCount);
 result = vkEnumeratePhysicalDevices(instance, &deviceCount, physicalDevices.data());
 
 if (result != VK_SUCCESS) {
-    fprintf(stderr, "vkEnumeratePhysicalDevices failed: %d\n", result);
+    fprintf(stderr, "Failed to enumerate physical devices: %d\n", result);
     exit(EXIT_FAILURE);
 }
 ```
@@ -310,7 +310,7 @@ void VulkanExample::initDevices()
 	VkResult result = vkEnumeratePhysicalDevices(instance, &deviceCount, NULL);
 
 	if (result != VK_SUCCESS) {
-		fprintf(stderr, "vkEnumeratePhysicalDevices failed: %d\n", result);
+		fprintf(stderr, "Failed to enumerate physical devices: %d\n", result);
 		exit(EXIT_FAILURE);
 	}
 
@@ -323,12 +323,12 @@ void VulkanExample::initDevices()
 	result = vkEnumeratePhysicalDevices(instance, &deviceCount, physicalDevices.data());
 
 	if (result != VK_SUCCESS) {
-		fprintf(stderr, "vkEnumeratePhysicalDevices failed: %d\n", result);
+		fprintf(stderr, "Failed to enumerate physical devices: %d\n", result);
 		exit(EXIT_FAILURE);
 	}
 
 	physicalDevice = physicalDevices[0];
-    
+	
 	float priorities[] = { 1.0f };
 	VkDeviceQueueCreateInfo queueInfo{};
 	queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
@@ -348,6 +348,7 @@ void VulkanExample::initDevices()
 	deviceInfo.enabledExtensionCount = enabledExtensions.size();
 	deviceInfo.ppEnabledExtensionNames = enabledExtensions.data();
 	deviceInfo.pEnabledFeatures = NULL;
+
 	result = vkCreateDevice(physicalDevice, &deviceInfo, NULL, &logicalDevice);
 
 	if (result != VK_SUCCESS) {
