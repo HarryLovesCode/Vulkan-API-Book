@@ -45,19 +45,6 @@ if (deviceCount < 1) {
 Following the usage guidelines outlined in the specification, a call to `vkEnumeratePhysicalDevices`would look like this...
 
 ```cpp
-uint32_t deviceCount = 0;
-VkResult result = vkEnumeratePhysicalDevices(instance, &deviceCount, NULL);
-
-if (result != VK_SUCCESS) {
-    fprintf(stderr, "vkEnumeratePhysicalDevices failed: %d\n", result);
-    exit(EXIT_FAILURE);
-}
-
-if (deviceCount < 1) {
-    fprintf(stderr, "No Vulkan compatible devices found: %d\n", result);
-    exit(EXIT_FAILURE);
-}
-    
 std::vector<VkPhysicalDevice> physicalDevices(deviceCount);
 result = vkEnumeratePhysicalDevices(instance, &deviceCount, physicalDevices.data());
 
@@ -166,6 +153,8 @@ fprintf(stdout, "API Version:		%d.%d.%d\n",
         VK_VERSION_PATCH(physicalProperties.apiVersion));
 ```
 
+**Important**: For now we're just going to use one physical device and one logical device. Thus, we should keep track of `physicalDevices[0]`.
+
 # `VkDeviceQueueCreateInfo`
 
 The next step is to create a device using `vkCreateDevice`. However, in order to do that, we must have a `VkDeviceCreateInfo` object. And, as you may have guessed having seen the specification, we need a `VkDeviceQueueCreateInfo` object. You can find the documentation for this object [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkDeviceQueueCreateInfo). Let's look at the definition...
@@ -257,4 +246,118 @@ deviceInfo.pQueueCreateInfos = &queueInfo;
 deviceInfo.enabledExtensionCount = enabledExtensions.size();
 deviceInfo.ppEnabledExtensionNames = enabledExtensions.data();
 deviceInfo.pEnabledFeatures = NULL;
+```
+
+#`vkCreateDevice`
+
+Finally, to wrap up this section, we need to create a logical device. We'll use the `vkCreateDevice` which you can find [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#vkCreateDevice) in the specification. This is how it is defined...
+
+```cpp
+VkResult vkCreateDevice(
+    // One of the device handles returned from a call to 
+    // vkEnumeratePhysicalDevices
+    VkPhysicalDevice                            physicalDevice,
+    // A pointer to a VkDeviceCreateInfo structure containing information 
+    // about how to create the device
+    const VkDeviceCreateInfo*                   pCreateInfo,
+    // NULL or a pointer to a valid VkAllocationCallbacks structure
+    const VkAllocationCallbacks*                pAllocator,
+    // A pointer to a VkDevice handle
+    VkDevice*                                   pDevice);
+```
+
+Following the usage guidelines outlined in the specification, calling `vkCreateDevice` looks like this...
+
+```cpp
+VkResult result = vkCreateDevice(physicalDevice, &deviceInfo, NULL, &logicalDevice);
+
+if (result != VK_SUCCESS) {
+    fprintf(stderr, "Failed to create logical device: %d\n", result);
+    exit(EXIT_FAILURE);
+}
+```
+
+# Putting it All Together
+
+```cpp
+class VulkanExample {
+private:
+	VkInstance instance;
+	VkPhysicalDevice physicalDevice;
+	VkDevice logicalDevice;
+
+	void initInstance();
+	void initDevices();
+public:
+	VulkanExample();
+	virtual ~VulkanExample();
+};
+
+VulkanExample::VulkanExample()
+{
+	this->initInstance();
+	this->initDevices();
+}
+
+void VulkanExample::initInstance()
+{
+    // Implementation shown in Chapter 1
+}
+
+void VulkanExample::initDevices()
+{
+	uint32_t deviceCount = 0;
+	VkResult result = vkEnumeratePhysicalDevices(instance, &deviceCount, NULL);
+
+	if (result != VK_SUCCESS) {
+		fprintf(stderr, "vkEnumeratePhysicalDevices failed: %d\n", result);
+		exit(EXIT_FAILURE);
+	}
+
+	if (deviceCount < 1) {
+		fprintf(stderr, "No Vulkan compatible devices found: %d\n", result);
+		exit(EXIT_FAILURE);
+	}
+
+	std::vector<VkPhysicalDevice> physicalDevices(deviceCount);
+	result = vkEnumeratePhysicalDevices(instance, &deviceCount, physicalDevices.data());
+
+	if (result != VK_SUCCESS) {
+		fprintf(stderr, "vkEnumeratePhysicalDevices failed: %d\n", result);
+		exit(EXIT_FAILURE);
+	}
+
+	physicalDevice = physicalDevices[0];
+    
+	float priorities[] = { 1.0f };
+	VkDeviceQueueCreateInfo queueInfo{};
+	queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	queueInfo.pNext = NULL;
+	queueInfo.flags = 0;
+	queueInfo.queueFamilyIndex = 0;
+	queueInfo.queueCount = 1;
+	queueInfo.pQueuePriorities = &priorities[0];
+
+	std::vector<const char *> enabledExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+	VkDeviceCreateInfo deviceInfo{};
+	deviceInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+	deviceInfo.pNext = NULL;
+	deviceInfo.flags = 0;
+	deviceInfo.queueCreateInfoCount = 1;
+	deviceInfo.pQueueCreateInfos = &queueInfo;
+	deviceInfo.enabledExtensionCount = enabledExtensions.size();
+	deviceInfo.ppEnabledExtensionNames = enabledExtensions.data();
+	deviceInfo.pEnabledFeatures = NULL;
+	result = vkCreateDevice(physicalDevice, &deviceInfo, NULL, &logicalDevice);
+
+	if (result != VK_SUCCESS) {
+		fprintf(stderr, "Failed to create logical device: %d\n", result);
+		exit(EXIT_FAILURE);
+	}
+}
+
+VulkanExample::~VulkanExample()
+{
+    // We'll get to cleanup soon
+}
 ```
