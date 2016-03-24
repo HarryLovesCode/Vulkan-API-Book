@@ -2,31 +2,29 @@
 
 In order to show something on the screen, we have to deal with **Window System Integration (WSI)**. The documentation I'm going to be using can be found [here](https://www.khronos.org/registry/vulkan/specs/1.0/refguide/Vulkan-1.0-web.pdf). To follow along, you can go to section **29.2.4**.
 
-# `HINSTANCE`
+# Creating a Window
 
-# `HWND`
-
-# `VkAndroidSurfaceCreateInfoKHR`
-
-Because we're getting into platform specific code, documentation can be a little hard to find. If you clicked on the documentation I linked, you'll see it's a quick reference guide. Looking at the documentation, we'll see in order to use `vkCreateWin32SurfaceKHR`, we'll need to create a `VkWin32SurfaceCreateInfoKHR` object. The definition looks like this...
+Creating a window for display on Windows is more work than you'd expect. You can find information on how I've created my implementation [here](https://msdn.microsoft.com/en-us/library/bb384843.aspx). So the first thing we need to know is what headers we should include. The information I linked tells us that we should include...
 
 ```cpp
-typedef struct VkWin32SurfaceCreateInfoKHR {
-    VkStructureType sType;
-    const void* pNext;
-    VkWin32SurfaceCreateFlagsKHR flags;
-    HINSTANCE hinstance;
-    HWND hwnd;
-} VkWin32SurfaceCreateInfoKHR;
+#include <windows.h>
+#include <stdlib.h>
+#include <string.h>
+#include <tchar.h>
 ```
 
-Following the valid usage from other sections, we can say that creating a `VkAndroidSurfaceCreateInfoKHR` object looks like...
+The next thing we need to know is whether or not the entry point is different. It is in fact something other than `main` similar to a few GUI tool-kits I've seen. The definition for the Win32 application main method looks like this...
 
 ```cpp
-VkWin32SurfaceCreateInfoKHR createInfo{};
-createInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-createInfo.pNext = NULL;
-createInfo.flags = 0;
-createInfo.hinstance = (HINSTANCE)platformHandle;
-createInfo.hwnd = (HWND)platformWindow;
+int WINAPI WinMain(
+    HINSTANCE hInstance,
+    HINSTANCE hPrevInstance,
+    LPSTR lpCmdLine,
+    int nCmdShow);
+```
+
+Finally, before we can begin creating the window and adding functionality, we need another function. We'll follow the information I linked and call it `WndProc`. Here's the definition...
+
+```cpp
+LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 ```
