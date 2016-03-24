@@ -1,6 +1,6 @@
 # Physical Devices and Logical Connections
 
-Once we have created a Vulkan instance, we can use two objects to interact with our implementation. These objects are queues and devices. This chapter is going to focus on the two types of devices: physical and logical. A physical device is a usually a single component in the system. It can also be multiple components working in conjunction to function like a single device. A logical device is basically our interface with the physical device.
+Once we have created a Vulkan instance, we can use two objects to interact with our implementation. These objects are queues and devices. This chapter is going to focus on the two types of devices: physical and logical. A physical device is a single component in the system. It can also be multiple components working in conjunction to function like a single device. A logical device is basically our interface with the physical device.
 
 # `VkPhysicalDevice`
 
@@ -8,7 +8,7 @@ A `VkPhysicalDevice` is a data type that we will use to represent each piece of 
 
 # `vkEnumeratePhysicalDevices`
 
-In order to get a list of all the physical devices in the system, we can call use this method. You can find more information [in the same section](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#devsandqueues-physical-device-enumeration) along with the definition itself. The definition looks like...
+To get a list of all the physical devices in the system, we can call use this method. You can find more information [in the same section](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#devsandqueues-physical-device-enumeration) along with the definition itself. The definition looks like...
 
 ```cpp
 VkResult vkEnumeratePhysicalDevices(
