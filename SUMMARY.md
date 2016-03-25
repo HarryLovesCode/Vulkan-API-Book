@@ -7,5 +7,6 @@
 * [Creating a Surface](chap3/creating_a_surface.md)
    * [Windows](chap3/windows.md)
    * Linux
+   * Android
 * [Working with Swapchains](chap4/working_with_swapchains.md)
 
