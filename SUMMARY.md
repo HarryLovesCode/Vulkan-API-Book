@@ -7,7 +7,7 @@
    * Android
 * [Creating an Instance](chap2/creating_an_instance.md)
 * [Physical Devices and Logical Connections](chap3/physical_devices_and_logical_connections.md)
-* [Creating a Window](chap4/creating_a_surface.md)
+* [Creating a Window](chap4/creating_a_window.md)
    * [Windows](chap3/windows.md)
    * Linux
    * Android
