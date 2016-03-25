@@ -23,7 +23,7 @@ int WINAPI WinMain(
     int nCmdShow);
 ```
 
-Finally, before we can begin creating the window and adding functionality, we need another function. We'll need to declare this Here's the definition...
+Before we can begin creating the window and adding functionality, we need another function. Here's the definition...
 
 ```cpp
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
