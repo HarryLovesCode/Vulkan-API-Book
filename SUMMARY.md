@@ -6,5 +6,6 @@
 * [Physical Devices and Logical Connections](chap2/physical_devices_and_logical_connections.md)
 * [Creating a Surface](chap3/creating_a_surface.md)
    * [Windows](chap3/windows.md)
+   * Linux
 * [Working with Swapchains](chap4/working_with_swapchains.md)
 
