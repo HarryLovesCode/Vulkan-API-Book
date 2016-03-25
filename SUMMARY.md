@@ -13,5 +13,6 @@
    * Android
    * GLFW
 * [Getting a Surface](chap5/getting_a_surface.md)
+   * Windows
 * [Working with Swapchains](chap6/working_with_swapchains.md)
 
