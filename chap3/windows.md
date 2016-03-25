@@ -79,10 +79,11 @@ int windowX = screenWidth / 2 - windowWidth / 2;
 int windowY = screenHeight / 2 - windowHeight / 2;
 ```
 
-Now that we've prepared everything for our window, we can go ahead and create it. This is the definition for `CreateWindow` if you're curious:
+Now that we've prepared everything for our window, we can go ahead and create it. This is the definition for `CreateWindowEx` if you're curious:
 
 ```cpp
-HWND WINAPI CreateWindow(
+HWND WINAPI CreateWindowEx(
+    _In_     DWORD     dwExStyle,
     _In_opt_ LPCTSTR   lpClassName,
     _In_opt_ LPCTSTR   lpWindowName,
     _In_     DWORD     dwStyle,
@@ -172,7 +173,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 # Coming Back to `WinMain`
 
-Here's the entry point to our program. It will replace the normal main method. We're going to be using the setup outlined [here](https://msdn.microsoft.com/en-us/library/windows/desktop/ms644936(v=vs.85.aspx) to act as the main application loop. The code looks like this:
+Here's the entry point to our program. It will replace the normal main method. The code looks like this:
 
 ```cpp
 MSG message;
