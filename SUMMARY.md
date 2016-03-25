@@ -12,6 +12,6 @@
    * Linux
    * Android
    * GLFW
-* [Working with Swapchains](chap4/working_with_swapchains.md)
 * Getting a Surface
+* [Working with Swapchains](chap4/working_with_swapchains.md)
 
