@@ -16,5 +16,6 @@
    * Windows
    * Linux
    * Android
+   * GLFW
 * [Working with Swapchains](chap6/working_with_swapchains.md)
 
