@@ -1,43 +1,75 @@
 # Windows
 
-In order to show something on the screen, we have to deal with **Window System Integration (WSI)**. The documentation I'm going to be using can be found [here](https://www.khronos.org/registry/vulkan/specs/1.0/refguide/Vulkan-1.0-web.pdf). To follow along, you can go to section **29.2.4**.
+In order to create a window, we're going to be using platform specific code. Please note that this tutorial is for Windows **only**. None of this will apply to Linux, Android, GLFW, etc.
 
-# Preparing for Window Creation
+# Including Headers
 
-Because we're going to be writing this from scratch, we're going to have to interact with Windows directly. The first thing we need to know is what headers we should include. The information I linked tells us that we should include these headers:
+Because we're going to be writing this from scratch, we're going to have to interact with Windows directly. Before we can do anything, we need to include the Windows header. If you're only targeting Windows, you can write:
 
 ```cpp
 #include <windows.h>
-#include <stdlib.h>
-#include <string.h>
-#include <tchar.h>
 ```
 
-The next thing we need to know is whether or not the entry point is different. It is in fact something other than `main` similar to a few GUI tool-kits I've seen. The definition for the Win32 application main method looks like this:
+If you're targeting multiple platforms including Windows, you can write:
 
 ```cpp
-int WINAPI WinMain(
-    HINSTANCE hInstance,
-    HINSTANCE hPrevInstance,
-    LPSTR lpCmdLine,
-    int nCmdShow);
+#if defined(_WIN32)
+#include <Windows.h>
+#endif
 ```
 
-Before we can begin creating the window and adding functionality, we need another function. Here's the definition:
+# Creating a Window
+
+As mentioned before, because we're writing this without any windowing libraries, we'll have to use the Win32 API. I won't go too much into detail because our focus is Vulkan and not Windows. Let's go ahead and list the variables we'll be using:
 
 ```cpp
-LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+const int windowWidth = 1280;
+const int windowHeight = 720;
+
+HINSTANCE windowInstance;
+HWND window;
 ```
 
-We'll come back to implement the bodies for these two methods later in this section.
+In this section we'll be writing the body this method:
 
-# Creating the Window
+```cpp
+void VulkanExample::createWindow(HINSTANCE hInstance, WNDPROC wndProc)
+{
 
-Window creation isn't anything crazy. We're just going to be creating a basic window.
+}
+```
+
+Don't worry about `hInstance` and `wndProc` for now. Those are simply passed from the `WinMain` method we'll write later on. To setup our window, we'll need to register it with Windows. You can find the documentation for the `RegisterClassEx` method [here](https://goo.gl/m3WViB). The definition looks like this:
+
+```cpp
+ATOM WINAPI RegisterClassEx(
+    _In_ const WNDCLASSEX *lpwcx
+);
+```
+
+As you'll see, we'll need to call it with a `WNDCLASSEX` object. You can find the documentation [here](https://goo.gl/1M92FX) and the definition looks like this:
+
+```cpp
+typedef struct tagWNDCLASSEX {
+    UINT      cbSize;
+    UINT      style;
+    WNDPROC   lpfnWndProc;
+    int       cbClsExtra;
+    int       cbWndExtra;
+    HINSTANCE hInstance;
+    HICON     hIcon;
+    HCURSOR   hCursor;
+    HBRUSH    hbrBackground;
+    LPCTSTR   lpszMenuName;
+    LPCTSTR   lpszClassName;
+    HICON     hIconSm;
+} WNDCLASSEX, *PWNDCLASSEX;
+```
+
+Here's the code we'll be using to set it up:
 
 ```cpp
 WNDCLASSEX wcex;
-
 wcex.cbSize = sizeof(WNDCLASSEX);
 wcex.style = CS_HREDRAW | CS_VREDRAW;
 wcex.lpfnWndProc = wndProc;
@@ -48,42 +80,49 @@ wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
 wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 wcex.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
 wcex.lpszMenuName = NULL;
-wcex.lpszClassName = windowClassName.c_str();
+wcex.lpszClassName = engineName.c_str();
 wcex.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
+```
 
+As I said, I'm not going to go too much into detail on what each field means so we'll move on to registering the window. Calling `RegisterClassEx` returns `NULL` upon failure so we should make sure we check for that.
+
+```cpp
 if (!RegisterClassEx(&wcex)) {
     fprintf(stderr, "Call to RegisterClassEx failed\n");
     exit(EXIT_FAILURE);
 }
+```
 
+Assuming all has gone well, we can set our `windowInstance` variable.
+
+```cpp
 windowInstance = hInstance;
 ```
 
-We'll talk about full-screen at a later time. For now, we're just going to create a window and center it on the screen. First, we need to ask the system for the width and height of the screen. We can use the `GetSystemMetrics` method to do this.
+While it's not required, I'd recommend centering the window on the screen upon showing it. We'll need to use the `GetSystemMetrics` method to get two values:
+
+- Screen width (`SM_CXSCREEN`)
+- Screen height (`SM_CYSCREEN`)
+
+Once we have these, we can do that math required to center the window:
+
+$$W_{left} = S_{width} / 2 - W_{width} / 2$$
+
+$$W_{top} = S_{height} / 2 - W_{height} / 2$$
+
+To get all of this information and compute the window's left and top positions, we can write the following code:
 
 ```cpp
 int screenWidth = GetSystemMetrics(SM_CXSCREEN);
 int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+int windowLeft = screenWidth / 2 - windowWidth / 2;
+int windowTop = screenHeight / 2 - windowHeight / 2;
 ```
 
-You probably know how to center something, but you may not know how to do it on a display. The way we do it is...
-
-$$X_{window} = W_{screen} / 2 - W_{window} / 2 $$
-
-$$Y_{window} = H_{screen} / 2 - H_{window} / 2 $$
-
-The implementation in code looks like this:
+Finally, we can call Window's `CreateWindow` method. You can find documentation [here](https://goo.gl/dmHFfS) and the definition looks like this:
 
 ```cpp
-int windowX = screenWidth / 2 - windowWidth / 2;
-int windowY = screenHeight / 2 - windowHeight / 2;
-```
-
-Now that we've prepared everything for our window, we can go ahead and create it. This is the definition for `CreateWindowEx` if you're curious:
-
-```cpp
-HWND WINAPI CreateWindowEx(
-    _In_     DWORD     dwExStyle,
+HWND WINAPI CreateWindow(
     _In_opt_ LPCTSTR   lpClassName,
     _In_opt_ LPCTSTR   lpWindowName,
     _In_     DWORD     dwStyle,
@@ -98,44 +137,31 @@ HWND WINAPI CreateWindowEx(
 );
 ```
 
-Now for the usage. I use the following to create my window:
+Valid usage following the documentation looks like this:
 
 ```cpp
-std::string windowTitle = "Vulkan Example";
-std::string windowClassName = "vulkanEngine";
-int windowWidth = 1280;
-int windowHeight = 720;
-
 window = CreateWindow(
-    windowClassName.c_str(), 
-    windowTitle.c_str(), 
-    WS_OVERLAPPEDWINDOW,
-    windowX, 
-    windowY, 
-    windowWidth,
-    windowHeight, 
-    NULL, 
-    NULL, 
+    engineName.c_str(),
+    applicationName.c_str(),
+    WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
+    windowLeft, windowTop,
+    windowWidth, windowHeight,
+    NULL,
+    NULL,
     hInstance,
     NULL);
 ```
 
-Next we need to verify our window was created. We can simply check if `window == NULL`.
+The `CreateWindow` method also returns `NULL` upon failure. Let's deal with that possibility before we move on:
 
 ```cpp
 if (!window) {
-    fprintf(stderr, "Failed to create window\n");
-    exit(EXIT_FAILURE);
+    fprintf(stderr, "Failed to create Win32 window\n");
+    exit(EXIT_FAILURE); 
 }
 ```
 
-If the window was created, we should:
-
-- Show it on the screen
-- Set it to the foreground
-- Set it to the active (focused) window
-
-Luckily, Windows provides functions for those three operations.
+Last, but not least, we should show the window, set it in the foreground, and focus it. Windows provides three methods that do exactly that:
 
 ```cpp
 ShowWindow(window, SW_SHOW);
@@ -145,41 +171,88 @@ SetFocus(window);
 
 # Updating the Window
 
-This section is super simple. We just need to check if the user tried to close the window.
+For this section, we'll be writing the body of this method:
 
 ```cpp
 void VulkanExample::updateWindow(UINT message, WPARAM wParam, LPARAM lParam)
 {
-	switch (message) {
-	case WM_CLOSE:
-		DestroyWindow(window);
-		PostQuitMessage(0);
-		break;
-	}
+
 }
 ```
 
-# Coming Back to `WndProc`
-
-We'll need to write the `WndProc` method I mentioned earlier. This will pass some of the arguments onto our `updateWindow` method.
+Essentially what we need to do is check if the window was closed. If it was, we should destroy it and tell Windows we're exiting. You can do this like so:
 
 ```cpp
-LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+switch (message) {
+case WM_CLOSE:
+    DestroyWindow(window);
+    PostQuitMessage(0);
+    break;
+}
+```
+
+# `WndProc`
+
+This method is called every time the application receives any input. This includes closing, key presses, mouse presses, and etc. All we're going to do is call out `updateWindow` method from here and pass some arguments. You can find documentation [here](https://goo.gl/aKPbCp) and this is the definition:
+
+```cpp
+LRESULT CALLBACK WndProc(
+    HWND hWnd, 
+    UINT uMsg, 
+    WPARAM wParam, 
+    LPARAM lParam);
+```
+
+Here is what our implementation looks like:
+
+```cpp
+vulkanExample->updateWindow(uMsg, wParam, lParam);
+return DefWindowProc(hWnd, uMsg, wParam, lParam);
+```
+
+# `WinMain`
+
+This is our application's new entry-point. We will **not** be using your typical `int main(void)` entry-point. This is because Windows requires GUI applications to enter at `WinMain`. We need to:
+
+- Create an instance of our class
+- Call our `createWindow` method
+- Create an empty message
+- Loop while propagating the message
+  - Call `TranslateMessage` (required)
+  - Call `DispatchMessage` (required)
+
+You can find documentation on the `WinMain` entry-point [here](https://goo.gl/uToSOo) and the definition is:
+
+```cpp
+int CALLBACK WinMain(
+    _In_ HINSTANCE hInstance,
+    _In_ HINSTANCE hPrevInstance,
+    _In_ LPSTR     lpCmdLine,
+    _In_ int       nCmdShow
+);
+```
+
+All we have to do now is implement it:
+
+```cpp
+VulkanExample * vulkanExample;
+
+void VulkanExample::createWindow(HINSTANCE hInstance, WNDPROC wndProc)
 {
-	vExample.updateWindow(uMsg, wParam, lParam);
-	return DefWindowProc(hWnd, uMsg, wParam, lParam);
+    vulkanExample = new VulkanExample();
+    vulkanExample->createWindow(hInstance, WndProc);
+
+    MSG message;
+
+    while (GetMessage(&message, NULL, 0, 0)) {
+        TranslateMessage(&message);
+        DispatchMessage(&message);
+    }
+
+    delete vulkanExample;
 }
 ```
 
-# Coming Back to `WinMain`
+# Resources
 
-Here's the entry point to our program. It will replace the normal main method. The code looks like this:
-
-```cpp
-MSG message;
-
-while (GetMessage(&message, NULL, 0, 0)) {
-    TranslateMessage(&message);
-    DispatchMessage(&message);
-}
-```
+- [Creating a window walkthrough](https://msdn.microsoft.com/en-us/library/bb384843.aspx)
