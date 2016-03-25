@@ -8,5 +8,6 @@
    * [Windows](chap3/windows.md)
    * Linux
    * Android
+   * GLFW
 * [Working with Swapchains](chap4/working_with_swapchains.md)
 
