@@ -13,7 +13,7 @@
    * Android
    * GLFW
 * [Getting a Surface](chap5/getting_a_surface.md)
-   * Windows
+   * [Windows](chap5/windows.md)
    * Linux
    * Android
    * GLFW
