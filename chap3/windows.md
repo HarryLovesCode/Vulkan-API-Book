@@ -64,7 +64,7 @@ int screenWidth = GetSystemMetrics(SM_CXSCREEN);
 int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 ```
 
-You probably know how to center something, but you may not know how to do it on a monitor. The way we do it is...
+You probably know how to center something, but you may not know how to do it on a display. The way we do it is...
 
 $$X_{window} = W_{screen} / 2 - W_{window} / 2 $$
 
@@ -117,7 +117,7 @@ window = CreateWindow(
     NULL);
 ```
 
-Next we need to verify our window was created correctly. We can simply check if `window == NULL`.
+Next we need to verify our window was created. We can simply check if `window == NULL`.
 
 ```cpp
 if (!window) {
@@ -126,13 +126,13 @@ if (!window) {
 }
 ```
 
-If the window was created correctly, we...
+If the window was createdy, we should...
 
 - Show it on the screen
 - Set it to the foreground
 - Set it to the active (focused) window
 
-Luckily, Windows provides functions for exactly those three operations.
+Luckily, Windows provides functions for those three operations.
 
 ```cpp
 ShowWindow(window, SW_SHOW);
@@ -158,7 +158,7 @@ void VulkanExample::updateWindow(UINT message, WPARAM wParam, LPARAM lParam)
 
 # Coming Back to `WndProc`
 
-We'll need to implement the `WndProc` method I mentioned earlier. This simply will pass some of the arguments onto our `updateWindow` method.
+We'll need to write the `WndProc` method I mentioned earlier. This will pass some of the arguments onto our `updateWindow` method.
 
 ```cpp
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -179,91 +179,4 @@ while (GetMessage(&message, NULL, 0, 0)) {
     TranslateMessage(&message);
     DispatchMessage(&message);
 }
-```
-
-# Putting it All Together
-
-```cpp
-void VulkanExample::createWindow(HINSTANCE hInstance, WNDPROC wndProc)
-{
-	WNDCLASSEX wcex;
-
-	wcex.cbSize = sizeof(WNDCLASSEX);
-	wcex.style = CS_HREDRAW | CS_VREDRAW;
-	wcex.lpfnWndProc = wndProc;
-	wcex.cbClsExtra = 0;
-	wcex.cbWndExtra = 0;
-	wcex.hInstance = hInstance;
-	wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
-	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
-	wcex.lpszMenuName = NULL;
-	wcex.lpszClassName = windowClassName.c_str();
-	wcex.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
-
-	if (!RegisterClassEx(&wcex)) {
-		fprintf(stderr, "Call to RegisterClassEx failed\n");
-		exit(EXIT_FAILURE);
-	}
-
-	windowInstance = hInstance;
-
-	// Center the window on the screen
-	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
-	int windowX = screenWidth / 2 - windowWidth / 2;
-	int windowY = screenHeight / 2 - windowHeight / 2;
-
-	window = CreateWindow(
-		windowClassName.c_str(), 
-		windowTitle.c_str(), 
-		WS_OVERLAPPEDWINDOW,
-		windowX, 
-		windowY, 
-		windowWidth,
-		windowHeight, 
-		NULL, 
-		NULL, 
-		hInstance,
-		NULL);
-
-	if (!window) {
-		fprintf(stderr, "Failed to create window\n");
-		exit(EXIT_FAILURE);
-	}
-
-	ShowWindow(window, SW_SHOW);
-	SetForegroundWindow(window);
-	SetFocus(window);
-}
-
-void VulkanExample::updateWindow(UINT message, WPARAM wParam, LPARAM lParam)
-{
-	switch (message) {
-	case WM_CLOSE:
-		DestroyWindow(window);
-		PostQuitMessage(0);
-		break;
-	}
-}
-
-LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	vExample.updateWindow(uMsg, wParam, lParam);
-	return DefWindowProc(hWnd, uMsg, wParam, lParam);
-}
-
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-{
-	vExample = VulkanExample();
-	vExample.createWindow(hInstance, WndProc);
-
-	MSG message;
-
-	while (GetMessage(&message, NULL, 0, 0)) {
-		TranslateMessage(&message);
-		DispatchMessage(&message);
-	}
-}
-#endif
 ```
