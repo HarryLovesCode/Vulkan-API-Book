@@ -53,11 +53,11 @@ void VulkanExample::initInstance()
     if (res == VK_ERROR_INCOMPATIBLE_DRIVER) {
         exitOnError("Cannot find a compatible Vulkan installable client "
             "driver (ICD). Please make sure your driver supports "
-            "Vulkan before continuing. The call to vkCreateInstance failed.\n");
+            "Vulkan before continuing. The call to vkCreateInstance failed.");
     } else if (res != VK_SUCCESS) {
         exitOnError("The call to vkCreateInstance failed. Please make sure "
             "you have a Vulkan installable client driver (ICD) before "
-            "continuing.\n");
+            "continuing.");
     }
 }
 
@@ -66,24 +66,20 @@ void VulkanExample::initDevices()
     uint32_t deviceCount = 0;
     VkResult result = vkEnumeratePhysicalDevices(instance, &deviceCount, NULL);
 
-    if (result != VK_SUCCESS) {
-        exitOnError ("Failed to enumerate physical devices in the system. "
-            "Call to vkEnumeratePhysicalDevices failed.\n");
-    }
+    if (result != VK_SUCCESS)
+        exitOnError ("Failed to enumerate physical devices in the system.");
 
     if (deviceCount < 1) {
         exitOnError ("vkEnumeratePhysicalDevices did not report any availible "
             "devices that support Vulkan. Do you have a compatible Vulkan "
-            "installable client driver (ICD)?\n");
+            "installable client driver (ICD)?");
     }
 
     std::vector<VkPhysicalDevice> physicalDevices(deviceCount);
     result = vkEnumeratePhysicalDevices(instance, &deviceCount, physicalDevices.data());
 
-    if (result != VK_SUCCESS) {
-        exitOnError ("Failed to enumerate physical devices in the system. "
-            "Call to vkEnumeratePhysicalDevices failed.\n");
-    }
+    if (result != VK_SUCCESS)
+        exitOnError ("Failed to enumerate physical devices in the system.");
 
     physicalDevice = physicalDevices[0];
 
@@ -109,10 +105,8 @@ void VulkanExample::initDevices()
 
     result = vkCreateDevice(physicalDevice, &deviceInfo, NULL, &device);
 
-    if (result != VK_SUCCESS) {
-        exitOnError ("Failed to create a Vulkan logical device. "
-            "Call to vkCreateDevice failed.\n");
-    }
+    if (result != VK_SUCCESS)
+        exitOnError ("Failed to create a Vulkan logical device.");
 
     VkPhysicalDeviceProperties physicalProperties;
 
@@ -127,4 +121,3 @@ void VulkanExample::initDevices()
             VK_VERSION_PATCH(physicalProperties.apiVersion));
     }
 }
-

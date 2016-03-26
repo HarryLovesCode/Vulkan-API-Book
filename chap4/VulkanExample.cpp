@@ -1,44 +1,10 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <vector>
-#if defined(_WIN32)
-#include <windows.h>
-#endif
-#include <vulkan/vulkan.h>
-
-class VulkanExample {
-private:
-    void initDevices();
-    void initInstance();
-
-    const int windowWidth = 1280;
-    const int windowHeight = 720;
-
-    const std::string applicationName = "Vulkan Example";
-    const std::string engineName = "vkEngine";
-
-    VkInstance instance;
-    VkDevice device;
-    VkPhysicalDevice physicalDevice;
-
-#if defined(_WIN32)
-    HINSTANCE windowInstance;
-    HWND window;
-#endif
-public:
-    VulkanExample();
-    virtual ~VulkanExample();
-
-#if defined(_WIN32)
-    void createWindow(HINSTANCE hInstance, WNDPROC wndProc);
-    void updateWindow(UINT message, WPARAM wParam, LPARAM lParam);
-#endif
-};
+#include "VulkanExample.hpp"
 
 VulkanExample::VulkanExample()
 {
-    this->initInstance();
-    this->initDevices();
+    initInstance();
+    initDevices();
+    initWindow();
 }
 
 VulkanExample::~VulkanExample()
@@ -46,28 +12,75 @@ VulkanExample::~VulkanExample()
     vkDestroyInstance(instance, NULL);
 }
 
+void VulkanExample::exitOnError(const char * msg)
+{
+    fputs(msg, stderr);
+    exit(EXIT_FAILURE);
+}
+
+void VulkanExample::initInstance()
+{
+    VkApplicationInfo appInfo{};
+
+    memset(&appInfo, 0, sizeof(appInfo));
+    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    appInfo.pNext = NULL;
+    appInfo.pApplicationName = applicationName;
+    appInfo.pEngineName = engineName;
+    appInfo.apiVersion = VK_MAKE_VERSION(1, 0, 3);
+
+    std::vector<const char*> enabledExtensions = { VK_KHR_SURFACE_EXTENSION_NAME };
+
+#if defined(_WIN32)
+    enabledExtensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+#elif defined(__ANDROID__)
+    enabledExtensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
+#elif defined(__linux__)
+    enabledExtensions.push_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
+#endif
+
+    VkInstanceCreateInfo createInfo{};
+
+    memset(&createInfo, 0, sizeof(createInfo));
+    createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    createInfo.pNext = NULL;
+    createInfo.flags = 0;
+    createInfo.pApplicationInfo = &appInfo;
+    createInfo.enabledExtensionCount = enabledExtensions.size();
+    createInfo.ppEnabledExtensionNames = enabledExtensions.data();
+
+    VkResult res = vkCreateInstance(&createInfo, NULL, &instance);
+
+    if (res == VK_ERROR_INCOMPATIBLE_DRIVER) {
+        exitOnError("Cannot find a compatible Vulkan installable client "
+            "driver (ICD). Please make sure your driver supports "
+            "Vulkan before continuing. The call to vkCreateInstance failed.");
+    } else if (res != VK_SUCCESS) {
+        exitOnError("The call to vkCreateInstance failed. Please make sure "
+            "you have a Vulkan installable client driver (ICD) before "
+            "continuing.");
+    }
+}
+
 void VulkanExample::initDevices()
 {
     uint32_t deviceCount = 0;
     VkResult result = vkEnumeratePhysicalDevices(instance, &deviceCount, NULL);
 
-    if (result != VK_SUCCESS) {
-        fprintf(stderr, "Failed to enumerate physical devices: %d\n", result);
-        exit(EXIT_FAILURE);
-    }
+    if (result != VK_SUCCESS)
+        exitOnError ("Failed to enumerate physical devices in the system.");
 
     if (deviceCount < 1) {
-        fprintf(stderr, "No Vulkan compatible devices found: %d\n", result);
-        exit(EXIT_FAILURE);
+        exitOnError ("vkEnumeratePhysicalDevices did not report any availible "
+            "devices that support Vulkan. Do you have a compatible Vulkan "
+            "installable client driver (ICD)?");
     }
 
     std::vector<VkPhysicalDevice> physicalDevices(deviceCount);
     result = vkEnumeratePhysicalDevices(instance, &deviceCount, physicalDevices.data());
 
-    if (result != VK_SUCCESS) {
-        fprintf(stderr, "Failed to enumerate physical devices: %d\n", result);
-        exit(EXIT_FAILURE);
-    }
+    if (result != VK_SUCCESS)
+        exitOnError ("Failed to enumerate physical devices in the system.");
 
     physicalDevice = physicalDevices[0];
 
@@ -80,9 +93,7 @@ void VulkanExample::initDevices()
     queueInfo.queueCount = 1;
     queueInfo.pQueuePriorities = &priorities[0];
 
-    std::vector<const char *> enabledExtensions = { 
-        VK_KHR_SWAPCHAIN_EXTENSION_NAME 
-    };
+    std::vector<const char *> enabledExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
     VkDeviceCreateInfo deviceInfo{};
     deviceInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     deviceInfo.pNext = NULL;
@@ -95,17 +106,15 @@ void VulkanExample::initDevices()
 
     result = vkCreateDevice(physicalDevice, &deviceInfo, NULL, &device);
 
-    if (result != VK_SUCCESS) {
-        fprintf(stderr, "Failed to create logical device: %d\n", result);
-        exit(EXIT_FAILURE);
-    }
+    if (result != VK_SUCCESS)
+        exitOnError ("Failed to create a Vulkan logical device.");
 
     VkPhysicalDeviceProperties physicalProperties;
 
     for (uint32_t i = 0; i < deviceCount; i++) {
         vkGetPhysicalDeviceProperties(physicalDevices[i], &physicalProperties);
-        fprintf(stdout, "Device Name:	 %s\n", physicalProperties.deviceName);
-        fprintf(stdout, "Device Type:	 %d\n", physicalProperties.deviceType);
+        fprintf(stdout, "Device Name:    %s\n", physicalProperties.deviceName);
+        fprintf(stdout, "Device Type:    %d\n", physicalProperties.deviceType);
         fprintf(stdout, "Driver Version: %d\n", physicalProperties.driverVersion);
         fprintf(stdout, "API Version:    %d.%d.%d\n",
             VK_VERSION_MAJOR(physicalProperties.apiVersion),
@@ -114,123 +123,76 @@ void VulkanExample::initDevices()
     }
 }
 
-void VulkanExample::initInstance()
+void VulkanExample::initWindow()
 {
-    VkApplicationInfo appInfo{};
-    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pNext = NULL;
-    appInfo.pApplicationName = applicationName.c_str();
-    appInfo.pEngineName = engineName.c_str();
-    appInfo.apiVersion = VK_MAKE_VERSION(1, 0, 4);
+#if defined(__linux__)
+    int screenp = 0;
+    connection = xcb_connect(NULL, &screenp);
 
-    std::vector<const char*> enabledExtensions = { 
-        VK_KHR_SURFACE_EXTENSION_NAME 
-    };
+    if (xcb_connection_has_error(connection))
+        exitOnError("Failed to connect to X server using XCB.");
 
-#if defined(_WIN32)
-    enabledExtensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
-#elif defined(__ANDROID__)
-    enabledExtensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
-#elif defined(__linux__)
-    enabledExtensions.push_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
-#endif
+    xcb_screen_iterator_t iter =
+        xcb_setup_roots_iterator(xcb_get_setup(connection));
 
-    VkInstanceCreateInfo createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    createInfo.pNext = NULL;
-    createInfo.flags = 0;
-    createInfo.pApplicationInfo = &appInfo;
-    createInfo.enabledExtensionCount = enabledExtensions.size();
-    createInfo.ppEnabledExtensionNames = enabledExtensions.data();
+    for (int s = screenp; s > 0; s--)
+        xcb_screen_next(&iter);
 
-    VkResult result = vkCreateInstance(&createInfo, NULL, &instance);
+    screen = iter.data;
+    window = xcb_generate_id(connection);
+    uint32_t eventMask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
+    uint32_t valueList[] = { screen->black_pixel, XCB_EVENT_MASK_KEY_PRESS };
 
-    if (result != VK_SUCCESS) {
-        fprintf(stderr, "vkCreateInstance failed: %d\n", result);
-        exit(EXIT_FAILURE);
-    }
-}
-
-VulkanExample * vulkanExample;
-
-#if defined(_WIN32)
-void VulkanExample::createWindow(HINSTANCE hInstance, WNDPROC wndProc)
-{
-    WNDCLASSEX wcex;
-    wcex.cbSize = sizeof(WNDCLASSEX);
-    wcex.style = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc = wndProc;
-    wcex.cbClsExtra = 0;
-    wcex.cbWndExtra = 0;
-    wcex.hInstance = hInstance;
-    wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
-    wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-    wcex.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
-    wcex.lpszMenuName = NULL;
-    wcex.lpszClassName = engineName.c_str();
-    wcex.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
-
-    if (!RegisterClassEx(&wcex)) {
-        fprintf(stderr, "Call to RegisterClassEx failed\n");
-        exit(EXIT_FAILURE);
-    }
-
-    windowInstance = hInstance;
-
-    int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-    int screenHeight = GetSystemMetrics(SM_CYSCREEN);
-    int windowLeft = screenWidth / 2 - windowWidth / 2;
-    int windowTop = screenHeight / 2 - windowHeight / 2;
-
-    window = CreateWindow(
-        engineName.c_str(),
-        applicationName.c_str(),
-        WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
-        windowLeft, windowTop,
+    xcb_create_window(
+        connection,
+        XCB_COPY_FROM_PARENT,
+        window,
+        screen->root,
+        0, 0,
         windowWidth, windowHeight,
-        NULL,
-        NULL,
-        hInstance,
-        NULL);
-
-    if (!window) {
-        fprintf(stderr, "Failed to create Win32 window\n");
-        exit(EXIT_FAILURE);
-    }
-
-    ShowWindow(window, SW_SHOW);
-    SetForegroundWindow(window);
-    SetFocus(window);
-}
-
-void VulkanExample::updateWindow(UINT message, WPARAM wParam, LPARAM lParam)
-{
-    switch (message) {
-    case WM_CLOSE:
-        DestroyWindow(window);
-        PostQuitMessage(0);
-        break;
-    }
-}
-
-LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-    vulkanExample->updateWindow(uMsg, wParam, lParam);
-    return DefWindowProc(hWnd, uMsg, wParam, lParam);
-}
-
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-{
-    vulkanExample = new VulkanExample();
-    vulkanExample->createWindow(hInstance, WndProc);
-
-    MSG message;
-
-    while (GetMessage(&message, NULL, 0, 0)) {
-        TranslateMessage(&message);
-        DispatchMessage(&message);
-    }
-
-    delete vulkanExample;
-}
+        0,
+        XCB_WINDOW_CLASS_INPUT_OUTPUT,
+        screen->root_visual,
+        eventMask, valueList);
+    xcb_change_property(
+        connection,
+        XCB_PROP_MODE_REPLACE,
+        window,
+        XCB_ATOM_WM_NAME,
+        XCB_ATOM_STRING,
+        8,
+        strlen(applicationName),
+        applicationName);
+    xcb_map_window(connection, window);
+    xcb_flush(connection);
 #endif
+}
+
+void VulkanExample::renderLoop()
+{
+#if defined(__linux__)
+    bool running = true;
+
+    while (running) {
+        xcb_generic_event_t * event = xcb_wait_for_event(connection);
+
+        if (!event)
+            exitOnError("IO error upon calling xcb_wait_for_event");
+
+        switch (event->response_type & ~0x80) {
+        case XCB_KEY_PRESS:
+            xcb_key_press_event_t *kp = (xcb_key_press_event_t *) event;
+
+            if (kp->detail == 9)
+                running = false;
+
+            break;
+        }
+
+        free(event);
+        xcb_flush(connection);
+    }
+
+    xcb_destroy_window(connection, window);
+#endif
+}

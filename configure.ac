@@ -6,6 +6,7 @@ AC_CONFIG_FILES([
  Makefile
  chap2/Makefile
  chap3/Makefile
+ chap4/Makefile
 ])
 AC_OUTPUT
 

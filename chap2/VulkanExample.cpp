@@ -53,10 +53,10 @@ VK_KHR_SURFACE_EXTENSION_NAME };
     if (res == VK_ERROR_INCOMPATIBLE_DRIVER) {
         exitOnError("Cannot find a compatible Vulkan installable client "
             "driver (ICD). Please make sure your driver supports "
-            "Vulkan before continuing. The call to vkCreateInstance failed.\n");
+            "Vulkan before continuing. The call to vkCreateInstance failed.");
     } else if (res != VK_SUCCESS) {
         exitOnError("The call to vkCreateInstance failed. Please make sure "
             "you have a Vulkan installable client driver (ICD) before "
-            "continuing.\n");
+            "continuing.");
     }
 }
