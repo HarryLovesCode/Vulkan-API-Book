@@ -1,34 +1,64 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <vector>
-#include <vulkan/vulkan.h>
-
-class VulkanExample {
-private:
-    void initDevices();
-    void initInstance();
-
-    const std::string applicationName = "Vulkan Example";
-    const std::string engineName = "vkEngine";
-
-    VkInstance instance;
-
-    VkDevice device;
-    VkPhysicalDevice physicalDevice;
-public:
-    VulkanExample();
-    virtual ~VulkanExample();
-};
+#include "VulkanExample.hpp"
 
 VulkanExample::VulkanExample()
 {
-    this->initInstance();
-    this->initDevices();
+    initInstance();
+    initDevices();
 }
 
 VulkanExample::~VulkanExample()
 {
     vkDestroyInstance(instance, NULL);
+}
+
+void VulkanExample::exitOnError(const char * msg)
+{
+    fputs(msg, stderr);
+    exit(EXIT_FAILURE);
+}
+
+void VulkanExample::initInstance()
+{
+    VkApplicationInfo appInfo{};
+
+    memset(&appInfo, 0, sizeof(appInfo));
+    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    appInfo.pNext = NULL;
+    appInfo.pApplicationName = applicationName;
+    appInfo.pEngineName = engineName;
+    appInfo.apiVersion = VK_MAKE_VERSION(1, 0, 3);
+
+    std::vector<const char*> enabledExtensions = { VK_KHR_SURFACE_EXTENSION_NAME };
+
+#if defined(_WIN32)
+    enabledExtensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+#elif defined(__ANDROID__)
+    enabledExtensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
+#elif defined(__linux__)
+    enabledExtensions.push_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
+#endif
+
+    VkInstanceCreateInfo createInfo{};
+
+    memset(&createInfo, 0, sizeof(createInfo));
+    createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    createInfo.pNext = NULL;
+    createInfo.flags = 0;
+    createInfo.pApplicationInfo = &appInfo;
+    createInfo.enabledExtensionCount = enabledExtensions.size();
+    createInfo.ppEnabledExtensionNames = enabledExtensions.data();
+
+    VkResult res = vkCreateInstance(&createInfo, NULL, &instance);
+
+    if (res == VK_ERROR_INCOMPATIBLE_DRIVER) {
+        exitOnError("Cannot find a compatible Vulkan installable client "
+            "driver (ICD). Please make sure your driver supports "
+            "Vulkan before continuing. The call to vkCreateInstance failed.\n");
+    } else if (res != VK_SUCCESS) {
+        exitOnError("The call to vkCreateInstance failed. Please make sure "
+            "you have a Vulkan installable client driver (ICD) before "
+            "continuing.\n");
+    }
 }
 
 void VulkanExample::initDevices()
@@ -37,21 +67,22 @@ void VulkanExample::initDevices()
     VkResult result = vkEnumeratePhysicalDevices(instance, &deviceCount, NULL);
 
     if (result != VK_SUCCESS) {
-        fprintf(stderr, "Failed to enumerate physical devices: %d\n", result);
-        exit(EXIT_FAILURE);
+        exitOnError ("Failed to enumerate physical devices in the system. "
+            "Call to vkEnumeratePhysicalDevices failed.\n");
     }
 
     if (deviceCount < 1) {
-        fprintf(stderr, "No Vulkan compatible devices found: %d\n", result);
-        exit(EXIT_FAILURE);
+        exitOnError ("vkEnumeratePhysicalDevices did not report any availible "
+            "devices that support Vulkan. Do you have a compatible Vulkan "
+            "installable client driver (ICD)?\n");
     }
 
     std::vector<VkPhysicalDevice> physicalDevices(deviceCount);
     result = vkEnumeratePhysicalDevices(instance, &deviceCount, physicalDevices.data());
 
     if (result != VK_SUCCESS) {
-        fprintf(stderr, "Failed to enumerate physical devices: %d\n", result);
-        exit(EXIT_FAILURE);
+        exitOnError ("Failed to enumerate physical devices in the system. "
+            "Call to vkEnumeratePhysicalDevices failed.\n");
     }
 
     physicalDevice = physicalDevices[0];
@@ -65,9 +96,7 @@ void VulkanExample::initDevices()
     queueInfo.queueCount = 1;
     queueInfo.pQueuePriorities = &priorities[0];
 
-    std::vector<const char *> enabledExtensions = { 
-        VK_KHR_SWAPCHAIN_EXTENSION_NAME 
-    };
+    std::vector<const char *> enabledExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
     VkDeviceCreateInfo deviceInfo{};
     deviceInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     deviceInfo.pNext = NULL;
@@ -81,16 +110,16 @@ void VulkanExample::initDevices()
     result = vkCreateDevice(physicalDevice, &deviceInfo, NULL, &device);
 
     if (result != VK_SUCCESS) {
-        fprintf(stderr, "Failed to create logical device: %d\n", result);
-        exit(EXIT_FAILURE);
+        exitOnError ("Failed to create a Vulkan logical device. "
+            "Call to vkCreateDevice failed.\n");
     }
 
     VkPhysicalDeviceProperties physicalProperties;
 
     for (uint32_t i = 0; i < deviceCount; i++) {
         vkGetPhysicalDeviceProperties(physicalDevices[i], &physicalProperties);
-        fprintf(stdout, "Device Name:	 %s\n", physicalProperties.deviceName);
-        fprintf(stdout, "Device Type:	 %d\n", physicalProperties.deviceType);
+        fprintf(stdout, "Device Name:    %s\n", physicalProperties.deviceName);
+        fprintf(stdout, "Device Type:    %d\n", physicalProperties.deviceType);
         fprintf(stdout, "Driver Version: %d\n", physicalProperties.driverVersion);
         fprintf(stdout, "API Version:    %d.%d.%d\n",
             VK_VERSION_MAJOR(physicalProperties.apiVersion),
@@ -99,44 +128,3 @@ void VulkanExample::initDevices()
     }
 }
 
-void VulkanExample::initInstance()
-{
-    VkApplicationInfo appInfo{};
-    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pNext = NULL;
-    appInfo.pApplicationName = applicationName.c_str();
-    appInfo.pEngineName = engineName.c_str();
-    appInfo.apiVersion = VK_MAKE_VERSION(1, 0, 4);
-
-    std::vector<const char*> enabledExtensions = { 
-        VK_KHR_SURFACE_EXTENSION_NAME 
-    };
-
-#if defined(_WIN32)
-    enabledExtensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
-#elif defined(__ANDROID__)
-    enabledExtensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
-#elif defined(__linux__)
-    enabledExtensions.push_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
-#endif
-
-    VkInstanceCreateInfo createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    createInfo.pNext = NULL;
-    createInfo.flags = 0;
-    createInfo.pApplicationInfo = &appInfo;
-    createInfo.enabledExtensionCount = enabledExtensions.size();
-    createInfo.ppEnabledExtensionNames = enabledExtensions.data();
-
-    VkResult result = vkCreateInstance(&createInfo, NULL, &instance);
-
-    if (result != VK_SUCCESS) {
-        fprintf(stderr, "vkCreateInstance failed: %d\n", result);
-        exit(EXIT_FAILURE);
-    }
-}
-
-int main(int argc, char * argv[])
-{
-    VulkanExample ve = VulkanExample();
-}
