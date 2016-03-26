@@ -17,13 +17,21 @@ Hello everyone. This is going to be a technical book about the newly published V
 - [Vulkan Specification v1.0.6](https://www.khronos.org/registry/vulkan/specs/1.0/pdf/vkspec.pdf)
 - [Sascha Willem's Vulkan Samples](https://github.com/SaschaWillems/Vulkan)
 
-# Github
+# Code
 
-If you'd like to see the raw Markdown, please visit [the book's Github repository](https://github.com/HarryLovesCode/Vulkan-API-Book).
+You can find the Github repository [here](https://github.com/HarryLovesCode/Vulkan-API-Book). I'm working on moving the Vulkan code into this repository along with getting Windows support. For now, only Linux is supported. To build on Linux, use the following commands:
 
-If you'd like to see the code **for Linux**, please visit [the Linux repository](https://github.com/HarryLovesCode/Vulkan-Linux).
+```sh
+git clone https://github.com/HarryLovesCode/Vulkan-API-Book
+cd Vulkan-API-Book
+
+autoreconf --install
+./configure
+make
+```
+
+Once you've done that, you should find all the binaries located in the `./bin` folder.
 
 # Who am I?
 
 I'm Harry and I'm a young developer who enjoys 3D graphics. I've worked with WebGL, OpenGL, and DirectX and when I heard about Vulkan, I was excited to get started! This is, in a way, and experiment because I'm publishing as I go. Thus, the book may be rough around the edges. Feel free to submit issues or pull requests on Github and add inline comments through Gitbook.
-
