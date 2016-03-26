@@ -19,7 +19,9 @@ Hello everyone. This is going to be a technical book about the newly published V
 
 # Github
 
-If you'd like to see the raw Markdown or the code base each chapter, please visit [the book's Github repository](https://github.com/HarryLovesCode/Vulkan-API-Book).
+If you'd like to see the raw Markdown, please visit [the book's Github repository](https://github.com/HarryLovesCode/Vulkan-API-Book).
+
+If you'd like to see the code **for Linux**, please visit [the Linux repository](https://github.com/HarryLovesCode/Vulkan-Linux).
 
 # Who am I?
 
