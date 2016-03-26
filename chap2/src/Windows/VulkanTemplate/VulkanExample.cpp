@@ -3,7 +3,7 @@
 VulkanExample::VulkanExample() {
     VkResult res = initInstance();
 
-    if (res != VK_ERROR_INCOMPATIBLE_DRIVER) {
+    if (res == VK_ERROR_INCOMPATIBLE_DRIVER) {
         exitOnError("Cannot find a compatible Vulkan installable client "
             "driver (ICD). Please make sure your driver supports "
             "Vulkan before continuing. The call to vkCreateInstance failed.\n");
@@ -19,7 +19,7 @@ VulkanExample::~VulkanExample() {
 }
 
 void VulkanExample::exitOnError(const char * msg) {
-    fprintf(stderr, msg);
+    fputs(msg, stderr);
     exit(EXIT_FAILURE);
 }
 
