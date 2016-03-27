@@ -8,8 +8,8 @@ Hello everyone. This is going to be a technical book about the newly published V
 - Rendering to surfaces
 - Swap chains
 - Queues
-- Windowing across multiple platforms
-- and more!
+- Windowing across different platforms
+- And more!
 
 # Resources
 
@@ -19,7 +19,11 @@ Hello everyone. This is going to be a technical book about the newly published V
 
 # Code
 
-You can find the Github repository [here](https://github.com/HarryLovesCode/Vulkan-API-Book). I'm working on moving the Vulkan code into this repository along with getting Windows support. For now, only Linux is supported. To build on Linux, use the following commands:
+You can find the Github repository [here](https://github.com/HarryLovesCode/Vulkan-API-Book). I'm working on moving the Vulkan code into this repository. For now, only Linux and Windows are supported. 
+
+# Building on Linux
+
+To build on Linux, use the following commands:
 
 ```sh
 git clone https://github.com/HarryLovesCode/Vulkan-API-Book
@@ -31,6 +35,10 @@ make
 ```
 
 Once you've done that, you should find all the binaries located in the `./bin` folder.
+
+# Building on Windows
+
+To build on Windows, you'll need Visual Studio 2015. You can find the Visual Studio solution in the root directory of the repository. Just open that and you can pick and choose which chapters to build and run.
 
 # Who am I?
 
