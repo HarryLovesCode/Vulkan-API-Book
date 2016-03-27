@@ -10,7 +10,7 @@ For windowing on Linux, we're going to be using the **X protocol C-language Bind
 #include <xcb/xcb.h>
 ```
 
-If you're targeting Windows as well, you should surround that by the `#if defined(__linux__)` directives.
+If you're targeting Windows as well, you should surround the include by the `#if defined(__linux__)` directives.
 
 # Our `initWindow` Method
 
@@ -216,14 +216,11 @@ void VulkanExample::renderLoop() {
     switch (event->response_type & ~0x80) {
       case XCB_CLIENT_MESSAGE: {
         xcb_client_message_event_t *cm = (xcb_client_message_event_t *)event;
-
         if (cm->data.data32[0] == wmDeleteWin)
           running = false;
-
         break;
       }
     }
-
     free(event);
   }
 

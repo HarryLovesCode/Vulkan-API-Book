@@ -12,13 +12,13 @@ To get a list of all the physical devices in the system, we can call use this me
 
 ```cpp
 VkResult vkEnumeratePhysicalDevices(
-    // A handle to a Vulkan instance previously created with vkCreateInstance
-    VkInstance                                  instance,
-    // A pointer to an integer related to the number of physical devices 
-    // available or queried, as described below.
-    uint32_t*                                   pPhysicalDeviceCount,
-    // NULL or a pointer to an array of VkPhysicalDevice structures
-    VkPhysicalDevice*                           pPhysicalDevices);
+  // A handle to a Vulkan instance previously created with vkCreateInstance
+  VkInstance                                  instance,
+  // A pointer to an integer related to the number of physical devices
+  // available or queried, as described below.
+  uint32_t*                                   pPhysicalDeviceCount,
+  // NULL or a pointer to an array of VkPhysicalDevice structures
+  VkPhysicalDevice*                           pPhysicalDevices);
 ```
 
 Before we create a `std::vector` to house the physical devices, we need to figure out the count. We can do this by calling `vkEnumeratePhysicalDevices` with a value of `NULL` for `pPhysicalDevices`.
@@ -31,14 +31,14 @@ VkResult result = vkEnumeratePhysicalDevices(instance, &deviceCount, NULL);
 We should handle two possible issues. First, `result != VK_SUCCESS` means our call to `vkEnumeratePhysicalDevices` failed. Second, `deviceCount < 1` means we found not devices that support Vulkan.
 
 ```cpp
-if (result != VK_SUCCESS) {
-    fprintf(stderr, "Failed to enumerate physical devices: %d\n", result);
-    exit(EXIT_FAILURE);
-}
+if (result != VK_SUCCESS)
+  exitOnError("Failed to enumerate physical devices in the system.");
 
 if (deviceCount < 1) {
-    fprintf(stderr, "No Vulkan compatible devices found: %d\n", result);
-    exit(EXIT_FAILURE);
+  exitOnError(
+      "vkEnumeratePhysicalDevices did not report any availible "
+      "devices that support Vulkan. Do you have a compatible Vulkan "
+      "installable client driver (ICD)?");
 }
 ```
 
@@ -47,11 +47,13 @@ Following the usage guidelines outlined in the specification, a call to `vkEnume
 ```cpp
 std::vector<VkPhysicalDevice> physicalDevices(deviceCount);
 result = vkEnumeratePhysicalDevices(instance, &deviceCount, physicalDevices.data());
+```
 
-if (result != VK_SUCCESS) {
-    fprintf(stderr, "Failed to enumerate physical devices: %d\n", result);
-    exit(EXIT_FAILURE);
-}
+We can check for errors just like before:
+
+```cpp
+if (result != VK_SUCCESS)
+  exitOnError("Failed to enumerate physical devices in the system.");
 ```
 
 # `VkPhysicalDeviceProperties`
@@ -60,28 +62,28 @@ if (result != VK_SUCCESS) {
 
 ```cpp
 typedef struct VkPhysicalDeviceProperties {
-    // The version of Vulkan supported by the device (encoded)
-    uint32_t                            apiVersion;
-    // The vendor-specified version of the driver
-    uint32_t                            driverVersion;
-    // A unique identifier for the physical device vendor
-    uint32_t                            vendorID;
-    // A unique identifier for the physical device among devices
-    // available from the vendor.
-    uint32_t                            deviceID;
-    // A VkPhysicalDeviceType specifying the type of device
-    VkPhysicalDeviceType                deviceType;
-    // A null-terminated UTF-8 string containing the name of the device
-    char                                deviceName[VK_MAX_PHYSICAL_DEVICE_NAME_SIZE];
-    // An array of size VK_UUID_SIZE, containing 8-bit values that 
-    // represent a universally unique identifier for the device
-    uint8_t                             pipelineCacheUUID[VK_UUID_SIZE];
-    // The VkPhysicalDeviceLimits structure which specifies 
-    // device-specific limits of the physical device. 
-    VkPhysicalDeviceLimits              limits;
-    // The VkPhysicalDeviceSparseProperties structure which specifies
-    // various sparse related properties of the physical device
-    VkPhysicalDeviceSparseProperties    sparseProperties;
+  // The version of Vulkan supported by the device (encoded)
+  uint32_t                            apiVersion;
+  // The vendor-specified version of the driver
+  uint32_t                            driverVersion;
+  // A unique identifier for the physical device vendor
+  uint32_t                            vendorID;
+  // A unique identifier for the physical device among devices
+  // available from the vendor.
+  uint32_t                            deviceID;
+  // A VkPhysicalDeviceType specifying the type of device
+  VkPhysicalDeviceType                deviceType;
+  // A null-terminated UTF-8 string containing the name of the device
+  char                                deviceName[VK_MAX_PHYSICAL_DEVICE_NAME_SIZE];
+  // An array of size VK_UUID_SIZE, containing 8-bit values that
+  // represent a universally unique identifier for the device
+  uint8_t                             pipelineCacheUUID[VK_UUID_SIZE];
+  // The VkPhysicalDeviceLimits structure which specifies
+  // device-specific limits of the physical device.
+  VkPhysicalDeviceLimits              limits;
+  // The VkPhysicalDeviceSparseProperties structure which specifies
+  // various sparse related properties of the physical device
+  VkPhysicalDeviceSparseProperties    sparseProperties;
 } VkPhysicalDeviceProperties;
 ```
 
@@ -96,11 +98,11 @@ For reference, the definition for `VkPhysicalDeviceType` looks like this...
 
 ```cpp
 typedef enum VkPhysicalDeviceType {
-    VK_PHYSICAL_DEVICE_TYPE_OTHER = 0,
-    VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU = 1,
-    VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU = 2,
-    VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU = 3,
-    VK_PHYSICAL_DEVICE_TYPE_CPU = 4,
+  VK_PHYSICAL_DEVICE_TYPE_OTHER = 0,
+  VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU = 1,
+  VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU = 2,
+  VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU = 3,
+  VK_PHYSICAL_DEVICE_TYPE_CPU = 4,
 } VkPhysicalDeviceType;
 ```
 
@@ -110,11 +112,11 @@ A call to this method is not necessary in most cases. However, it can be useful 
 
 ```cpp
 void vkGetPhysicalDeviceProperties(
-    // The handle to the physical device whose properties will be queried
-    VkPhysicalDevice                            physicalDevice,
-    // points to an instance of the VkPhysicalDeviceProperties structure,
-    // that will be filled with returned information
-    VkPhysicalDeviceProperties*                 pProperties);
+  // The handle to the physical device whose properties will be queried
+  VkPhysicalDevice                            physicalDevice,
+  // points to an instance of the VkPhysicalDeviceProperties structure,
+  // that will be filled with returned information
+  VkPhysicalDeviceProperties*                 pProperties);
 ```
 
 Following the usage guidelines outlined in the specification, a call to `vkGetPhysicalDeviceProperties`would look like this...
@@ -123,17 +125,17 @@ Following the usage guidelines outlined in the specification, a call to `vkGetPh
 VkPhysicalDeviceProperties physicalProperties;
 
 for (uint32_t i = 0; i < deviceCount; i++) {
-    vkGetPhysicalDeviceProperties(physicalDevices[i], & physicalProperties);
-    //Now do something with the properties we know now...
+  vkGetPhysicalDeviceProperties(physicalDevices[i], & physicalProperties);
+  //Now do something with the properties...
 }
 ```
 
-We can output some of the information we thought to be useful using this piece of code...
+We can output some useful parts of the information using this piece of code...
 
 ```cpp
-fprintf(stdout, "Device Name:		%s\n", physicalProperties.deviceName);
-fprintf(stdout, "Device Type:		%d\n", physicalProperties.deviceType);
-fprintf(stdout, "Driver Version:	%d\n", physicalProperties.driverVersion);
+fprintf(stdout, "Device Name:    %s\n", physicalProperties.deviceName);
+fprintf(stdout, "Device Type:    %d\n", physicalProperties.deviceType);
+fprintf(stdout, "Driver Version: %d\n", physicalProperties.driverVersion);
 ```
 
 As I mentioned before, the API version is encoded. There are three macros that will help make it human readable...
@@ -147,13 +149,13 @@ As I mentioned before, the API version is encoded. There are three macros that w
 Thus, to output the API version, you can use this line...
 
 ```cpp
-fprintf(stdout, "API Version:		%d.%d.%d\n", 
+fprintf(stdout, "API Version:    %d.%d.%d\n",
         VK_VERSION_MAJOR(physicalProperties.apiVersion),
         VK_VERSION_MINOR(physicalProperties.apiVersion),
         VK_VERSION_PATCH(physicalProperties.apiVersion));
 ```
 
-**Important**: For now we're just going to use one physical device and one logical device. Thus, we should keep track of `physicalDevices[0]`.
+For now we're just going to use one physical device. We'll always default to the first in the system.
 
 # `VkDeviceQueueCreateInfo`
 
@@ -161,24 +163,24 @@ The next step is to create a device using `vkCreateDevice`. However, in order to
 
 ```cpp
 typedef struct VkDeviceQueueCreateInfo {
-    // The type of this structure
-    VkStructureType             sType;
-    // NULL or a pointer to an extension-specific structure
-    const void*                 pNext;
-    // Reserved for future use
-    VkDeviceQueueCreateFlags    flags;
-    // An unsigned integer indicating the index of the queue family to 
-    // create on this device. This index corresponds to the index of an
-    // element of the pQueueFamilyProperties array that was returned by
-    // vkGetPhysicalDeviceQueueFamilyProperties
-    uint32_t                    queueFamilyIndex;
-    // An unsigned integer specifying the number of queues to create 
-    // in the queue family indicated by queueFamilyIndex.
-    uint32_t                    queueCount;
-    // An array of queueCount normalized floating point values, 
-    // specifying priorities of work that will be submitted to each
-    // created queue.
-    const float*                pQueuePriorities;
+  // The type of this structure
+  VkStructureType             sType;
+  // NULL or a pointer to an extension-specific structure
+  const void*                 pNext;
+  // Reserved for future use
+  VkDeviceQueueCreateFlags    flags;
+  // An unsigned integer indicating the index of the queue family to
+  // create on this device. This index corresponds to the index of an
+  // element of the pQueueFamilyProperties array that was returned by
+  // vkGetPhysicalDeviceQueueFamilyProperties
+  uint32_t                    queueFamilyIndex;
+  // An unsigned integer specifying the number of queues to create
+  // in the queue family indicated by queueFamilyIndex.
+  uint32_t                    queueCount;
+  // An array of queueCount normalized floating point values,
+  // specifying priorities of work that will be submitted to each
+  // created queue.
+  const float*                pQueuePriorities;
 } VkDeviceQueueCreateInfo;
 ```
 
@@ -203,33 +205,33 @@ The parent of `VkDeviceQueueCreateInfo` is `VkDeviceCreateInfo`. You can find mo
 
 ```cpp
 typedef struct VkDeviceCreateInfo {
-    // The type of this structure
-    VkStructureType                    sType;
-    // NULL or a pointer to an extension-specific structure
-    const void*                        pNext;
-    // Reserved for future use
-    VkDeviceCreateFlags                flags;
-    // The unsigned integer size of the pQueueCreateInfos array
-    uint32_t                           queueCreateInfoCount;
-    // A pointer to an array of VkDeviceQueueCreateInfo structures 
-    // describing the queues that are requested to be created along 
-    // with the logical device
-    const VkDeviceQueueCreateInfo*     pQueueCreateInfos;
-    // The number of device layers to enable
-    uint32_t                           enabledLayerCount;
-    // A pointer to an array of enabledLayerCount null-terminated 
-    // UTF-8 strings containing the names of layers to enable for 
-    // the created device
-    const char* const*                 ppEnabledLayerNames;
-    // The number of device extensions to enable
-    uint32_t                           enabledExtensionCount;
-    // A pointer to an array of enabledExtensionCount null-terminated 
-    // UTF-8 strings containing the names of extensions to enable for
-    // the created device
-    const char* const*                 ppEnabledExtensionNames;
-    // NULL or a pointer to a VkPhysicalDeviceFeatures structure that 
-    // contains boolean indicators of all the features to be enabled
-    const VkPhysicalDeviceFeatures*    pEnabledFeatures;
+  // The type of this structure
+  VkStructureType                    sType;
+  // NULL or a pointer to an extension-specific structure
+  const void*                        pNext;
+  // Reserved for future use
+  VkDeviceCreateFlags                flags;
+  // The unsigned integer size of the pQueueCreateInfos array
+  uint32_t                           queueCreateInfoCount;
+  // A pointer to an array of VkDeviceQueueCreateInfo structures
+  // describing the queues that are requested to be created along
+  // with the logical device
+  const VkDeviceQueueCreateInfo*     pQueueCreateInfos;
+  // The number of device layers to enable
+  uint32_t                           enabledLayerCount;
+  // A pointer to an array of enabledLayerCount null-terminated
+  // UTF-8 strings containing the names of layers to enable for
+  // the created device
+  const char* const*                 ppEnabledLayerNames;
+  // The number of device extensions to enable
+  uint32_t                           enabledExtensionCount;
+  // A pointer to an array of enabledExtensionCount null-terminated
+  // UTF-8 strings containing the names of extensions to enable for
+  // the created device
+  const char* const*                 ppEnabledExtensionNames;
+  // NULL or a pointer to a VkPhysicalDeviceFeatures structure that
+  // contains boolean indicators of all the features to be enabled
+  const VkPhysicalDeviceFeatures*    pEnabledFeatures;
 } VkDeviceCreateInfo;
 ```
 
@@ -254,16 +256,16 @@ Finally, to wrap up this section, we need to create a logical device. We'll use 
 
 ```cpp
 VkResult vkCreateDevice(
-    // One of the device handles returned from a call to 
-    // vkEnumeratePhysicalDevices
-    VkPhysicalDevice                            physicalDevice,
-    // A pointer to a VkDeviceCreateInfo structure containing information 
-    // about how to create the device
-    const VkDeviceCreateInfo*                   pCreateInfo,
-    // NULL or a pointer to a valid VkAllocationCallbacks structure
-    const VkAllocationCallbacks*                pAllocator,
-    // A pointer to a VkDevice handle
-    VkDevice*                                   pDevice);
+  // One of the device handles returned from a call to
+  // vkEnumeratePhysicalDevices
+  VkPhysicalDevice                            physicalDevice,
+  // A pointer to a VkDeviceCreateInfo structure containing information
+  // about how to create the device
+  const VkDeviceCreateInfo*                   pCreateInfo,
+  // NULL or a pointer to a valid VkAllocationCallbacks structure
+  const VkAllocationCallbacks*                pAllocator,
+  // A pointer to a VkDevice handle
+  VkDevice*                                   pDevice);
 ```
 
 Following the usage guidelines outlined in the specification, calling `vkCreateDevice` looks like this...
@@ -271,8 +273,6 @@ Following the usage guidelines outlined in the specification, calling `vkCreateD
 ```cpp
 VkResult result = vkCreateDevice(physicalDevice, &deviceInfo, NULL, &logicalDevice);
 
-if (result != VK_SUCCESS) {
-    fprintf(stderr, "Failed to create logical device: %d\n", result);
-    exit(EXIT_FAILURE);
-}
+if (result != VK_SUCCESS)
+  exitOnError("Failed to create a Vulkan logical device.");
 ```
