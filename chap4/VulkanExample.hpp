@@ -16,7 +16,6 @@ private:
     void exitOnError(const char * msg);
     void initInstance();
     void initDevices();
-    void initWindow();
 
     const char * applicationName = "Vulkan Example";
     const char * engineName = "Vulkan Engine";
@@ -27,7 +26,10 @@ private:
     VkInstance instance;
     VkPhysicalDevice physicalDevice;
     VkDevice device;
-#if defined(__linux__)
+#if defined (_WIN32)
+    HINSTANCE windowInstance;
+    HWND window;
+#elif defined(__linux__)
     xcb_connection_t * connection;
     xcb_window_t window;
     xcb_screen_t * screen;
@@ -38,6 +40,11 @@ public:
     VulkanExample();
     virtual ~VulkanExample();
 
+#if defined(_WIN32)
+    void initWindow(HINSTANCE hInstance);
+#elif defined (__linux)
+    void initWindow();
+#endif
     void renderLoop();
 };
 

@@ -2,9 +2,15 @@
 
 VulkanExample::VulkanExample()
 {
+#if defined(_WIN32)
+    AllocConsole();
+    AttachConsole(GetCurrentProcessId());
+    freopen("CON", "w", stdout);
+    freopen("CON", "w", stderr);
+    SetConsoleTitle(TEXT(applicationName));
+#endif
     initInstance();
     initDevices();
-    initWindow();
 }
 
 VulkanExample::~VulkanExample()
@@ -14,7 +20,11 @@ VulkanExample::~VulkanExample()
 
 void VulkanExample::exitOnError(const char * msg)
 {
+#if defined(_WIN32)
+    MessageBox(NULL, msg, applicationName, MB_ICONERROR);
+#elif defined(__linux__)
     fputs(msg, stderr);
+#endif
     exit(EXIT_FAILURE);
 }
 
@@ -123,9 +133,80 @@ void VulkanExample::initDevices()
     }
 }
 
+#if defined (_WIN32)
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    switch (message) {
+    case WM_DESTROY:
+        DestroyWindow(hWnd);
+        PostQuitMessage(0);
+        break;
+    case WM_PAINT:
+        ValidateRect(hWnd, NULL);
+        break;
+    default:
+        return DefWindowProc(hWnd, message, wParam, lParam);
+        break;
+    }
+}
+
+void VulkanExample::initWindow(HINSTANCE hInstance) 
+{
+    WNDCLASSEX wcex;
+
+    wcex.cbSize = sizeof(WNDCLASSEX);
+    wcex.style = CS_HREDRAW | CS_VREDRAW;
+    wcex.lpfnWndProc = WndProc;
+    wcex.cbClsExtra = 0;
+    wcex.cbWndExtra = 0;
+    wcex.hInstance = hInstance;
+    wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
+    wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+    wcex.hbrBackground = (HBRUSH) GetStockObject(BLACK_BRUSH);
+    wcex.lpszMenuName = NULL;
+    wcex.lpszClassName = applicationName;
+    wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
+
+    if (!RegisterClassEx(&wcex))
+        exitOnError("Failed to register window");
+
+    windowInstance = hInstance;
+    int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+    int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+    int windowX = screenWidth / 2 - windowWidth / 2;
+    int windowY = screenHeight / 2 - windowHeight / 2;
+    window = CreateWindow(
+        applicationName,
+        applicationName,
+        WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
+        windowX, windowY,
+        windowWidth, windowHeight,
+        NULL,
+        NULL,
+        windowInstance,
+        NULL);
+
+    if (!window)
+        exitOnError("Failed to create window");
+
+    ShowWindow(window, SW_SHOW);
+    SetForegroundWindow(window);
+    SetFocus(window);
+}
+
+void VulkanExample::renderLoop() 
+{
+    MSG message;
+
+    while (GetMessage(&message, NULL, 0, 0)) {
+        TranslateMessage(&message);
+        DispatchMessage(&message);
+    }
+}
+
+#elif defined(__linux__)
 void VulkanExample::initWindow()
 {
-#if defined(__linux__)
     int screenp = 0;
     connection = xcb_connect(NULL, &screenp);
 
@@ -196,12 +277,10 @@ void VulkanExample::initWindow()
         &wmDeleteReply->atom);
     xcb_map_window(connection, window);
     xcb_flush(connection);
-#endif
 }
 
 void VulkanExample::renderLoop()
 {
-#if defined(__linux__)
     bool running = true;
 
     while (running) {
@@ -222,5 +301,5 @@ void VulkanExample::renderLoop()
     }
 
     xcb_destroy_window(connection, window);
-#endif
 }
+#endif
