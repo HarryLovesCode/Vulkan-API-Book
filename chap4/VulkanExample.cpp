@@ -208,7 +208,7 @@ void VulkanExample::initWindow() {
   screen = iter.data;
   window = xcb_generate_id(connection);
   uint32_t eventMask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
-  uint32_t valueList[] = {screen->black_pixel, XCB_EVENT_MASK_KEY_PRESS};
+  uint32_t valueList[] = {screen->black_pixel, 0};
 
   xcb_create_window(connection, XCB_COPY_FROM_PARENT, window, screen->root, 0,
                     0, windowWidth, windowHeight, 0,
