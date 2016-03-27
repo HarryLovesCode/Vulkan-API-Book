@@ -163,6 +163,37 @@ void VulkanExample::initWindow()
         8,
         strlen(applicationName),
         applicationName);
+
+    xcb_intern_atom_cookie_t wmDeleteCookie = xcb_intern_atom(
+    	connection,
+    	0,
+    	strlen("WM_DELETE_WINDOW"),
+    	"WM_DELETE_WINDOW");
+    xcb_intern_atom_cookie_t wmProtocolsCookie = xcb_intern_atom(
+    	connection,
+    	0,
+    	strlen("WM_PROTOCOLS"),
+    	"WM_PROTOCOLS");
+    xcb_intern_atom_reply_t * wmDeleteReply = xcb_intern_atom_reply(
+    	connection,
+    	wmDeleteCookie,
+    	NULL);
+    xcb_intern_atom_reply_t * wmProtocolsReply = xcb_intern_atom_reply(
+    	connection,
+    	wmProtocolsCookie,
+    	NULL);
+    wmDeleteWin = wmDeleteReply->atom;
+    wmProtocols = wmProtocolsReply->atom;
+
+    xcb_change_property(
+        connection,
+        XCB_PROP_MODE_REPLACE,
+        window,
+        wmProtocolsReply->atom,
+        4,
+        32,
+        1,
+        &wmDeleteReply->atom);
     xcb_map_window(connection, window);
     xcb_flush(connection);
 #endif
@@ -176,21 +207,18 @@ void VulkanExample::renderLoop()
     while (running) {
         xcb_generic_event_t * event = xcb_wait_for_event(connection);
 
-        if (!event)
-            exitOnError("IO error upon calling xcb_wait_for_event");
-
         switch (event->response_type & ~0x80) {
-        case XCB_KEY_PRESS:
-            xcb_key_press_event_t *kp = (xcb_key_press_event_t *) event;
+            case XCB_CLIENT_MESSAGE: {
+                xcb_client_message_event_t * cm = (xcb_client_message_event_t *) event;
 
-            if (kp->detail == 9)
-                running = false;
+                if (cm->data.data32[0] == wmDeleteWin)
+                    running = false;
 
-            break;
+                break;
+            }
         }
 
         free(event);
-        xcb_flush(connection);
     }
 
     xcb_destroy_window(connection, window);

@@ -31,6 +31,8 @@ private:
     xcb_connection_t * connection;
     xcb_window_t window;
     xcb_screen_t * screen;
+    xcb_atom_t wmProtocols;
+    xcb_atom_t wmDeleteWin;
 #endif
 public:
     VulkanExample();
