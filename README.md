@@ -2,12 +2,13 @@
 
 Hello everyone. This is going to be a technical book about the newly published Vulkan specification. We'll go over different topics such as...
 
+- Extensions
 - Getting started
-- Instancing
+- Instances
 - Physical & logical devices
-- Rendering to surfaces
-- Swap chains
 - Queues
+- Surfaces
+- Swap chains
 - Windowing across different platforms
 - And more!
 
