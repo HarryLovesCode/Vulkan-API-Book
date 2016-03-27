@@ -10,6 +10,16 @@ VulkanExample::VulkanExample() {
 #endif
   initInstance();
   initDevices();
+  GET_INSTANCE_PROC_ADDR(instance, GetPhysicalDeviceSurfaceSupportKHR);
+  GET_INSTANCE_PROC_ADDR(instance, GetPhysicalDeviceSurfaceCapabilitiesKHR);
+  GET_INSTANCE_PROC_ADDR(instance, GetPhysicalDeviceSurfaceFormatsKHR);
+  GET_INSTANCE_PROC_ADDR(instance, GetPhysicalDeviceSurfacePresentModesKHR);
+  GET_DEVICE_PROC_ADDR(device, CreateSwapchainKHR);
+  GET_DEVICE_PROC_ADDR(device, DestroySwapchainKHR);
+  GET_DEVICE_PROC_ADDR(device, GetSwapchainImagesKHR);
+  GET_DEVICE_PROC_ADDR(device, AcquireNextImageKHR);
+  GET_DEVICE_PROC_ADDR(device, QueuePresentKHR);
+  initSurface();
 }
 
 VulkanExample::~VulkanExample() { vkDestroyInstance(instance, NULL); }
@@ -255,3 +265,44 @@ void VulkanExample::renderLoop() {
   xcb_destroy_window(connection, window);
 }
 #endif
+
+void VulkanExample::initSurface() {
+#if defined(_WIN32)
+  VkWin32SurfaceCreateInfoKHR surfaceCreateInfo;
+  surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+  surfaceCreateInfo.hinstance = windowInstance;
+  surfaceCreateInfo.hwnd = window;
+  VkResult result =
+      vkCreateWin32SurfaceKHR(instance, &surfaceCreateInfo, NULL, &surface);
+#elif defined(__linux__)
+  VkXcbSurfaceCreateInfoKHR surfaceCreateInfo;
+  surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
+  surfaceCreateInfo.connection = connection;
+  surfaceCreateInfo.window = window;
+  VkResult result =
+      vkCreateXcbSurfaceKHR(instance, &surfaceCreateInfo, NULL, &surface);
+#endif
+
+  if (result != VK_SUCCESS) exitOnError("Failed to create VkSurfaceKHR.");
+
+  uint32_t formatCount = 0;
+  result = vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface,
+                                                &formatCount, NULL);
+
+  if (result != VK_SUCCESS || formatCount < 1)
+    exitOnError("Failed to get device surface formats.");
+
+  std::vector<VkSurfaceFormatKHR> surfaceFormats(formatCount);
+  result = vkGetPhysicalDeviceSurfaceFormatsKHR(
+      physicalDevice, surface, &formatCount, surfaceFormats.data());
+
+  if (result != VK_SUCCESS || formatCount < 1)
+    exitOnError("Failed to get device surface formats.");
+
+  if (formatCount == 1 && surfaceFormats[0].format == VK_FORMAT_UNDEFINED)
+    colorFormat = VK_FORMAT_B8G8R8A8_UNORM;
+  else if (formatCount >= 1)
+    colorFormat = surfaceFormats[0].format;
+
+  colorSpace = surfaceFormats[0].colorSpace;
+}
