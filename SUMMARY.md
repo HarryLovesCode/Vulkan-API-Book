@@ -9,7 +9,7 @@
 * [Physical Devices and Logical Connections](chap3/physical_devices_and_logical_connections.md)
 * [Creating a Window](chap4/creating_a_window.md)
    * [Windows](chap4/windows.md)
-   * Linux
+   * [Linux](chap4/linux.md)
    * Android
    * GLFW
 * [Getting a Surface](chap5/getting_a_surface.md)
