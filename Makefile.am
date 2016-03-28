@@ -1,1 +1,1 @@
-SUBDIRS = chap2 chap3 chap4 chap5
+SUBDIRS = src/chap2 src/chap3 src/chap4 src/chap5
