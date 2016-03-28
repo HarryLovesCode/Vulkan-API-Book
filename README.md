@@ -24,7 +24,7 @@ You can find the Github repository [here](https://github.com/HarryLovesCode/Vulk
 
 # Building the Book
 
-I'll need to write up a more detailed guide about how to use Pandoc, but for now, just use the `build.sh` script. It will build the book in the `.epub` format.
+I'll need to write up a more detailed guide about how to use Pandoc, but for now, just use the `build.sh` script. It will build the book in both `.epub` and `.pdf` formats.
 
 # Reading the Book
 
