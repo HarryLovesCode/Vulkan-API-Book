@@ -22,7 +22,11 @@ Hello everyone. This is going to be a technical book about the newly published V
 
 You can find the Github repository [here](https://github.com/HarryLovesCode/Vulkan-API-Book). I'm working on moving the Vulkan code into this repository. For now, only Linux and Windows are supported. 
 
-# Building on Linux
+# Building the Book
+
+You can use the Gitbook CLI to build the book from source, but I prefer to use [mdBook](https://github.com/azerupi/mdBook). Simply follow the instructions to install their tool and run `mdbook build` in the root directory of the repository. That will create a `book` directory with the static HTML files.
+
+# Building Code on Linux
 
 To build on Linux, use the following commands:
 
@@ -37,7 +41,7 @@ make
 
 Once you've done that, you should find all the binaries located in the `./bin` folder.
 
-# Building on Windows
+# Building Code on Windows
 
 To build on Windows, you'll need Visual Studio 2015. You can find the Visual Studio solution in the root directory of the repository. Just open that and you can pick and choose which chapters to build and run.
 
