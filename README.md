@@ -20,11 +20,15 @@ Hello everyone. This is going to be a technical book about the newly published V
 
 # Code
 
-You can find the Github repository [here](https://github.com/HarryLovesCode/Vulkan-API-Book). I'm working on moving the Vulkan code into this repository. For now, only Linux and Windows are supported. 
+You can find the Github repository [here](https://github.com/HarryLovesCode/Vulkan-API-Book). For now, only Linux and Windows are supported. 
 
 # Building the Book
 
-You can use the Gitbook CLI to build the book from source, but I prefer to use [mdBook](https://github.com/azerupi/mdBook). Simply follow the instructions to install their tool and run `mdbook build` in the root directory of the repository. That will create a `book` directory with the static HTML files.
+I'll need to write up a more detailed guide about how to use Pandoc, but for now, just use the `build.sh` script. It will build the book in the `.epub` format.
+
+# Reading the Book
+
+You can find the latest stable version [on the release page](https://github.com/HarryLovesCode/Vulkan-API-Book/releases).
 
 # Building Code on Linux
 
