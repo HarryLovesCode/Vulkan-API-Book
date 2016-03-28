@@ -46,6 +46,7 @@ class VulkanExample {
   VkSurfaceKHR surface;
   VkFormat colorFormat;
   VkColorSpaceKHR colorSpace;
+  uint32_t queueIndex;
 
   PFN_vkGetPhysicalDeviceSurfaceSupportKHR fpGetPhysicalDeviceSurfaceSupportKHR;
   PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR fpGetPhysicalDeviceSurfaceCapabilitiesKHR;

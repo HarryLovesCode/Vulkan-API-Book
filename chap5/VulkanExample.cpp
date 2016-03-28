@@ -286,14 +286,44 @@ void VulkanExample::initSurface() {
   if (result != VK_SUCCESS) exitOnError("Failed to create VkSurfaceKHR.");
 
   uint32_t formatCount = 0;
-  result = vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface,
+  result = fpGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface,
                                                 &formatCount, NULL);
 
   if (result != VK_SUCCESS || formatCount < 1)
     exitOnError("Failed to get device surface formats.");
 
+  uint32_t queueCount = 0;
+  vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueCount, NULL);
+
+  if (queueCount < 1)
+    exitOnError("Failed to get physical device queue family properties.");
+
+  std::vector<VkQueueFamilyProperties> queueProperties(queueCount);
+  vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueCount,
+                                           queueProperties.data());
+
+  if (queueCount < 1)
+    exitOnError("Failed to get physical device queue family properties.");
+
+  queueIndex = UINT32_MAX;
+  std::vector<VkBool32> supportsPresenting(queueCount);
+
+  for (uint32_t i = 0; i < queueCount; i++) {
+    fpGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface,
+                                         &supportsPresenting[i]);
+    if ((queueProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) != 0) {
+      if (supportsPresenting[i] == VK_TRUE) {
+        queueIndex = i;
+        break;
+      }
+    }
+  }
+
+  if (queueIndex == UINT32_MAX)
+    exitOnError("Could not find queue that supports graphics and presenting");
+
   std::vector<VkSurfaceFormatKHR> surfaceFormats(formatCount);
-  result = vkGetPhysicalDeviceSurfaceFormatsKHR(
+  result = fpGetPhysicalDeviceSurfaceFormatsKHR(
       physicalDevice, surface, &formatCount, surfaceFormats.data());
 
   if (result != VK_SUCCESS || formatCount < 1)
