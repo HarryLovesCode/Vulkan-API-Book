@@ -301,7 +301,7 @@ void VulkanExample::initSurface() {
 
   if (formatCount == 1 && surfaceFormats[0].format == VK_FORMAT_UNDEFINED)
     colorFormat = VK_FORMAT_B8G8R8A8_UNORM;
-  else if (formatCount >= 1)
+  else
     colorFormat = surfaceFormats[0].format;
 
   colorSpace = surfaceFormats[0].colorSpace;
