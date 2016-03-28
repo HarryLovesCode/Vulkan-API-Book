@@ -14,7 +14,7 @@
    * GLFW
 * [Getting a Surface](chap5/chap5.md)
    * [Windows](chap5/chap5-windows.md)
-   * Linux
+   * [Linux](chap5/chap5-linux.md)
    * Android
    * GLFW
 * [Working with Swapchains](chap6/working_with_swapchains.md)
