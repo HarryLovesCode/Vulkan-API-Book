@@ -2,7 +2,7 @@
 
 We're going to be writing the Windows specific code for getting a surface in this section. Now, the code here does not exist in the specification. It is up to platforms like Windows to expose surface features on their own. For documentation, I recommend following the [Vulkan Quick Reference](https://www.khronos.org/files/vulkan10-reference-guide.pdf). You can find the platform specific WSI features on page 9.
 
-# `VkWin32SurfaceCreateInfoKHR`
+## `VkWin32SurfaceCreateInfoKHR`
 
 Before we create a surface, we must specify information ahead of time like most Vulkan objects. You'll see in section **29.2.4** that the structure we'll be using is `VkWin32SurfaceCreateInfoKHR`. Here is the definition:
 
@@ -27,7 +27,7 @@ surfaceCreateInfo.hinstance = windowInstance;
 surfaceCreateInfo.hwnd = window;
 ```
 
-# `vkCreateWin32SurfaceKHR`
+## `vkCreateWin32SurfaceKHR`
 
 Now we can create the surface. Also in section **29.2.4** is the definition for `vkCreateWin32SurfaceKHR`. It looks like:
 
@@ -43,7 +43,7 @@ VkResult vkCreateWin32SurfaceKHR(
 Again, we should follow the usage we've seen before for `pAllocator`. This would mean we pass in `NULL` to the function as the third argument. Let's look at the code:
 
 ```cpp
-VkResult result = 
+VkResult result =
     vkCreateWin32SurfaceKHR(instance, &surfaceCreateInfo, NULL, &surface);
 ```
 
