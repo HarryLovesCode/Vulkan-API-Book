@@ -61,9 +61,11 @@ We'll insert that right after we call `initSurface` in our constructor. We also 
 
 ```cpp
 PFN_vkGetPhysicalDeviceSurfaceSupportKHR fpGetPhysicalDeviceSurfaceSupportKHR;
-PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR fpGetPhysicalDeviceSurfaceCapabilitiesKHR;
+PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR
+    fpGetPhysicalDeviceSurfaceCapabilitiesKHR;
 PFN_vkGetPhysicalDeviceSurfaceFormatsKHR fpGetPhysicalDeviceSurfaceFormatsKHR;
-PFN_vkGetPhysicalDeviceSurfacePresentModesKHR fpGetPhysicalDeviceSurfacePresentModesKHR;
+PFN_vkGetPhysicalDeviceSurfacePresentModesKHR
+    fpGetPhysicalDeviceSurfacePresentModesKHR;
 PFN_vkCreateSwapchainKHR fpCreateSwapchainKHR;
 PFN_vkDestroySwapchainKHR fpDestroySwapchainKHR;
 PFN_vkGetSwapchainImagesKHR fpGetSwapchainImagesKHR;
@@ -86,9 +88,9 @@ Next, we need to look for a device queue that allows for drawing images **and** 
 
 ```cpp
 VkResult vkGetPhysicalDeviceSurfaceSupportKHR(
-  VkPhysicalDevice physicalDevice, 
-  uint32_t queueFamilyIndex, 
-  VkSurfaceKHR surface, 
+  VkPhysicalDevice physicalDevice,
+  uint32_t queueFamilyIndex,
+  VkSurfaceKHR surface,
   VkBool32* pSupported);
 ```
 
@@ -98,7 +100,8 @@ The usage would therefore look like this:
 std::vector<VkBool32> supportsPresenting(queueCount);
 
 for (uint32_t i = 0; i < queueCount; i++) {
-  fpGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface, &supportsPresenting[i]);
+  fpGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface,
+                                       &supportsPresenting[i]);
 }
 ```
 
@@ -135,9 +138,9 @@ A common and well supported color format in Vulkan is `VK_FORMAT_B8G8R8A8_UNORM`
 
 ```cpp
 VkResult vkGetPhysicalDeviceSurfaceFormatsKHR(
-  VkPhysicalDevice     physicalDevice, 
-  VkSurfaceKHR         surface, 
-  uint32_t*            pSurfaceFormatCount, 
+  VkPhysicalDevice     physicalDevice,
+  VkSurfaceKHR         surface,
+  uint32_t*            pSurfaceFormatCount,
   VkSurfaceFormatKHR*  pSurfaceFormats);
 ```
 
