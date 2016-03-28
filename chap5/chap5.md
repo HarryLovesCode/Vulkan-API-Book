@@ -120,6 +120,13 @@ if ((queueProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) != 0) {
 }
 ```
 
+If we didn't find anything, the value of `queueIndex` will still be `UINT32_MAX`. Let's handle that possibility before moving on:
+
+```cpp
+if (queueIndex == UINT32_MAX)
+  exitOnError("Could not find queue that supports graphics and presenting");
+```
+
 ## Color Formats and Color Spaces
 
 For rendering purposes, we'll need some information on the surface formats our device supports. Specifically, we're going to check right now for color support. Vulkan breaks up this into two categories: color formats and color spaces. Color formats can describe the number of components, size of components, compression types, etc. In contrast, color spaces tells the Vulkan implementation how to interpret that data. For example, if we are telling Vulkan we have an RGBA image with 8 bits for each component (`VK_FORMAT_B8G8R8A8_*`), it would need to understand what `0.0` and `1.0` mean. A color space describes the range of colors or gamut if you prefer.
