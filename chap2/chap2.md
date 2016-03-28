@@ -33,7 +33,7 @@ class VulkanExample {
 
 We'll be writing the contents of the constructor and the `initInstance` method.
 
-# VkApplicationInfo
+## `VkApplicationInfo`
 
 This object, while not required, is pretty standard in most applications. You can find it documented [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkApplicationInfo). It is defined in the Vulkan header as:
 
@@ -84,7 +84,7 @@ You'll notice that for `apiVersion`, I am using `VK_MAKE_VERSION` to set the API
 
 We'll see later that if the version we try to get is unsupported, we'll get an error (`VK_ERROR_INCOMPATIBLE_DRIVER`). We'll check for this error later in this chapter.
 
-# VkInstanceCreateInfo
+## `VkInstanceCreateInfo`
 
 This object, **is** required. You can find it documented [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkInstanceCreateInfo). It is defined in the Vulkan header as:
 
@@ -146,7 +146,7 @@ createInfo.enabledExtensionCount = enabledExtensions.size();
 createInfo.ppEnabledExtensionNames = enabledExtensions.data();
 ```
 
-# vkCreateInstance
+## `vkCreateInstance`
 
 Finally we're ready to create our instance. You can find the documentation for `vkCreateInstance` [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#initialization-instances). Let's look at the definition:
 
@@ -191,7 +191,7 @@ void VulkanExample::exitOnError(const char* msg) {
 }
 ```
 
-# Destructor
+## Destructor
 
 For now, we will simply destroy the instance we created and then exit. The destructor therefore looks like this:
 
