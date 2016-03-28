@@ -15,7 +15,7 @@ Hello everyone. This is going to be a technical book about the newly published V
 # Resources
 
 - [Vulkan Quick Reference v1.0](https://www.khronos.org/files/vulkan10-reference-guide.pdf)
-- [Vulkan Specification v1.0.6](https://www.khronos.org/registry/vulkan/specs/1.0/pdf/vkspec.pdf)
+- [Vulkan Specification v1.0.7](https://www.khronos.org/registry/vulkan/specs/1.0/pdf/vkspec.pdf)
 - [Sascha Willem's Vulkan Samples](https://github.com/SaschaWillems/Vulkan)
 
 # Code
