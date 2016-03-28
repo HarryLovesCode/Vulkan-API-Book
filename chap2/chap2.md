@@ -64,9 +64,7 @@ typedef struct VkApplicationInfo {
 Following the usage guidelines outlined in the specification, `VkApplicationInfo` usage would look something like this:
 
 ```cpp
-VkApplicationInfo appInfo{};
-
-memset(&appInfo, 0, sizeof(appInfo));
+VkApplicationInfo appInfo = {};
 appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 appInfo.pNext = NULL;
 appInfo.pApplicationName = applicationName;
@@ -116,9 +114,7 @@ typedef struct VkInstanceCreateInfo {
 Following the usage guidelines outlined in the specification, `VkInstanceCreateInfo` usage would look something like this:
 
 ```cpp
-VkInstanceCreateInfo createInfo{};
-
-memset(&createInfo, 0, sizeof(createInfo));
+VkInstanceCreateInfo createInfo = {};
 createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 createInfo.pNext = NULL;
 createInfo.flags = 0;

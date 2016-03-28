@@ -10,9 +10,7 @@ void VulkanExample::exitOnError(const char* msg) {
 }
 
 void VulkanExample::initInstance() {
-  VkApplicationInfo appInfo{};
-
-  memset(&appInfo, 0, sizeof(appInfo));
+  VkApplicationInfo appInfo = {};
   appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   appInfo.pNext = NULL;
   appInfo.pApplicationName = applicationName;
@@ -29,9 +27,7 @@ void VulkanExample::initInstance() {
   enabledExtensions.push_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
 #endif
 
-  VkInstanceCreateInfo createInfo{};
-
-  memset(&createInfo, 0, sizeof(createInfo));
+  VkInstanceCreateInfo createInfo = {};
   createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
   createInfo.pNext = NULL;
   createInfo.flags = 0;

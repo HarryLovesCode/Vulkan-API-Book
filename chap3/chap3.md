@@ -122,7 +122,7 @@ void vkGetPhysicalDeviceProperties(
 Following the usage guidelines outlined in the specification, a call to `vkGetPhysicalDeviceProperties`would look like this...
 
 ```cpp
-VkPhysicalDeviceProperties physicalProperties;
+VkPhysicalDeviceProperties physicalProperties = {};
 
 for (uint32_t i = 0; i < deviceCount; i++) {
   vkGetPhysicalDeviceProperties(physicalDevices[i], & physicalProperties);

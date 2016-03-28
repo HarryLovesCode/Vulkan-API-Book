@@ -34,9 +34,7 @@ void VulkanExample::exitOnError(const char *msg) {
 }
 
 void VulkanExample::initInstance() {
-  VkApplicationInfo appInfo{};
-
-  memset(&appInfo, 0, sizeof(appInfo));
+  VkApplicationInfo appInfo = {};
   appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   appInfo.pNext = NULL;
   appInfo.pApplicationName = applicationName;
@@ -53,9 +51,7 @@ void VulkanExample::initInstance() {
   enabledExtensions.push_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
 #endif
 
-  VkInstanceCreateInfo createInfo{};
-
-  memset(&createInfo, 0, sizeof(createInfo));
+  VkInstanceCreateInfo createInfo = {};
   createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
   createInfo.pNext = NULL;
   createInfo.flags = 0;
@@ -102,7 +98,7 @@ void VulkanExample::initDevices() {
   physicalDevice = physicalDevices[0];
 
   float priorities[] = {1.0f};
-  VkDeviceQueueCreateInfo queueInfo{};
+  VkDeviceQueueCreateInfo queueInfo = {};
   queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
   queueInfo.pNext = NULL;
   queueInfo.flags = 0;
@@ -112,7 +108,7 @@ void VulkanExample::initDevices() {
 
   std::vector<const char *> enabledExtensions = {
       VK_KHR_SWAPCHAIN_EXTENSION_NAME};
-  VkDeviceCreateInfo deviceInfo{};
+  VkDeviceCreateInfo deviceInfo = {};
   deviceInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
   deviceInfo.pNext = NULL;
   deviceInfo.flags = 0;
@@ -127,7 +123,7 @@ void VulkanExample::initDevices() {
   if (result != VK_SUCCESS)
     exitOnError("Failed to create a Vulkan logical device.");
 
-  VkPhysicalDeviceProperties physicalProperties;
+  VkPhysicalDeviceProperties physicalProperties = {};
 
   for (uint32_t i = 0; i < deviceCount; i++) {
     vkGetPhysicalDeviceProperties(physicalDevices[i], &physicalProperties);
@@ -268,14 +264,18 @@ void VulkanExample::renderLoop() {
 
 void VulkanExample::initSurface() {
 #if defined(_WIN32)
-  VkWin32SurfaceCreateInfoKHR surfaceCreateInfo;
+  VkWin32SurfaceCreateInfoKHR surfaceCreateInfo = {};
   surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+  surfaceCreateInfo.pNext = NULL;
+  surfaceCreateInfo.flags = 0;
   surfaceCreateInfo.hinstance = windowInstance;
   surfaceCreateInfo.hwnd = window;
   VkResult result =
       vkCreateWin32SurfaceKHR(instance, &surfaceCreateInfo, NULL, &surface);
 #elif defined(__linux__)
-  VkXcbSurfaceCreateInfoKHR surfaceCreateInfo;
+  VkXcbSurfaceCreateInfoKHR surfaceCreateInfo = {};
+  surfaceCreateInfo.pNext = NULL;
+  surfaceCreateInfo.flags = 0;
   surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
   surfaceCreateInfo.connection = connection;
   surfaceCreateInfo.window = window;

@@ -50,8 +50,9 @@ VkResult result =
 Of course, we'll also need to verify our surface creation was successful using:
 
 ```cpp
-if (result != VK_SUCCESS) {
-    fprintf(stderr, "Failed to create Win32 Surface\n");
-    exit(EXIT_FAILURE);
-}
+if (result != VK_SUCCESS) exitOnError("Failed to create VkSurfaceKHR.");
 ```
+
+## Color Formats and Color Spaces
+
+Please go back to the [Chapter 5 landing page](./chap5.md) to read about determining the color formats and color spaces for the surface.
