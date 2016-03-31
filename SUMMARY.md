@@ -17,4 +17,5 @@
    * [Linux](chap5/chap5-linux.md)
    * Android
    * GLFW
-* [Working with Swapchains](chap6/working_with_swapchains.md)
+* [Working with Swapchains](chap6/chap6.md)
+
