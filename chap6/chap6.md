@@ -105,7 +105,25 @@ Now let's look at the available present modes. There are a few different types:
 - `VK_PRESENT_MODE_FIFO_RELAXED_KHR` - Our engine waits for the next vertical blanking interval to update the image. If we've missed the interval, we **do not** wait. We will append already rendered images to the pending presentation queue. We present as soon as possible. We follow the "first in first out" (FIFO) philosophy as the name suggests. This *may* result in tearing.
   - You can think of the underlying data structure as something similar to a [heap](https://en.wikipedia.org/wiki/Heap_(data_structure)).
 
-If you do not care about tearing, you might want `VK_PRESENT_MODE_IMMEDIATE_KHR`. However, if you want a low-latency tear-less presentation mode, you would choose `VK_PRESENT_MODE_MAILBOX_KHR`.
+If you do not care about tearing, you might want `VK_PRESENT_MODE_IMMEDIATE_KHR`. However, if you want a low-latency tear-less presentation mode, you would choose `VK_PRESENT_MODE_MAILBOX_KHR`. Now let's look through our present modes and see if we can find `VK_PRESENT_MODE_MAILBOX_KHR`. If we find it, stop looking. Otherwise, if we see our next preference `VK_PRESENT_MODE_IMMEDIATE_KHR`, keep that. Finally, if we didn't find anything, we should continue with our default `VK_PRESENT_MODE_FIFO_KHR`. The code would look like this:
+
+```cpp
+VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
+
+for (uint32_t i = 0; i < presentModeCount; i++) {
+  if (presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR) {
+    presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+    break;
+  }
+
+  if (presentModes[i] == VK_PRESENT_MODE_IMMEDIATE_KHR)
+    presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+}
+```
+
+# Image Layouts
+
+
 
 # `VkSwapchainCreateInfoKHR`
 
