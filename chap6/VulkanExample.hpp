@@ -28,17 +28,24 @@
   }
 
 class VulkanExample {
- private:
+private:
   void exitOnError(const char *msg);
   void initInstance();
   void initDevices();
   void initSurface();
+  void initSwapchain();
+  void setImageLayout(VkCommandBuffer cmdBuffer,
+    VkImage image,
+    VkImageAspectFlags aspects,
+    VkImageLayout oldLayout,
+    VkImageLayout newLayout,
+    VkImageSubresourceRange subresourceRange);
 
   const char *applicationName = "Vulkan Example";
   const char *engineName = "Vulkan Engine";
 
-  const uint32_t windowWidth = 1280;
-  const uint32_t windowHeight = 720;
+  const int windowWidth = 1280;
+  const int windowHeight = 720;
 
   VkInstance instance;
   VkPhysicalDevice physicalDevice;
@@ -50,10 +57,10 @@ class VulkanExample {
 
   PFN_vkGetPhysicalDeviceSurfaceSupportKHR fpGetPhysicalDeviceSurfaceSupportKHR;
   PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR
-      fpGetPhysicalDeviceSurfaceCapabilitiesKHR;
+    fpGetPhysicalDeviceSurfaceCapabilitiesKHR;
   PFN_vkGetPhysicalDeviceSurfaceFormatsKHR fpGetPhysicalDeviceSurfaceFormatsKHR;
   PFN_vkGetPhysicalDeviceSurfacePresentModesKHR
-      fpGetPhysicalDeviceSurfacePresentModesKHR;
+    fpGetPhysicalDeviceSurfacePresentModesKHR;
   PFN_vkCreateSwapchainKHR fpCreateSwapchainKHR;
   PFN_vkDestroySwapchainKHR fpDestroySwapchainKHR;
   PFN_vkGetSwapchainImagesKHR fpGetSwapchainImagesKHR;
@@ -69,7 +76,7 @@ class VulkanExample {
   xcb_atom_t wmProtocols;
   xcb_atom_t wmDeleteWin;
 #endif
- public:
+public:
   VulkanExample();
   virtual ~VulkanExample();
 
