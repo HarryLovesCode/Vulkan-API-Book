@@ -31,7 +31,8 @@ Now let's get the information we need:
 
 ```cpp
 VkSurfaceCapabilitiesKHR caps = {};
-VkResult result = fpGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &caps);
+VkResult result = fpGetPhysicalDeviceSurfaceCapabilitiesKHR(
+    physicalDevice, surface, &caps);
 ```
 
 Per usual, let's verify we were successful:
@@ -43,7 +44,7 @@ if (result != VK_SUCCESS)
 
 # `VkExtent2D`
 
-Windows uses `RECT` to define properties of rectangles. Similarly, Vulkan uses `VkExtent2D` for the same purpose. The `VkExtent2D` object will be used later, but for now, let's check something. The `caps` variable has a `currentExtent` field. This informs us about the surface's size. In the case that `caps.currentExtent.width == -1`, we'll need to set the swapchain's extent ourselves. Otherwise, we can just use `caps.currentExtent` for the swapchain. Let's see how this looks in code:
+Windows uses `RECT` to define properties of rectangles. Similarly, Vulkan uses `VkExtent2D` for the same purpose. The `VkExtent2D` object will be used later, but for now, let's check something. The `caps` variable has a `currentExtent` field. This informs us about the surface's size. In the case that either the `width` or `height` are `-1`, we'll need to set the extent size ourselves. Otherwise, we can just use `caps.currentExtent` for the swapchain. Let's see how this looks in code:
 
 ```cpp
 VkExtent2D swapchainExtent = {};
