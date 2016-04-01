@@ -123,6 +123,14 @@ for (uint32_t i = 0; i < presentModeCount; i++) {
 
 # Image Layouts
 
+In Vulkan, there is a concept called **memory barriers**. A GPU can have a memory barrier to enforce constraints on the order in which memory is operated on. A barrier splits the memory up into two sections: the operations before the barrier and those after. This can ensure that an operation or set of operations is complete before another set begins. With Vulkan, we have three types of memory barriers:
+
+- Global memory - `VkMemeoryBarrier`
+- Buffer memory - `VkBufferMemoryBarrier`
+- Image memory - `VkImageMemoryBarrier`
+
+We'll be writing the body of this method:
+
 
 
 # `VkSwapchainCreateInfoKHR`
