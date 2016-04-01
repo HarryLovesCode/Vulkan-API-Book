@@ -59,6 +59,51 @@ if (caps.currentExtent.width == -1 || caps.currentExtent.height == -1) {
 
 # `fpGetPhysicalDeviceSurfacePresentModesKHR`
 
+In Vulkan, there are multiple ways images can be presented. We'll talk about the options later in this section, but for now, we need to figure out which are supported. We can use `fpGetPhysicalDeviceSurfacePresentModesKHR` to get the present modes as the name suggests. You can find documentation [here](https://www.khronos.org/files/vulkan10-reference-guide.pdf) in section **29.5**. The definition is the same as:
+
+```cpp
+VkResult vkGetPhysicalDeviceSurfacePresentModesKHR(
+  VkPhysicalDevice   physicalDevice, 
+  VkSurfaceKHR       surface, 
+  uint32_t*          pPresentModeCount, 
+  VkPresentModeKHR*  pPresentModes);
+```
+
+Like with other `vkGetX` methods, we should pass in `NULL` as the last argument to get `pPresentModeCount` before we allocate memory for `pPresentModes`. Let's look at how this is used:
+
+```cpp
+uint32_t presentModeCount = 0;
+result = fpGetPhysicalDeviceSurfacePresentModesKHR(
+    physicalDevice, surface, &presentModeCount, NULL);
+```
+
+Before we move on, let's verify success. We should check the `result` and check make sure one or more present modes are available.
+
+```cpp
+if (result != VK_SUCCESS || presentModeCount < 1)
+  exitOnError("Failed to get physical device present modes");
+```
+
+Now let's go ahead and call the function again with our `std::vector<VkPresentModeKHR>`:
+
+```cpp
+std::vector<VkPresentModeKHR> presentModes(presentModeCount);
+result = fpGetPhysicalDeviceSurfacePresentModesKHR(
+    physicalDevice, surface, &presentModeCount, presentModes.data());
+
+if (result != VK_SUCCESS || presentModeCount < 1)
+  exitOnError("Failed to get physical device present modes");
+```
+
+Now let's look at the available present modes. There are a few different types:
+
+- `VK_PRESENT_MODE_IMMEDIATE_KHR` - Our engine **will not ever** wait for the vertical blanking interval. This *may* result in visible tearing if our frame misses the interval and is presented too late.
+- `VK_PRESENT_MODE_MAILBOX_KHR` - Our engine waits for the next vertical blanking interval to update the image. If we render another image, the image waiting to be displayed is overwritten.
+- `VK_PRESENT_MODE_FIFO_KHR` - Our engine waits for the next vertical blanking interval to update the image. If we've missed an interval, we wait until the next one. We will append already rendered images to the pending presentation queue. There **will not** be any visible tearing.
+- `VK_PRESENT_MODE_FIFO_RELAXED_KHR` - Our engine waits for the next vertical blanking interval to update the image. If we've missed the interval, we **do not** wait. We will append already rendered images to the pending presentation queue. We present as soon as possible. This *may* result in tearing.
+
+If you do not care about tearing, you might want `VK_PRESENT_MODE_IMMEDIATE_KHR`. However, if you want a low-latency tear-less presentation mode, you would choose `VK_PRESENT_MODE_MAILBOX_KHR`.
+
 # `VkSwapchainCreateInfoKHR`
 
 # `vkCreateSwapchainKHR`
