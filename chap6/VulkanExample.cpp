@@ -41,7 +41,7 @@ void VulkanExample::initInstance() {
   appInfo.pEngineName = engineName;
   appInfo.apiVersion = VK_MAKE_VERSION(1, 0, 3);
 
-  std::vector<const char *> enabledExtensions = { VK_KHR_SURFACE_EXTENSION_NAME };
+  std::vector<const char *> enabledExtensions = {VK_KHR_SURFACE_EXTENSION_NAME};
 
 #if defined(_WIN32)
   enabledExtensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
@@ -63,14 +63,14 @@ void VulkanExample::initInstance() {
 
   if (res == VK_ERROR_INCOMPATIBLE_DRIVER) {
     exitOnError(
-      "Cannot find a compatible Vulkan installable client "
-      "driver (ICD). Please make sure your driver supports "
-      "Vulkan before continuing. The call to vkCreateInstance failed.");
+        "Cannot find a compatible Vulkan installable client "
+        "driver (ICD). Please make sure your driver supports "
+        "Vulkan before continuing. The call to vkCreateInstance failed.");
   } else if (res != VK_SUCCESS) {
     exitOnError(
-      "The call to vkCreateInstance failed. Please make sure "
-      "you have a Vulkan installable client driver (ICD) before "
-      "continuing.");
+        "The call to vkCreateInstance failed. Please make sure "
+        "you have a Vulkan installable client driver (ICD) before "
+        "continuing.");
   }
 }
 
@@ -83,21 +83,21 @@ void VulkanExample::initDevices() {
 
   if (deviceCount < 1) {
     exitOnError(
-      "vkEnumeratePhysicalDevices did not report any availible "
-      "devices that support Vulkan. Do you have a compatible Vulkan "
-      "installable client driver (ICD)?");
+        "vkEnumeratePhysicalDevices did not report any availible "
+        "devices that support Vulkan. Do you have a compatible Vulkan "
+        "installable client driver (ICD)?");
   }
 
   std::vector<VkPhysicalDevice> physicalDevices(deviceCount);
   result = vkEnumeratePhysicalDevices(instance, &deviceCount,
-    physicalDevices.data());
+                                      physicalDevices.data());
 
   if (result != VK_SUCCESS)
     exitOnError("Failed to enumerate physical devices in the system.");
 
   physicalDevice = physicalDevices[0];
 
-  float priorities[] = { 1.0f };
+  float priorities[] = {1.0f};
   VkDeviceQueueCreateInfo queueInfo = {};
   queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
   queueInfo.pNext = NULL;
@@ -107,7 +107,7 @@ void VulkanExample::initDevices() {
   queueInfo.pQueuePriorities = &priorities[0];
 
   std::vector<const char *> enabledExtensions = {
-      VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+      VK_KHR_SWAPCHAIN_EXTENSION_NAME};
   VkDeviceCreateInfo deviceInfo = {};
   deviceInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
   deviceInfo.pNext = NULL;
@@ -131,26 +131,26 @@ void VulkanExample::initDevices() {
     fprintf(stdout, "Device Type:    %d\n", physicalProperties.deviceType);
     fprintf(stdout, "Driver Version: %d\n", physicalProperties.driverVersion);
     fprintf(stdout, "API Version:    %d.%d.%d\n",
-      VK_VERSION_MAJOR(physicalProperties.apiVersion),
-      VK_VERSION_MINOR(physicalProperties.apiVersion),
-      VK_VERSION_PATCH(physicalProperties.apiVersion));
+            VK_VERSION_MAJOR(physicalProperties.apiVersion),
+            VK_VERSION_MINOR(physicalProperties.apiVersion),
+            VK_VERSION_PATCH(physicalProperties.apiVersion));
   }
 }
 
 #if defined(_WIN32)
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
-  LPARAM lParam) {
+                         LPARAM lParam) {
   switch (message) {
-  case WM_DESTROY:
-    DestroyWindow(hWnd);
-    PostQuitMessage(0);
-    break;
-  case WM_PAINT:
-    ValidateRect(hWnd, NULL);
-    break;
-  default:
-    return DefWindowProc(hWnd, message, wParam, lParam);
-    break;
+    case WM_DESTROY:
+      DestroyWindow(hWnd);
+      PostQuitMessage(0);
+      break;
+    case WM_PAINT:
+      ValidateRect(hWnd, NULL);
+      break;
+    default:
+      return DefWindowProc(hWnd, message, wParam, lParam);
+      break;
   }
 }
 
@@ -178,9 +178,9 @@ void VulkanExample::initWindow(HINSTANCE hInstance) {
   int windowX = screenWidth / 2 - windowWidth / 2;
   int windowY = screenHeight / 2 - windowHeight / 2;
   window = CreateWindow(applicationName, applicationName,
-    WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
-    windowX, windowY, windowWidth, windowHeight, NULL, NULL,
-    windowInstance, NULL);
+                        WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
+                        windowX, windowY, windowWidth, windowHeight, NULL, NULL,
+                        windowInstance, NULL);
 
   if (!window) exitOnError("Failed to create window");
 
@@ -207,36 +207,36 @@ void VulkanExample::initWindow() {
     exitOnError("Failed to connect to X server using XCB.");
 
   xcb_screen_iterator_t iter =
-    xcb_setup_roots_iterator(xcb_get_setup(connection));
+      xcb_setup_roots_iterator(xcb_get_setup(connection));
 
   for (int s = screenp; s > 0; s--) xcb_screen_next(&iter);
 
   screen = iter.data;
   window = xcb_generate_id(connection);
   uint32_t eventMask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
-  uint32_t valueList[] = { screen->black_pixel, 0 };
+  uint32_t valueList[] = {screen->black_pixel, 0};
 
   xcb_create_window(connection, XCB_COPY_FROM_PARENT, window, screen->root, 0,
-    0, windowWidth, windowHeight, 0,
-    XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual,
-    eventMask, valueList);
+                    0, windowWidth, windowHeight, 0,
+                    XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual,
+                    eventMask, valueList);
   xcb_change_property(connection, XCB_PROP_MODE_REPLACE, window,
-    XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8,
-    strlen(applicationName), applicationName);
+                      XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8,
+                      strlen(applicationName), applicationName);
 
   xcb_intern_atom_cookie_t wmDeleteCookie = xcb_intern_atom(
-    connection, 0, strlen("WM_DELETE_WINDOW"), "WM_DELETE_WINDOW");
+      connection, 0, strlen("WM_DELETE_WINDOW"), "WM_DELETE_WINDOW");
   xcb_intern_atom_cookie_t wmProtocolsCookie =
-    xcb_intern_atom(connection, 0, strlen("WM_PROTOCOLS"), "WM_PROTOCOLS");
+      xcb_intern_atom(connection, 0, strlen("WM_PROTOCOLS"), "WM_PROTOCOLS");
   xcb_intern_atom_reply_t *wmDeleteReply =
-    xcb_intern_atom_reply(connection, wmDeleteCookie, NULL);
+      xcb_intern_atom_reply(connection, wmDeleteCookie, NULL);
   xcb_intern_atom_reply_t *wmProtocolsReply =
-    xcb_intern_atom_reply(connection, wmProtocolsCookie, NULL);
+      xcb_intern_atom_reply(connection, wmProtocolsCookie, NULL);
   wmDeleteWin = wmDeleteReply->atom;
   wmProtocols = wmProtocolsReply->atom;
 
   xcb_change_property(connection, XCB_PROP_MODE_REPLACE, window,
-    wmProtocolsReply->atom, 4, 32, 1, &wmDeleteReply->atom);
+                      wmProtocolsReply->atom, 4, 32, 1, &wmDeleteReply->atom);
   xcb_map_window(connection, window);
   xcb_flush(connection);
 }
@@ -248,11 +248,11 @@ void VulkanExample::renderLoop() {
     xcb_generic_event_t *event = xcb_wait_for_event(connection);
 
     switch (event->response_type & ~0x80) {
-    case XCB_CLIENT_MESSAGE: {
-      xcb_client_message_event_t *cm = (xcb_client_message_event_t *)event;
-      if (cm->data.data32[0] == wmDeleteWin) running = false;
-      break;
-    }
+      case XCB_CLIENT_MESSAGE: {
+        xcb_client_message_event_t *cm = (xcb_client_message_event_t *)event;
+        if (cm->data.data32[0] == wmDeleteWin) running = false;
+        break;
+      }
     }
 
     free(event);
@@ -271,7 +271,7 @@ void VulkanExample::initSurface() {
   surfaceCreateInfo.hinstance = windowInstance;
   surfaceCreateInfo.hwnd = window;
   VkResult result =
-    vkCreateWin32SurfaceKHR(instance, &surfaceCreateInfo, NULL, &surface);
+      vkCreateWin32SurfaceKHR(instance, &surfaceCreateInfo, NULL, &surface);
 #elif defined(__linux__)
   VkXcbSurfaceCreateInfoKHR surfaceCreateInfo = {};
   surfaceCreateInfo.pNext = NULL;
@@ -280,14 +280,14 @@ void VulkanExample::initSurface() {
   surfaceCreateInfo.connection = connection;
   surfaceCreateInfo.window = window;
   VkResult result =
-    vkCreateXcbSurfaceKHR(instance, &surfaceCreateInfo, NULL, &surface);
+      vkCreateXcbSurfaceKHR(instance, &surfaceCreateInfo, NULL, &surface);
 #endif
 
   if (result != VK_SUCCESS) exitOnError("Failed to create VkSurfaceKHR.");
 
   uint32_t formatCount = 0;
   result = fpGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface,
-    &formatCount, NULL);
+                                                &formatCount, NULL);
 
   if (result != VK_SUCCESS || formatCount < 1)
     exitOnError("Failed to get device surface formats.");
@@ -300,7 +300,7 @@ void VulkanExample::initSurface() {
 
   std::vector<VkQueueFamilyProperties> queueProperties(queueCount);
   vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueCount,
-    queueProperties.data());
+                                           queueProperties.data());
 
   if (queueCount < 1)
     exitOnError("Failed to get physical device queue family properties.");
@@ -310,7 +310,7 @@ void VulkanExample::initSurface() {
 
   for (uint32_t i = 0; i < queueCount; i++) {
     fpGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface,
-      &supportsPresenting[i]);
+                                         &supportsPresenting[i]);
     if ((queueProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) != 0) {
       if (supportsPresenting[i] == VK_TRUE) {
         queueIndex = i;
@@ -324,7 +324,7 @@ void VulkanExample::initSurface() {
 
   std::vector<VkSurfaceFormatKHR> surfaceFormats(formatCount);
   result = fpGetPhysicalDeviceSurfaceFormatsKHR(
-    physicalDevice, surface, &formatCount, surfaceFormats.data());
+      physicalDevice, surface, &formatCount, surfaceFormats.data());
 
   if (result != VK_SUCCESS || formatCount < 1)
     exitOnError("Failed to get device surface formats.");
@@ -339,7 +339,8 @@ void VulkanExample::initSurface() {
 
 void VulkanExample::initSwapchain() {
   VkSurfaceCapabilitiesKHR caps = {};
-  VkResult result = fpGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &caps);
+  VkResult result =
+      fpGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &caps);
 
   if (result != VK_SUCCESS)
     exitOnError("Failed to get physical device surface capabilities");
@@ -354,13 +355,15 @@ void VulkanExample::initSwapchain() {
   }
 
   uint32_t presentModeCount = 0;
-  result = fpGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, NULL);
+  result = fpGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface,
+                                                     &presentModeCount, NULL);
 
   if (result != VK_SUCCESS || presentModeCount < 1)
     exitOnError("Failed to get physical device present modes");
 
   std::vector<VkPresentModeKHR> presentModes(presentModeCount);
-  result = fpGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, presentModes.data());
+  result = fpGetPhysicalDeviceSurfacePresentModesKHR(
+      physicalDevice, surface, &presentModeCount, presentModes.data());
 
   if (result != VK_SUCCESS || presentModeCount < 1)
     exitOnError("Failed to get physical device present modes");
@@ -378,13 +381,11 @@ void VulkanExample::initSwapchain() {
   }
 }
 
-void VulkanExample::setImageLayout(VkCommandBuffer cmdBuffer,
-  VkImage image,
-  VkImageAspectFlags aspects,
-  VkImageLayout oldLayout,
-  VkImageLayout newLayout,
-  VkImageSubresourceRange subresourceRange)
-{
+void VulkanExample::setImageLayout(VkCommandBuffer cmdBuffer, VkImage image,
+                                   VkImageAspectFlags aspects,
+                                   VkImageLayout oldLayout,
+                                   VkImageLayout newLayout,
+                                   VkImageSubresourceRange subresourceRange) {
   VkImageMemoryBarrier imageBarrier = {};
   imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
   imageBarrier.pNext = NULL;
@@ -394,45 +395,49 @@ void VulkanExample::setImageLayout(VkCommandBuffer cmdBuffer,
   imageBarrier.subresourceRange = subresourceRange;
 
   switch (oldLayout) {
-  case VK_IMAGE_LAYOUT_PREINITIALIZED:
-    imageBarrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
-    break;
-  case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
-    imageBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-    break;
-  case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
-    imageBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-    break;
-  case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
-    imageBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-    break;
-  case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
-    imageBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-    break;
+    case VK_IMAGE_LAYOUT_PREINITIALIZED:
+      imageBarrier.srcAccessMask =
+          VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+      break;
+    case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+      imageBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+      break;
+    case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+      imageBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+      break;
+    case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+      imageBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+      break;
+    case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+      imageBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+      break;
   }
 
   switch (newLayout) {
-  case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
-    imageBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-    break;
-  case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
-    imageBarrier.srcAccessMask |= VK_ACCESS_TRANSFER_READ_BIT;
-    imageBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-    break;
-  case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
-    imageBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-    imageBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-    break;
-  case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
-    imageBarrier.dstAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-    break;
-  case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
-    imageBarrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
-    imageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-    break;
+    case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+      imageBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+      break;
+    case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+      imageBarrier.srcAccessMask |= VK_ACCESS_TRANSFER_READ_BIT;
+      imageBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+      break;
+    case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+      imageBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+      imageBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+      break;
+    case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+      imageBarrier.dstAccessMask |=
+          VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+      break;
+    case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+      imageBarrier.srcAccessMask =
+          VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+      imageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+      break;
   }
 
   VkPipelineStageFlagBits srcFlags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
   VkPipelineStageFlagBits dstFlags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-  vkCmdPipelineBarrier(cmdBuffer, srcFlags, dstFlags, 0, 0, NULL, 0, NULL, 1, &imageBarrier);
+  vkCmdPipelineBarrier(cmdBuffer, srcFlags, dstFlags, 0, 0, NULL, 0, NULL, 1,
+                       &imageBarrier);
 }

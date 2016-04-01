@@ -8,7 +8,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
   ve.renderLoop();
 }
 #elif defined(__linux__)
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   VulkanExample ve = VulkanExample();
   ve.initWindow();
   ve.renderLoop();

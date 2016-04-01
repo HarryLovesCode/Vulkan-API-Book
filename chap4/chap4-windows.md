@@ -35,8 +35,8 @@ MessageBox(NULL, msg, applicationName, MB_ICONERROR);
 As mentioned before, because we're writing this without any windowing libraries, we'll have to use the Win32 API. I won't go too much into detail because **our focus is Vulkan** and not Windows. Let's go ahead and list the variables we'll be using:
 
 ```cpp
-const int windowWidth = 1280;
-const int windowHeight = 720;
+const uint32_t windowWidth = 1280;
+const uint32_t windowHeight = 720;
 
 HINSTANCE windowInstance;
 HWND window;
