@@ -18,5 +18,5 @@
    * Android
    * GLFW
 * [Working with Swapchains](chap6/chap6.md)
-* Buffers
+* Working with Buffers
 
