@@ -19,4 +19,5 @@
    * GLFW
 * [Working with Swapchains](chap6/chap6.md)
 * Working with Buffers
+* Descriptor Pools and Pipelines
 
