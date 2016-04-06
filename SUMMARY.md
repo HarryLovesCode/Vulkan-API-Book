@@ -17,7 +17,7 @@
    * [Linux](chap5/chap5-linux.md)
    * Android
    * GLFW
-* [Working with Swapchains](chap6/chap6.md)
+* [Swapchains](chap6/chap6.md)
 * Working with Buffers
 * Creating Shaders
 * Descriptor Pools and Pipelines
