@@ -16,8 +16,8 @@ We created a surface in the last chapter. Now we need to check the surface resol
 
 ```cpp
 VkResult vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
-  VkPhysicalDevice           physicalDevice, 
-  VkSurfaceKHR               surface, 
+  VkPhysicalDevice           physicalDevice,
+  VkSurfaceKHR               surface,
   VkSurfaceCapabilitiesKHR*  pSurfaceCapabilities);
 ```
 
@@ -63,9 +63,9 @@ In Vulkan, there are multiple ways images can be presented. We'll talk about the
 
 ```cpp
 VkResult vkGetPhysicalDeviceSurfacePresentModesKHR(
-  VkPhysicalDevice   physicalDevice, 
-  VkSurfaceKHR       surface, 
-  uint32_t*          pPresentModeCount, 
+  VkPhysicalDevice   physicalDevice,
+  VkSurfaceKHR       surface,
+  uint32_t*          pPresentModeCount,
   VkPresentModeKHR*  pPresentModes);
 ```
 
@@ -134,14 +134,14 @@ typedef struct VkSwapchainCreateInfoKHR {
   uint32_t minImageCount;
   VkFormat imageFormat;
   VkColorSpaceKHR imageColorSpace;
-  VkExtent2D imageExtent; P.11
+  VkExtent2D imageExtent;
   uint32_t imageArrayLayers;
   VkImageUsageFlags imageUsage;
-  VkSharingMode imageSharingMode; P.12
+  VkSharingMode imageSharingMode;
   uint32_t queueFamilyIndexCount;
   const uint32_t* pQueueFamilyIndices;
   VkSurfaceTransformFlagBitsKHR preTransform;
-  VkCompositeAlphaFlagBitsKHR compositeAlpha; P.11
+  VkCompositeAlphaFlagBitsKHR compositeAlpha;
   VkPresentModeKHR presentMode;
   VkBool32 clipped;
   VkSwapchainKHR oldSwapchain;
@@ -220,3 +220,5 @@ if (result != VK_SUCCESS)
 # Acquiring the Next Image
 
 # Presenting Images
+
+# Cleaning Up
