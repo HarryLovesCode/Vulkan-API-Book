@@ -123,4 +123,100 @@ for (uint32_t i = 0; i < presentModeCount; i++) {
 
 # `VkSwapchainCreateInfoKHR`
 
+Next up, we're going to prepare the information needed to create our `VkSwapchainKHR`. You can find more information [here](https://www.khronos.org/files/vulkan10-reference-guide.pdf) in section **29.6**. The definition looks like this:
+
+```cpp
+typedef struct VkSwapchainCreateInfoKHR {
+  VkStructureType sType;
+  const void* pNext;
+  VkSwapchainCreateFlagsKHR flags;
+  VkSurfaceKHR surface;
+  uint32_t minImageCount;
+  VkFormat imageFormat;
+  VkColorSpaceKHR imageColorSpace;
+  VkExtent2D imageExtent; P.11
+  uint32_t imageArrayLayers;
+  VkImageUsageFlags imageUsage;
+  VkSharingMode imageSharingMode; P.12
+  uint32_t queueFamilyIndexCount;
+  const uint32_t* pQueueFamilyIndices;
+  VkSurfaceTransformFlagBitsKHR preTransform;
+  VkCompositeAlphaFlagBitsKHR compositeAlpha; P.11
+  VkPresentModeKHR presentMode;
+  VkBool32 clipped;
+  VkSwapchainKHR oldSwapchain;
+} VkSwapchainCreateInfoKHR
+```
+
+That's quite a definition. Before we can fill in the values, we'll need to prepare a number for `minImageCount`. First let's check verify our surface supports images:
+
+```cpp
+if (caps.maxImageCount < 1)
+  exitOnError("Surface capabilities don't support one or more images");
+```
+
+While that should never happen, it doesn't hurt to check. Now let's we want at least one image:
+
+```cpp
+uint32_t imageCount = caps.minImageCount + 1;
+```
+
+If we asked for more images that are supported, we should just go with the maximum:
+
+```cpp
+if (imageCount > caps.maxImageCount)
+  imageCount = caps.maxImageCount;
+```
+
+Let's go ahead and fill in `VkSwapchainCreateInfoKHR`:
+
+```cpp
+VkSwapchainCreateInfoKHR swapchainCreateInfo = {};
+swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+swapchainCreateInfo.surface = surface;
+swapchainCreateInfo.minImageCount = imageCount;
+swapchainCreateInfo.imageFormat = colorFormat;
+swapchainCreateInfo.imageColorSpace = colorSpace;
+swapchainCreateInfo.imageExtent = { swapchainExtent.width, swapchainExtent.height };
+swapchainCreateInfo.imageArrayLayers = 1;
+swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+swapchainCreateInfo.queueFamilyIndexCount = 1;
+swapchainCreateInfo.pQueueFamilyIndices = { 0 };
+swapchainCreateInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+swapchainCreateInfo.presentMode = presentMode;
+```
+
 # `vkCreateSwapchainKHR`
+
+You can find documentation on this function [here](https://www.khronos.org/registry/vulkan/specs/1.0/man/html/vkCreateSwapchainKHR.html). The definition looks like this:
+
+```cpp
+VkResult vkCreateSwapchainKHR(
+  VkDevice                                    device,
+  const VkSwapchainCreateInfoKHR*             pCreateInfo,
+  const VkAllocationCallbacks*                pAllocator,
+  VkSwapchainKHR*                             pSwapchain);
+```
+
+Let's call the method:
+
+```cpp
+result = fpCreateSwapchainKHR(device, &swapchainCreateInfo, NULL, &swapchain);
+```
+
+and verify we were successful:
+
+```cpp
+if (result != VK_SUCCESS)
+  exitOnError("Failed to create swapchain");
+```
+
+# `fpGetSwapchainImagesKHR`
+
+# Image Layouts
+
+# Acquiring the Next Image
+
+# Presenting Images
