@@ -18,7 +18,7 @@
    * Android
    * GLFW
 * [Swapchains](chap6/chap6.md)
-* Working with Buffers
+* Buffers
 * Creating Shaders
 * Descriptor Pools and Pipelines
 
