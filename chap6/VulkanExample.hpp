@@ -42,10 +42,10 @@ class VulkanExample {
   void initSurface();
   void initSwapchain(VkCommandBuffer cmdBuffer);
   void setImageLayout(VkCommandBuffer cmdBuffer, VkImage image,
-    VkImageAspectFlags aspects,
-    VkImageLayout oldLayout,
-    VkImageLayout newLayout);
-  void swapchainPresent(VkCommandBuffer cmdBuffer, VkQueue queue, uint32_t buffer);
+                      VkImageAspectFlags aspects, VkImageLayout oldLayout,
+                      VkImageLayout newLayout);
+  void swapchainPresent(VkCommandBuffer cmdBuffer, VkQueue queue,
+                        uint32_t buffer);
 
   const char *applicationName = "Vulkan Example";
   const char *engineName = "Vulkan Engine";
