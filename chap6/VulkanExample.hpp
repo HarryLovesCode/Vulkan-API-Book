@@ -27,17 +27,25 @@
       exitOnError("vkGetDeviceProcAddr failed to find vk" #entry);    \
   }
 
+struct SwapChainBuffer {
+  VkImage image;
+  VkImageView view;
+  VkFramebuffer frameBuffer;
+};
+
 class VulkanExample {
  private:
   void exitOnError(const char *msg);
+  void getSwapchainNext(VkSemaphore presentCompleteSemaphore, uint32_t buffer);
   void initInstance();
   void initDevices();
   void initSurface();
-  void initSwapchain();
+  void initSwapchain(VkCommandBuffer cmdBuffer);
   void setImageLayout(VkCommandBuffer cmdBuffer, VkImage image,
-                      VkImageAspectFlags aspects, VkImageLayout oldLayout,
-                      VkImageLayout newLayout,
-                      VkImageSubresourceRange subresourceRange);
+    VkImageAspectFlags aspects,
+    VkImageLayout oldLayout,
+    VkImageLayout newLayout);
+  void swapchainPresent(VkCommandBuffer cmdBuffer, VkQueue queue, uint32_t buffer);
 
   const char *applicationName = "Vulkan Example";
   const char *engineName = "Vulkan Engine";
@@ -52,6 +60,9 @@ class VulkanExample {
   VkFormat colorFormat;
   VkColorSpaceKHR colorSpace;
   uint32_t queueIndex;
+  VkSwapchainKHR swapchain;
+  std::vector<VkImage> images;
+  std::vector<SwapChainBuffer> buffers;
 
   PFN_vkGetPhysicalDeviceSurfaceSupportKHR fpGetPhysicalDeviceSurfaceSupportKHR;
   PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR

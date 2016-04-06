@@ -22,7 +22,14 @@ VulkanExample::VulkanExample() {
   initSurface();
 }
 
-VulkanExample::~VulkanExample() { vkDestroyInstance(instance, NULL); }
+VulkanExample::~VulkanExample() {
+  for (SwapChainBuffer buffer : buffers)
+    vkDestroyImageView(device, buffer.view, NULL);
+
+  fpDestroySwapchainKHR(device, swapchain, NULL);
+  vkDestroySurfaceKHR(instance, surface, NULL);
+  vkDestroyInstance(instance, NULL); 
+}
 
 void VulkanExample::exitOnError(const char *msg) {
 #if defined(_WIN32)
@@ -31,6 +38,13 @@ void VulkanExample::exitOnError(const char *msg) {
   fputs(msg, stderr);
 #endif
   exit(EXIT_FAILURE);
+}
+
+void VulkanExample::getSwapchainNext(VkSemaphore presentCompleteSemaphore, uint32_t buffer) {
+  VkResult result = fpAcquireNextImageKHR(device, swapchain, UINT64_MAX, presentCompleteSemaphore, (VkFence)0, &buffer);
+
+  if (result != VK_SUCCESS)
+    exitOnError("Failed to get next image in swapchain");
 }
 
 void VulkanExample::initInstance() {
@@ -337,7 +351,7 @@ void VulkanExample::initSurface() {
   colorSpace = surfaceFormats[0].colorSpace;
 }
 
-void VulkanExample::initSwapchain() {
+void VulkanExample::initSwapchain(VkCommandBuffer cmdBuffer) {
   VkSurfaceCapabilitiesKHR caps = {};
   VkResult result =
       fpGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &caps);
@@ -379,65 +393,165 @@ void VulkanExample::initSwapchain() {
     if (presentModes[i] == VK_PRESENT_MODE_IMMEDIATE_KHR)
       presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
   }
+
+  if (caps.maxImageCount < 1)
+    exitOnError("Surface capabilities don't support one or more images");
+
+  uint32_t imageCount = caps.minImageCount + 1;
+
+  if (imageCount > caps.maxImageCount)
+    imageCount = caps.maxImageCount;
+
+  VkSwapchainCreateInfoKHR swapchainCreateInfo = {};
+  swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+  swapchainCreateInfo.surface = surface;
+  swapchainCreateInfo.minImageCount = imageCount;
+  swapchainCreateInfo.imageFormat = colorFormat;
+  swapchainCreateInfo.imageColorSpace = colorSpace;
+  swapchainCreateInfo.imageExtent = { swapchainExtent.width, swapchainExtent.height };
+  swapchainCreateInfo.imageArrayLayers = 1;
+  swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+  swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+  swapchainCreateInfo.queueFamilyIndexCount = 1;
+  swapchainCreateInfo.pQueueFamilyIndices = { 0 };
+  swapchainCreateInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+  swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+  swapchainCreateInfo.presentMode = presentMode;
+
+  result = fpCreateSwapchainKHR(device, &swapchainCreateInfo, NULL, &swapchain);
+
+  if (result != VK_SUCCESS)
+    exitOnError("Failed to create swapchain");
+
+  result = fpGetSwapchainImagesKHR(device, swapchain, &imageCount, NULL);
+
+  if (result != VK_SUCCESS)
+    exitOnError("Failed to get presentable images from swapchain");
+
+  images.resize(imageCount);
+  buffers.resize(imageCount);
+
+  result = fpGetSwapchainImagesKHR(device, swapchain, &imageCount, images.data());
+
+  if (result != VK_SUCCESS)
+    exitOnError("Failed to get presentable images from swapchain");
+
+  for (uint32_t i = 0; i < imageCount; i++) {
+    VkImageViewCreateInfo imageCreateInfo = {};
+    imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    imageCreateInfo.pNext = NULL;
+    imageCreateInfo.format = colorFormat;
+    imageCreateInfo.components = {
+      VK_COMPONENT_SWIZZLE_R,
+      VK_COMPONENT_SWIZZLE_G,
+      VK_COMPONENT_SWIZZLE_B,
+      VK_COMPONENT_SWIZZLE_A
+    };
+    imageCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    imageCreateInfo.subresourceRange.baseMipLevel = 0;
+    imageCreateInfo.subresourceRange.levelCount = 1;
+    imageCreateInfo.subresourceRange.baseArrayLayer = 0;
+    imageCreateInfo.subresourceRange.layerCount = 1;
+    imageCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    imageCreateInfo.flags = 0;
+
+
+    buffers[i].image = images[i];
+    setImageLayout(cmdBuffer, buffers[i].image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+    imageCreateInfo.image = buffers[i].image;
+    result = vkCreateImageView(device, &imageCreateInfo, NULL, &buffers[i].view);
+
+    if (result != VK_SUCCESS)
+      exitOnError("Failed to create a swapchain image view");
+
+    VkFramebufferCreateInfo fbCreateInfo = {};
+    fbCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    fbCreateInfo.attachmentCount = 1;
+    fbCreateInfo.pAttachments = &buffers[i].view;
+    fbCreateInfo.width = swapchainExtent.width;
+    fbCreateInfo.height = swapchainExtent.height;
+    fbCreateInfo.layers = 1;
+
+    result = vkCreateFramebuffer(device, &fbCreateInfo, NULL, &buffers[i].frameBuffer);
+
+    if (result != VK_SUCCESS)
+      exitOnError("Failed to create a swapchain framebuffer");
+  }
 }
 
 void VulkanExample::setImageLayout(VkCommandBuffer cmdBuffer, VkImage image,
-                                   VkImageAspectFlags aspects,
-                                   VkImageLayout oldLayout,
-                                   VkImageLayout newLayout,
-                                   VkImageSubresourceRange subresourceRange) {
+  VkImageAspectFlags aspects,
+  VkImageLayout oldLayout,
+  VkImageLayout newLayout) {
   VkImageMemoryBarrier imageBarrier = {};
   imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
   imageBarrier.pNext = NULL;
   imageBarrier.oldLayout = oldLayout;
   imageBarrier.newLayout = newLayout;
   imageBarrier.image = image;
-  imageBarrier.subresourceRange = subresourceRange;
+  imageBarrier.subresourceRange.aspectMask = aspects;
+  imageBarrier.subresourceRange.baseMipLevel = 0;
+  imageBarrier.subresourceRange.levelCount = 1;
+  imageBarrier.subresourceRange.layerCount = 1;
 
   switch (oldLayout) {
-    case VK_IMAGE_LAYOUT_PREINITIALIZED:
-      imageBarrier.srcAccessMask =
-          VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
-      break;
-    case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
-      imageBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-      break;
-    case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
-      imageBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-      break;
-    case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
-      imageBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-      break;
-    case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
-      imageBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-      break;
+  case VK_IMAGE_LAYOUT_PREINITIALIZED:
+    imageBarrier.srcAccessMask =
+      VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+    break;
+  case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+    imageBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    break;
+  case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+    imageBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+    break;
+  case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+    imageBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+    break;
+  case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+    imageBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    break;
   }
 
   switch (newLayout) {
-    case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
-      imageBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-      break;
-    case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
-      imageBarrier.srcAccessMask |= VK_ACCESS_TRANSFER_READ_BIT;
-      imageBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-      break;
-    case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
-      imageBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-      imageBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-      break;
-    case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
-      imageBarrier.dstAccessMask |=
-          VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-      break;
-    case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
-      imageBarrier.srcAccessMask =
-          VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
-      imageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-      break;
+  case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+    imageBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    break;
+  case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+    imageBarrier.srcAccessMask |= VK_ACCESS_TRANSFER_READ_BIT;
+    imageBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+    break;
+  case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+    imageBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    imageBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+    break;
+  case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+    imageBarrier.dstAccessMask |=
+      VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+    break;
+  case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+    imageBarrier.srcAccessMask =
+      VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+    imageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    break;
   }
 
   VkPipelineStageFlagBits srcFlags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
   VkPipelineStageFlagBits dstFlags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
   vkCmdPipelineBarrier(cmdBuffer, srcFlags, dstFlags, 0, 0, NULL, 0, NULL, 1,
-                       &imageBarrier);
+    &imageBarrier);
+}
+
+void VulkanExample::swapchainPresent(VkCommandBuffer cmdBuffer, VkQueue queue, uint32_t buffer) {
+  VkPresentInfoKHR presentInfo = {};
+  presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+  presentInfo.pNext = NULL;
+  presentInfo.swapchainCount = 1;
+  presentInfo.pSwapchains = &swapchain;
+  presentInfo.pImageIndices = &buffer;
+
+  VkResult result = fpQueuePresentKHR(queue, &presentInfo);
+
+  if (result != VK_SUCCESS)
+    exitOnError("Failed to present swapchain queue");
 }
