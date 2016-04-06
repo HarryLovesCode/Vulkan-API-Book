@@ -8,7 +8,7 @@ A `VkPhysicalDevice` is a data type that we will use to represent each piece of 
 
 ## `vkEnumeratePhysicalDevices`
 
-To get a list of all the physical devices in the system, we can call use this method. You can find more information [in the same section](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#devsandqueues-physical-device-enumeration) along with the definition itself. The definition looks like...
+To get a list of all the physical devices in the system, we can call use this method. You can find more information [in the same section](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#devsandqueues-physical-device-enumeration) along with the definition itself. The definition looks like:
 
 ```cpp
 VkResult vkEnumeratePhysicalDevices(
@@ -31,34 +31,26 @@ VkResult result = vkEnumeratePhysicalDevices(instance, &deviceCount, NULL);
 We should handle two possible issues. First, `result != VK_SUCCESS` means our call to `vkEnumeratePhysicalDevices` failed. Second, `deviceCount < 1` means we found no devices that support Vulkan.
 
 ```cpp
-if (result != VK_SUCCESS)
-  exitOnError("Failed to enumerate physical devices in the system.");
-
-if (deviceCount < 1) {
-  exitOnError(
-      "vkEnumeratePhysicalDevices did not report any availible "
-      "devices that support Vulkan. Do you have a compatible Vulkan "
-      "installable client driver (ICD)?");
-}
+assert(result == VK_SUCCESS);
+assert(deviceCount >= 1);
 ```
 
-Following the usage guidelines outlined in the specification, a call to `vkEnumeratePhysicalDevices`would look like this...
+Following the usage guidelines outlined in the specification, a call to `vkEnumeratePhysicalDevices`would look like this:
 
 ```cpp
 std::vector<VkPhysicalDevice> physicalDevices(deviceCount);
 result = vkEnumeratePhysicalDevices(instance, &deviceCount, physicalDevices.data());
 ```
 
-We can check for errors just like before:
+We should verify no error occurred like before:
 
 ```cpp
-if (result != VK_SUCCESS)
-  exitOnError("Failed to enumerate physical devices in the system.");
+assert(result == VK_SUCCESS);
 ```
 
 ## `VkPhysicalDeviceProperties`
 
-`VkPhysicalDeviceProperties` is a data type that we will use to represent properties of each physical device. There's not much to say here other than we will pass a pointer of this type to the implementation. The implementation will then write properties for the specified `VkPhysicalDevice`. You can find all the information you need [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#devsandqueues-physical-device-enumeration). The definition looks like this...
+`VkPhysicalDeviceProperties` is a data type that we will use to represent properties of each physical device. There's not much to say here other than we will pass a pointer of this type to the implementation. The implementation will then write properties for the specified `VkPhysicalDevice`. You can find all the information you need [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#devsandqueues-physical-device-enumeration). The definition looks like this:
 
 ```cpp
 typedef struct VkPhysicalDeviceProperties {
@@ -94,7 +86,7 @@ In my mind, there are a few important fields that we get back.
 3. `deviceName` - Usually the model of the GPU such as `GTX 780`
 4. `deviceType` - Tells us if we're using an integrated GPU, discrete GPU, virtual GPU, CPU, or something else.
 
-For reference, the definition for `VkPhysicalDeviceType` looks like this...
+For reference, the definition for `VkPhysicalDeviceType` looks like this:
 
 ```cpp
 typedef enum VkPhysicalDeviceType {
@@ -108,7 +100,7 @@ typedef enum VkPhysicalDeviceType {
 
 ## `vkGetPhysicalDeviceProperties`
 
-A call to this method is not necessary in most cases. However, it can be useful in retrieving information about your device. You can find more information [in the same section](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#devsandqueues-physical-device-enumeration) along with the definition itself. The definition looks like...
+A call to this method is not necessary in most cases. However, it can be useful in retrieving information about your device. You can find more information [in the same section](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#devsandqueues-physical-device-enumeration) along with the definition itself. The definition looks like:
 
 ```cpp
 void vkGetPhysicalDeviceProperties(
@@ -119,18 +111,18 @@ void vkGetPhysicalDeviceProperties(
   VkPhysicalDeviceProperties*                 pProperties);
 ```
 
-Following the usage guidelines outlined in the specification, a call to `vkGetPhysicalDeviceProperties`would look like this...
+Following the usage guidelines outlined in the specification, a call to `vkGetPhysicalDeviceProperties`would look like this:
 
 ```cpp
 VkPhysicalDeviceProperties physicalProperties = {};
 
 for (uint32_t i = 0; i < deviceCount; i++) {
   vkGetPhysicalDeviceProperties(physicalDevices[i], & physicalProperties);
-  //Now do something with the properties...
+  //Now do something with the properties:
 }
 ```
 
-We can output some useful parts of the information using this piece of code...
+We can output some useful parts of the information using this piece of code:
 
 ```cpp
 fprintf(stdout, "Device Name:    %s\n", physicalProperties.deviceName);
@@ -138,7 +130,7 @@ fprintf(stdout, "Device Type:    %d\n", physicalProperties.deviceType);
 fprintf(stdout, "Driver Version: %d\n", physicalProperties.driverVersion);
 ```
 
-As I mentioned before, the API version is encoded. There are three macros that will help make it human readable...
+As I mentioned before, the API version is encoded. There are three macros that will help make it human readable:
 
 ```cpp
 #define VK_VERSION_MAJOR(version) ((uint32_t)(version) >> 22)
@@ -146,7 +138,7 @@ As I mentioned before, the API version is encoded. There are three macros that w
 #define VK_VERSION_PATCH(version) ((uint32_t)(version) & 0xfff)
 ```
 
-Thus, to output the API version, you can use this line...
+Thus, to output the API version, you can use this:
 
 ```cpp
 fprintf(stdout, "API Version:    %d.%d.%d\n",
@@ -159,7 +151,7 @@ For now we're just going to use one physical device. We'll always default to the
 
 ## `VkDeviceQueueCreateInfo`
 
-The next step is to create a device using `vkCreateDevice`. However, in order to do that, we must have a `VkDeviceCreateInfo` object. And, as you may have guessed having seen the specification, we need a `VkDeviceQueueCreateInfo` object. You can find the documentation for this object [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkDeviceQueueCreateInfo). Let's look at the definition...
+The next step is to create a device using `vkCreateDevice`. However, in order to do that, we must have a `VkDeviceCreateInfo` object. And, as you may have guessed having seen the specification, we need a `VkDeviceQueueCreateInfo` object. You can find the documentation for this object [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkDeviceQueueCreateInfo). Let's look at the definition:
 
 ```cpp
 typedef struct VkDeviceQueueCreateInfo {
@@ -184,7 +176,7 @@ typedef struct VkDeviceQueueCreateInfo {
 } VkDeviceQueueCreateInfo;
 ```
 
-Following the usage guidelines outlined in the specification, creating a `VkDeviceQueueCreateInfo` object looks like this...
+Following the usage guidelines outlined in the specification, creating a `VkDeviceQueueCreateInfo` object looks like this:
 
 ```cpp
 float priorities[] = { 1.0f };
@@ -201,7 +193,7 @@ You'll note that we create a `float` array with a single value. Each value in th
 
 ## `VkDeviceCreateInfo`
 
-The parent of `VkDeviceQueueCreateInfo` is `VkDeviceCreateInfo`. You can find more information [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkDeviceCreateInfo) and the definition is included below...
+The parent of `VkDeviceQueueCreateInfo` is `VkDeviceCreateInfo`. You can find more information [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkDeviceCreateInfo) and the definition is included below:
 
 ```cpp
 typedef struct VkDeviceCreateInfo {
@@ -235,7 +227,7 @@ typedef struct VkDeviceCreateInfo {
 } VkDeviceCreateInfo;
 ```
 
-Following the usage guidelines outlined in the specification, creating a `VkDeviceCreateInfo` object looks like this...
+Following the usage guidelines outlined in the specification, creating a `VkDeviceCreateInfo` object looks like this:
 
 ```cpp
 std::vector<const char *> enabledExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
@@ -252,7 +244,7 @@ deviceInfo.pEnabledFeatures = NULL;
 
 ## `vkCreateDevice`
 
-Finally, to wrap up this section, we need to create a logical device. We'll use the `vkCreateDevice` which you can find [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#vkCreateDevice) in the specification. This is how it is defined...
+Finally, to wrap up this section, we need to create a logical device. We'll use the `vkCreateDevice` which you can find [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#vkCreateDevice) in the specification. This is how it is defined:
 
 ```cpp
 VkResult vkCreateDevice(
@@ -268,7 +260,7 @@ VkResult vkCreateDevice(
   VkDevice*                                   pDevice);
 ```
 
-Following the usage guidelines outlined in the specification, calling `vkCreateDevice` looks like this...
+Following the usage guidelines outlined in the specification, calling `vkCreateDevice` looks like this:
 
 ```cpp
 VkResult result = vkCreateDevice(physicalDevice, &deviceInfo, NULL, &logicalDevice);

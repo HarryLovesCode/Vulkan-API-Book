@@ -78,27 +78,19 @@ void VulkanExample::initDevices() {
   uint32_t deviceCount = 0;
   VkResult result = vkEnumeratePhysicalDevices(instance, &deviceCount, NULL);
 
-  if (result != VK_SUCCESS)
-    exitOnError("Failed to enumerate physical devices in the system.");
-
-  if (deviceCount < 1) {
-    exitOnError(
-        "vkEnumeratePhysicalDevices did not report any availible "
-        "devices that support Vulkan. Do you have a compatible Vulkan "
-        "installable client driver (ICD)?");
-  }
+  assert(result == VK_SUCCESS);
+  assert(deviceCount >= 1);
 
   std::vector<VkPhysicalDevice> physicalDevices(deviceCount);
   result = vkEnumeratePhysicalDevices(instance, &deviceCount,
                                       physicalDevices.data());
 
-  if (result != VK_SUCCESS)
-    exitOnError("Failed to enumerate physical devices in the system.");
+  assert(result == VK_SUCCESS);
 
   physicalDevice = physicalDevices[0];
 
   float priorities[] = {1.0f};
-  VkDeviceQueueCreateInfo queueInfo = {};
+  VkDeviceQueueCreateInfo queueInfo{};
   queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
   queueInfo.pNext = NULL;
   queueInfo.flags = 0;
@@ -108,7 +100,7 @@ void VulkanExample::initDevices() {
 
   std::vector<const char *> enabledExtensions = {
       VK_KHR_SWAPCHAIN_EXTENSION_NAME};
-  VkDeviceCreateInfo deviceInfo = {};
+  VkDeviceCreateInfo deviceInfo{};
   deviceInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
   deviceInfo.pNext = NULL;
   deviceInfo.flags = 0;
@@ -120,8 +112,7 @@ void VulkanExample::initDevices() {
 
   result = vkCreateDevice(physicalDevice, &deviceInfo, NULL, &device);
 
-  if (result != VK_SUCCESS)
-    exitOnError("Failed to create a Vulkan logical device.");
+  assert(result == VK_SUCCESS);
 
   VkPhysicalDeviceProperties physicalProperties = {};
 
@@ -283,27 +274,16 @@ void VulkanExample::initSurface() {
       vkCreateXcbSurfaceKHR(instance, &surfaceCreateInfo, NULL, &surface);
 #endif
 
-  if (result != VK_SUCCESS) exitOnError("Failed to create VkSurfaceKHR.");
-
-  uint32_t formatCount = 0;
-  result = fpGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface,
-                                                &formatCount, NULL);
-
-  if (result != VK_SUCCESS || formatCount < 1)
-    exitOnError("Failed to get device surface formats.");
+  assert(result == VK_SUCCESS);
 
   uint32_t queueCount = 0;
   vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueCount, NULL);
 
-  if (queueCount < 1)
-    exitOnError("Failed to get physical device queue family properties.");
+  assert(queueCount >= 1);
 
   std::vector<VkQueueFamilyProperties> queueProperties(queueCount);
   vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueCount,
                                            queueProperties.data());
-
-  if (queueCount < 1)
-    exitOnError("Failed to get physical device queue family properties.");
 
   queueIndex = UINT32_MAX;
   std::vector<VkBool32> supportsPresenting(queueCount);
@@ -319,15 +299,19 @@ void VulkanExample::initSurface() {
     }
   }
 
-  if (queueIndex == UINT32_MAX)
-    exitOnError("Could not find queue that supports graphics and presenting");
+  assert(queueIndex != UINT32_MAX);
+
+  uint32_t formatCount = 0;
+  result = fpGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface,
+                                                &formatCount, NULL);
+
+  assert(result == VK_SUCCESS && formatCount >= 1);
 
   std::vector<VkSurfaceFormatKHR> surfaceFormats(formatCount);
   result = fpGetPhysicalDeviceSurfaceFormatsKHR(
       physicalDevice, surface, &formatCount, surfaceFormats.data());
 
-  if (result != VK_SUCCESS || formatCount < 1)
-    exitOnError("Failed to get device surface formats.");
+  assert(result == VK_SUCCESS);
 
   if (formatCount == 1 && surfaceFormats[0].format == VK_FORMAT_UNDEFINED)
     colorFormat = VK_FORMAT_B8G8R8A8_UNORM;

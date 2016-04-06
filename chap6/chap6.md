@@ -38,8 +38,7 @@ VkResult result = fpGetPhysicalDeviceSurfaceCapabilitiesKHR(
 Per usual, let's verify we were successful:
 
 ```cpp
-if (result != VK_SUCCESS)
-  exitOnError("Failed to get physical device surface capabilities");
+assert(result == VK_SUCCESS);
 ```
 
 # `VkExtent2D`
@@ -80,8 +79,7 @@ result = fpGetPhysicalDeviceSurfacePresentModesKHR(
 Before we move on, let's verify success. We should check the `result` and check make sure one or more present modes are available.
 
 ```cpp
-if (result != VK_SUCCESS || presentModeCount < 1)
-  exitOnError("Failed to get physical device present modes");
+assert(result == VK_SUCCESS && presentModeCount >= 1);
 ```
 
 Now let's go ahead and call the function again with our `std::vector<VkPresentModeKHR>`:
@@ -91,8 +89,7 @@ std::vector<VkPresentModeKHR> presentModes(presentModeCount);
 result = fpGetPhysicalDeviceSurfacePresentModesKHR(
     physicalDevice, surface, &presentModeCount, presentModes.data());
 
-if (result != VK_SUCCESS || presentModeCount < 1)
-  exitOnError("Failed to get physical device present modes");
+assert(result == VK_SUCCESS);
 ```
 
 Now let's look at the available present modes. There are a few different types:
@@ -151,11 +148,10 @@ typedef struct VkSwapchainCreateInfoKHR {
 That's quite a definition. Before we can fill in the values, we'll need to prepare a number for `minImageCount`. First let's check verify our surface supports images:
 
 ```cpp
-if (caps.maxImageCount < 1)
-  exitOnError("Surface capabilities don't support one or more images");
+assert(caps.maxImageCount >= 1);
 ```
 
-While that should never happen, it doesn't hurt to check. Now let's we want at least one image:
+Now let's say we want at least one image:
 
 ```cpp
 uint32_t imageCount = caps.minImageCount + 1;
@@ -209,8 +205,7 @@ result = fpCreateSwapchainKHR(device, &swapchainCreateInfo, NULL, &swapchain);
 and verify we were successful:
 
 ```cpp
-if (result != VK_SUCCESS)
-  exitOnError("Failed to create swapchain");
+assert(result == VK_SUCCESS);
 ```
 
 # `fpGetSwapchainImagesKHR`

@@ -57,22 +57,14 @@ void VulkanExample::initDevices() {
   uint32_t deviceCount = 0;
   VkResult result = vkEnumeratePhysicalDevices(instance, &deviceCount, NULL);
 
-  if (result != VK_SUCCESS)
-    exitOnError("Failed to enumerate physical devices in the system.");
-
-  if (deviceCount < 1) {
-    exitOnError(
-        "vkEnumeratePhysicalDevices did not report any availible "
-        "devices that support Vulkan. Do you have a compatible Vulkan "
-        "installable client driver (ICD)?");
-  }
+  assert(result == VK_SUCCESS);
+  assert(deviceCount >= 1);
 
   std::vector<VkPhysicalDevice> physicalDevices(deviceCount);
   result = vkEnumeratePhysicalDevices(instance, &deviceCount,
                                       physicalDevices.data());
 
-  if (result != VK_SUCCESS)
-    exitOnError("Failed to enumerate physical devices in the system.");
+  assert(result == VK_SUCCESS);
 
   physicalDevice = physicalDevices[0];
 
@@ -99,8 +91,7 @@ void VulkanExample::initDevices() {
 
   result = vkCreateDevice(physicalDevice, &deviceInfo, NULL, &device);
 
-  if (result != VK_SUCCESS)
-    exitOnError("Failed to create a Vulkan logical device.");
+  assert(result == VK_SUCCESS);
 
   VkPhysicalDeviceProperties physicalProperties = {};
 

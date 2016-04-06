@@ -1,9 +1,10 @@
 #ifndef VULKAN_EXAMPLE_HPP
 #define VULKAN_EXAMPLE_HPP
 
+#include <cassert>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <cstring>
 #include <vector>
 
 #include <vulkan/vulkan.h>

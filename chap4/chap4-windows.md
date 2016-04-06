@@ -130,17 +130,17 @@ Finally, we can call Window's `CreateWindow` method. You can find documentation 
 ```cpp
 // Definition
 HWND WINAPI CreateWindow(
-    _In_opt_ LPCTSTR   lpClassName,
-    _In_opt_ LPCTSTR   lpWindowName,
-    _In_     DWORD     dwStyle,
-    _In_     int       x,
-    _In_     int       y,
-    _In_     int       nWidth,
-    _In_     int       nHeight,
-    _In_opt_ HWND      hWndParent,
-    _In_opt_ HMENU     hMenu,
-    _In_opt_ HINSTANCE hInstance,
-    _In_opt_ LPVOID    lpParam
+  _In_opt_ LPCTSTR   lpClassName,
+  _In_opt_ LPCTSTR   lpWindowName,
+  _In_     DWORD     dwStyle,
+  _In_     int       x,
+  _In_     int       y,
+  _In_     int       nWidth,
+  _In_     int       nHeight,
+  _In_opt_ HWND      hWndParent,
+  _In_opt_ HMENU     hMenu,
+  _In_opt_ HINSTANCE hInstance,
+  _In_opt_ LPVOID    lpParam
 );
 
 // Usage
@@ -229,10 +229,10 @@ You can find documentation on the `WinMain` entry-point [here](https://goo.gl/uT
 ```cpp
 // Definition
 int CALLBACK WinMain(
-    _In_ HINSTANCE hInstance,
-    _In_ HINSTANCE hPrevInstance,
-    _In_ LPSTR     lpCmdLine,
-    _In_ int       nCmdShow
+  _In_ HINSTANCE hInstance,
+  _In_ HINSTANCE hPrevInstance,
+  _In_ LPSTR     lpCmdLine,
+  _In_ int       nCmdShow
 );
 
 // Our implementation

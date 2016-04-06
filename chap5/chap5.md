@@ -12,11 +12,12 @@ Vulkan doesn't directly expose functions for all platforms. Thus, we'll have to 
 
 ```cpp
 PFN_vkVoidFunction vkGetInstanceProcAddr(
-    VkInstance  instance,
-    const char* pName);
+  VkInstance  instance,
+  const char* pName);
+
 PFN_vkVoidFunction vkGetDeviceProcAddr(
-    VkDevice    device,
-    const char* pName);
+  VkDevice    device,
+  const char* pName);
 ```
 
 We can use two handy macros to do the heavy lifting for us:
@@ -84,7 +85,36 @@ Now, please visit your platform (or all platforms) to get the specific code. You
 
 ## Checking Graphics / Present Support
 
-Next, we need to look for a device queue that allows for drawing images **and** presenting images. You can use two different queues, but we'll discuss that in a later chapter. We can use the `fpGetPhysicalDeviceSurfaceSupportKHR` function pointer from earlier. The definition is the same as `vkGetPhysicalDeviceSurfaceSupportKHR` which looks like this:
+In this section, we're going to find a queue that supports both graphics operations and presenting images. But first, we'll need to get the number of queues to store properties in. We'll be using `vkGetPhysicalDeviceQueueFamilyProperties` which you can find documented [here](https://www.khronos.org/registry/vulkan/specs/1.0/man/html/vkGetPhysicalDeviceQueueFamilyProperties.html). The definition looks like this:
+
+
+```cpp
+void vkGetPhysicalDeviceQueueFamilyProperties(
+  VkPhysicalDevice         physicalDevice,
+  uint32_t*                pQueueFamilyPropertyCount,
+  VkQueueFamilyProperties* pQueueFamilyProperties);
+```
+
+Per usual, we'll call it with `NULL` as the last argument to get the number of queues before we allocate memory. Let's see how this method can be used:
+
+```cpp
+uint32_t queueCount = 0;
+vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueCount, NULL);
+
+assert(queueCount >= 1);
+
+std::vector<VkQueueFamilyProperties> queueProperties(queueCount);
+vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueCount,
+                                         queueProperties.data());
+```
+
+Perfect! Now let's add a variable in our `VulkanExample` class called `queueIndex` to store the index of the queue we want:
+
+```cpp
+uint32_t queueIndex;
+```
+
+We'll make the default value `UINT32_MAX` so we can later check if we found any suitable queue. Next, we need to look for a device queue that allows for drawing images and presenting images like I mentioned before. You can use two different queues, but we'll discuss that in a later chapter. We can use the `fpGetPhysicalDeviceSurfaceSupportKHR` function pointer from earlier. The definition is the same as `vkGetPhysicalDeviceSurfaceSupportKHR` which looks like this:
 
 ```cpp
 VkResult vkGetPhysicalDeviceSurfaceSupportKHR(
@@ -105,14 +135,14 @@ for (uint32_t i = 0; i < queueCount; i++) {
 }
 ```
 
-However, if we don't check for graphics and presenting support, this is a little pointless. To check if our queue supports graphics operations, we can check if the queue flag contains `VK_QUEUE_GRAPHICS_BIT`. You may or may not be aware that this can be done using the `&` operator. We can use the following syntax:
+To check if our queue supports graphics operations, we can check if the queue flag contains `VK_QUEUE_GRAPHICS_BIT`. You may or may not be aware that this can be done using the `&` operator. We can use the following syntax:
 
 ```cpp
 if ((QUEUE_FLAG & VK_QUEUE_GRAPHICS_BIT) != 0)
   // We support graphics operations!
 ```
 
-We'll also want to keep the index of the queue on hand for later. Make sure you have `uint32_t queueIndex;` defined somewhere in the class. Now, let's finish the body of the loop:
+Now, let's finish the body of the loop:
 
 ```cpp
 if ((queueProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) != 0) {
@@ -126,8 +156,7 @@ if ((queueProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) != 0) {
 If we didn't find anything, the value of `queueIndex` will still be `UINT32_MAX`. Let's handle that possibility before moving on:
 
 ```cpp
-if (queueIndex == UINT32_MAX)
-  exitOnError("Could not find queue that supports graphics and presenting");
+assert(queueIndex != UINT32_MAX);
 ```
 
 ## Color Formats and Color Spaces
@@ -155,8 +184,7 @@ result = fpGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface,
 We should verify that we were successful and that the device supports at least one format:
 
 ```cpp
-if (result != VK_SUCCESS || formatCount < 1)
-  exitOnError("Failed to get device surface formats.");
+assert(result == VK_SUCCESS && formatCount >= 1);
 ```
 
 Now we can get the actual formats:
@@ -170,8 +198,7 @@ result = fpGetPhysicalDeviceSurfaceFormatsKHR(
 As you've seen in previous chapters, I prefer to verify success each time we call a method that returns a `VkResult`. We can make the same check as before:
 
 ```cpp
-if (result != VK_SUCCESS || formatCount < 1)
-  exitOnError("Failed to get device surface formats.");
+assert(result == VK_SUCCESS);
 ```
 
 Now that we've found the formats our device supports, we can go ahead and set them. Let's add two variables to our `VulkanExample` class:

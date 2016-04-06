@@ -95,27 +95,19 @@ void VulkanExample::initDevices() {
   uint32_t deviceCount = 0;
   VkResult result = vkEnumeratePhysicalDevices(instance, &deviceCount, NULL);
 
-  if (result != VK_SUCCESS)
-    exitOnError("Failed to enumerate physical devices in the system.");
-
-  if (deviceCount < 1) {
-    exitOnError(
-        "vkEnumeratePhysicalDevices did not report any availible "
-        "devices that support Vulkan. Do you have a compatible Vulkan "
-        "installable client driver (ICD)?");
-  }
+  assert(result == VK_SUCCESS);
+  assert(deviceCount >= 1);
 
   std::vector<VkPhysicalDevice> physicalDevices(deviceCount);
   result = vkEnumeratePhysicalDevices(instance, &deviceCount,
                                       physicalDevices.data());
 
-  if (result != VK_SUCCESS)
-    exitOnError("Failed to enumerate physical devices in the system.");
+  assert(result == VK_SUCCESS);
 
   physicalDevice = physicalDevices[0];
 
   float priorities[] = {1.0f};
-  VkDeviceQueueCreateInfo queueInfo = {};
+  VkDeviceQueueCreateInfo queueInfo{};
   queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
   queueInfo.pNext = NULL;
   queueInfo.flags = 0;
@@ -125,7 +117,7 @@ void VulkanExample::initDevices() {
 
   std::vector<const char *> enabledExtensions = {
       VK_KHR_SWAPCHAIN_EXTENSION_NAME};
-  VkDeviceCreateInfo deviceInfo = {};
+  VkDeviceCreateInfo deviceInfo{};
   deviceInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
   deviceInfo.pNext = NULL;
   deviceInfo.flags = 0;
@@ -137,8 +129,7 @@ void VulkanExample::initDevices() {
 
   result = vkCreateDevice(physicalDevice, &deviceInfo, NULL, &device);
 
-  if (result != VK_SUCCESS)
-    exitOnError("Failed to create a Vulkan logical device.");
+  assert(result == VK_SUCCESS);
 
   VkPhysicalDeviceProperties physicalProperties = {};
 
@@ -300,27 +291,16 @@ void VulkanExample::initSurface() {
       vkCreateXcbSurfaceKHR(instance, &surfaceCreateInfo, NULL, &surface);
 #endif
 
-  if (result != VK_SUCCESS) exitOnError("Failed to create VkSurfaceKHR.");
-
-  uint32_t formatCount = 0;
-  result = fpGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface,
-                                                &formatCount, NULL);
-
-  if (result != VK_SUCCESS || formatCount < 1)
-    exitOnError("Failed to get device surface formats.");
+  assert(result == VK_SUCCESS);
 
   uint32_t queueCount = 0;
   vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueCount, NULL);
 
-  if (queueCount < 1)
-    exitOnError("Failed to get physical device queue family properties.");
+  assert(queueCount >= 1);
 
   std::vector<VkQueueFamilyProperties> queueProperties(queueCount);
   vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueCount,
                                            queueProperties.data());
-
-  if (queueCount < 1)
-    exitOnError("Failed to get physical device queue family properties.");
 
   queueIndex = UINT32_MAX;
   std::vector<VkBool32> supportsPresenting(queueCount);
@@ -336,15 +316,19 @@ void VulkanExample::initSurface() {
     }
   }
 
-  if (queueIndex == UINT32_MAX)
-    exitOnError("Could not find queue that supports graphics and presenting");
+  assert(queueIndex != UINT32_MAX);
+
+  uint32_t formatCount = 0;
+  result = fpGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface,
+                                                &formatCount, NULL);
+
+  assert(result == VK_SUCCESS && formatCount >= 1);
 
   std::vector<VkSurfaceFormatKHR> surfaceFormats(formatCount);
   result = fpGetPhysicalDeviceSurfaceFormatsKHR(
       physicalDevice, surface, &formatCount, surfaceFormats.data());
 
-  if (result != VK_SUCCESS || formatCount < 1)
-    exitOnError("Failed to get device surface formats.");
+  assert(result == VK_SUCCESS);
 
   if (formatCount == 1 && surfaceFormats[0].format == VK_FORMAT_UNDEFINED)
     colorFormat = VK_FORMAT_B8G8R8A8_UNORM;
@@ -375,15 +359,13 @@ void VulkanExample::initSwapchain(VkCommandBuffer cmdBuffer) {
   result = fpGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface,
                                                      &presentModeCount, NULL);
 
-  if (result != VK_SUCCESS || presentModeCount < 1)
-    exitOnError("Failed to get physical device present modes");
+  assert(result == VK_SUCCESS && presentModeCount >= 1);
 
   std::vector<VkPresentModeKHR> presentModes(presentModeCount);
   result = fpGetPhysicalDeviceSurfacePresentModesKHR(
       physicalDevice, surface, &presentModeCount, presentModes.data());
 
-  if (result != VK_SUCCESS || presentModeCount < 1)
-    exitOnError("Failed to get physical device present modes");
+  assert(result == VK_SUCCESS);
 
   VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
 
@@ -397,8 +379,7 @@ void VulkanExample::initSwapchain(VkCommandBuffer cmdBuffer) {
       presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
   }
 
-  if (caps.maxImageCount < 1)
-    exitOnError("Surface capabilities don't support one or more images");
+  assert(caps.maxImageCount >= 1);
 
   uint32_t imageCount = caps.minImageCount + 1;
 
@@ -423,12 +404,11 @@ void VulkanExample::initSwapchain(VkCommandBuffer cmdBuffer) {
 
   result = fpCreateSwapchainKHR(device, &swapchainCreateInfo, NULL, &swapchain);
 
-  if (result != VK_SUCCESS) exitOnError("Failed to create swapchain");
+  assert(result == VK_SUCCESS);
 
   result = fpGetSwapchainImagesKHR(device, swapchain, &imageCount, NULL);
 
-  if (result != VK_SUCCESS)
-    exitOnError("Failed to get presentable images from swapchain");
+  assert(result == VK_SUCCESS);
 
   images.resize(imageCount);
   buffers.resize(imageCount);
@@ -436,8 +416,7 @@ void VulkanExample::initSwapchain(VkCommandBuffer cmdBuffer) {
   result =
       fpGetSwapchainImagesKHR(device, swapchain, &imageCount, images.data());
 
-  if (result != VK_SUCCESS)
-    exitOnError("Failed to get presentable images from swapchain");
+  assert(result == VK_SUCCESS);
 
   for (uint32_t i = 0; i < imageCount; i++) {
     VkImageViewCreateInfo imageCreateInfo = {};
@@ -462,8 +441,7 @@ void VulkanExample::initSwapchain(VkCommandBuffer cmdBuffer) {
     result =
         vkCreateImageView(device, &imageCreateInfo, NULL, &buffers[i].view);
 
-    if (result != VK_SUCCESS)
-      exitOnError("Failed to create a swapchain image view");
+    assert(result == VK_SUCCESS);
 
     VkFramebufferCreateInfo fbCreateInfo = {};
     fbCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -476,8 +454,7 @@ void VulkanExample::initSwapchain(VkCommandBuffer cmdBuffer) {
     result = vkCreateFramebuffer(device, &fbCreateInfo, NULL,
                                  &buffers[i].frameBuffer);
 
-    if (result != VK_SUCCESS)
-      exitOnError("Failed to create a swapchain framebuffer");
+    assert(result == VK_SUCCESS);
   }
 }
 
@@ -555,5 +532,5 @@ void VulkanExample::swapchainPresent(VkCommandBuffer cmdBuffer, VkQueue queue,
 
   VkResult result = fpQueuePresentKHR(queue, &presentInfo);
 
-  if (result != VK_SUCCESS) exitOnError("Failed to present swapchain queue");
+  assert(result == VK_SUCCESS);
 }
