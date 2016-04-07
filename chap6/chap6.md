@@ -210,6 +210,76 @@ assert(result == VK_SUCCESS);
 
 # `fpGetSwapchainImagesKHR`
 
+We will need to get the available images from the swapchain. In a later section of this chapter, we'll actually get them ready for use, but right now, let's focus on this part. We'll be using a function pointer we got earlier called ``. You can find documentation [here](https://www.khronos.org/files/vulkan10-reference-guide.pdf) in **29.6** and the definition is the same as:
+
+```cpp
+VkResult vkGetSwapchainImagesKHR(
+  VkDevice device, 
+  VkSwapchainKHR swapchain, 
+  uint32_t* pSwapchainImageCount, 
+  VkImage* pSwapchainImages);
+```
+
+Let's go ahead and make use of the function and check if we were successful:
+
+```cpp
+result = fpGetSwapchainImagesKHR(device, swapchain, &imageCount, NULL);
+assert(result == VK_SUCCESS && imageCount > 0);
+```
+
+We'll need to make a new `struct` to contain a few things. Let's look at it:
+
+```cpp
+struct SwapChainBuffer {
+  VkImage image;
+  VkImageView view;
+  VkFramebuffer frameBuffer;
+};
+```
+
+This will become more relevant later on when we get closer to rendering. For now, we'll create two variables in the `VulkanExample` class. These will be:
+
+```cpp
+std::vector<VkImage> images;
+std::vector<SwapChainBuffer> buffers;
+```
+
+Let's make sure we `resize` these to fit the number of images we'll get back:
+
+```cpp
+images.resize(imageCount);
+buffers.resize(imageCount);
+```
+
+And of course, we'll call the function again:
+
+```cpp
+result =
+    fpGetSwapchainImagesKHR(device, swapchain, &imageCount, images.data());
+assert(result == VK_SUCCESS);
+```
+
+# `VkImageViewCreateInfo`
+
+In Vulkan, we don't directly access images via shaders for reading and writing. We make use of image views which represent subresources of the images and their metadata to do the same. You can find documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0/man/html/VkImageViewCreateInfo.html) and the definition is included below:
+
+```cpp
+typedef struct VkImageViewCreateInfo {
+  VkStructureType            sType;
+  const void*                pNext;
+  VkImageViewCreateFlags     flags;
+  VkImage                    image;
+  VkImageViewType            viewType;
+  VkFormat                   format;
+  VkComponentMapping         components;
+  VkImageSubresourceRange    subresourceRange;
+} VkImageViewCreateInfo;
+```
+
+# `vkCreateImageView`
+
+You can find documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0/man/html/vkCreateImageView.html).
+
 # Image Layouts
 
 # Acquiring the Next Image
