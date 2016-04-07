@@ -305,11 +305,26 @@ imageCreateInfo.components = {
 
 Unless you know what you're doing, just use `RGBA` values.
 
+# `VkImageMemoryBarrier`
+
+
+
+# `setImageLayout`
+
+For this section, we're going to be writing the contents of this method:
+
+```cpp
+void VulkanExample::setImageLayout(VkCommandBuffer cmdBuffer, VkImage image,
+                                   VkImageAspectFlags aspects,
+                                   VkImageLayout oldLayout,
+                                   VkImageLayout newLayout) {}
+```
+
+This will take a `VkCommandBuffer` and a `VkImage` whose image layout we want to set. While it's not necessary to build out a method, it may be useful later on. We'll also take in two `VkImageLayout`s. Depending on the values `oldLayout` and `newLayout` take, we'll change how we set up our `VkImageMemoryBarrier`.
+
 # `vkCreateImageView`
 
 You can find documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0/man/html/vkCreateImageView.html).
-
-# Image Layouts
 
 # Acquiring the Next Image
 
