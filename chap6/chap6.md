@@ -276,6 +276,35 @@ typedef struct VkImageViewCreateInfo {
 } VkImageViewCreateInfo;
 ```
 
+There is a pretty typical way of setting up your `VkImageViewCreateInfo`. Let's look at my usage:
+
+```cpp
+VkImageViewCreateInfo imageCreateInfo = {};
+imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+imageCreateInfo.pNext = NULL;
+imageCreateInfo.format = colorFormat;
+imageCreateInfo.components = {}; // We'll get to this in a second!
+imageCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+imageCreateInfo.subresourceRange.baseMipLevel = 0;
+imageCreateInfo.subresourceRange.levelCount = 1;
+imageCreateInfo.subresourceRange.baseArrayLayer = 0;
+imageCreateInfo.subresourceRange.layerCount = 1;
+imageCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+imageCreateInfo.flags = 0;
+```
+
+Notice I did not finish the `components` line. You can see this [section](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkComponentMapping) for more information on component mapping. But, essentially what we're doing is telling Vulkan how to map components of the image to components of the vector output by our shaders. We'll simply tell Vulkan we want our `(R, G, B, A)` images to map to a vector in the form `<R, G, B, A>`. We can do that like so:
+
+```cpp
+imageCreateInfo.components = {
+    VK_COMPONENT_SWIZZLE_R, 
+    VK_COMPONENT_SWIZZLE_G, 
+    VK_COMPONENT_SWIZZLE_B,
+    VK_COMPONENT_SWIZZLE_A};
+```
+
+Unless you know what you're doing, just use `RGBA` values.
+
 # `vkCreateImageView`
 
 You can find documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0/man/html/vkCreateImageView.html).
