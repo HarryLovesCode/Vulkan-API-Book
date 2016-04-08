@@ -549,6 +549,42 @@ That's all we'll need for our `initSwapchain` method!
 
 # Acquiring the Next Image
 
+For this section, we'll be writing a small helper method. The definition looks like this:
+
+```cpp
+void getSwapchainNext(VkSemaphore presentCompleteSemaphore, uint32_t buffer) {}
+```
+
+We already have the function pointer from earlier called `fpAcquireNextImageKHR`. This has the same definition as:
+
+```cpp
+VkResult vkAcquireNextImageKHR(
+  // The device assocated with swapchain.
+  VkDevice       device,
+  // The swapchain from which an image is being acquired.
+  VkSwapchainKHR swapchain,
+  // Indicates how long the function waits, in nanoseconds, 
+  // if no image is available.
+  uint64_t       timeout,
+  // VK_NULL_HANDLE or a semaphore to signal.
+  VkSemaphore    semaphore,
+  // VK_NULL_HANDLE or a fence to signal.
+  VkFence        fence,
+  // A pointer to a uint32_t that is set to the index of the 
+  // next image to use (i.e. an index into the array of images 
+  // returned by vkGetSwapchainImagesKHR).
+  uint32_t*      pImageIndex);
+```
+
+Now that we know that, all we need to do is call the function and make sure we were successful:
+
+```cpp
+VkResult result =
+    fpAcquireNextImageKHR(device, swapchain, UINT64_MAX,
+                          presentCompleteSemaphore, (VkFence)0, &buffer);
+assert(result == VK_SUCCESS);
+```
+
 # Presenting Images
 
 # Cleaning Up
