@@ -547,7 +547,7 @@ assert(result == VK_SUCCESS);
 
 That's all we'll need for our `initSwapchain` method!
 
-# Acquiring the Next Image
+# `fpAcquireNextImageKHR`
 
 For this section, we'll be writing a small helper method. The definition looks like this:
 
@@ -555,7 +555,7 @@ For this section, we'll be writing a small helper method. The definition looks l
 void getSwapchainNext(VkSemaphore presentCompleteSemaphore, uint32_t buffer) {}
 ```
 
-We already have the function pointer from earlier called `fpAcquireNextImageKHR`. This has the same definition as:
+We already have the function pointer from earlier called `fpAcquireNextImageKHR`. You can find the documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#vkAcquireNextImageKHR) and this has the same definition as:
 
 ```cpp
 VkResult vkAcquireNextImageKHR(
@@ -585,6 +585,75 @@ VkResult result =
 assert(result == VK_SUCCESS);
 ```
 
+# `swapchainPresent`
+
+For the next two sections, we'll be writing the body of this method:
+
+```cpp
+void swapchainPresent(VkCommandBuffer cmdBuffer, VkQueue queue,
+                      uint32_t buffer) {}
+```
+
 # Presenting Images
+
+In order for the swapchain to present images, we'll have to inform Vulkan of some things. We can use `VkPresentInfoKHR` to do this. You can find documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#VkPresentInfoKHR) and the definition is below:
+
+```cpp
+typedef struct VkPresentInfoKHR {
+  // The type of this structure and must be 
+  // VK_STRUCTURE_TYPE_PRESENT_INFO_KHR.
+  VkStructureType          sType;
+  // NULL or a pointer to an extension-specific structure.
+  const void*              pNext;
+  // The number of semaphores to wait for before issuing the 
+  // present request. The number may be zero.
+  uint32_t                 waitSemaphoreCount;
+  // If non-NULL, is an array of VkSemaphore objects with 
+  // waitSemaphoreCount entries, and specifies the semaphores to wait 
+  // for before issuing the present request.
+  const VkSemaphore*       pWaitSemaphores;
+  // The number of swapchains being presented to by this command.
+  uint32_t                 swapchainCount;
+  // An array of VkSwapchainKHR objects with swapchainCount entries. 
+  // A given swapchain must not appear in this list more than once.
+  const VkSwapchainKHR*    pSwapchains;
+  // An array of indices into the array of each swapchain’s 
+  // presentable images, with swapchainCount entries. Each entry in 
+  // this array identifies the image to present on the corresponding 
+  // entry in the pSwapchains array.
+  const uint32_t*          pImageIndices;
+  // An array of VkResult typed elements with swapchainCount entries. 
+  // Applications that don’t need per-swapchain results can use NULL 
+  // for pResults. If non-NULL, each entry in pResults will be set to 
+  // the VkResult for presenting the swapchain corresponding to the same 
+  // index in pSwapchains.
+  VkResult*                pResults;
+} VkPresentInfoKHR;
+```
+
+Our usage will simply look like:
+
+```cpp
+VkPresentInfoKHR presentInfo = {};
+presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+presentInfo.pNext = NULL;
+presentInfo.swapchainCount = 1;
+presentInfo.pSwapchains = &swapchain;
+presentInfo.pImageIndices = &buffer;
+```
+
+# `fpQueuePresentKHR`
+
+As the last part of the `swapchainPresent` method, we actually get to present! We'll be using the function pointer from earlier called `fpQueuePresentKHR`. The documentation is [here](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#vkQueuePresentKHR) and the definition is the same as:
+
+```cpp
+VkResult vkQueuePresentKHR(
+  // A queue that is capable of presentation to the target 
+  // surface’s platform on the same device as the image’s swapchain.
+  VkQueue                 queue,
+  // A pointer to an instance of the VkPresentInfoKHR structure 
+  // specifying the parameters of the presentation.
+  const VkPresentInfoKHR* pPresentInfo);
+```
 
 # Cleaning Up
