@@ -10,6 +10,9 @@ pandoc book.md                \
   chap5/chap5-windows.md      \
   chap5/chap5-linux.md        \
   chap6/chap6.md              \
+  chap7/chap7.md              \
+  chap8/chap8.md              \
+  chap9/chap9.md              \
 -o VulkanApiBook.epub --epub-stylesheet book.css --toc
 
 pandoc book.md                \
@@ -22,4 +25,7 @@ pandoc book.md                \
   chap5/chap5-windows.md      \
   chap5/chap5-linux.md        \
   chap6/chap6.md              \
+  chap7/chap7.md              \
+  chap8/chap8.md              \
+  chap9/chap9.md              \
 -o VulkanApiBook.pdf --toc --latex-engine=xelatex
