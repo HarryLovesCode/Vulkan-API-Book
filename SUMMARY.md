@@ -20,7 +20,8 @@
 * [Swapchains](chap6/chap6.md)
 * [Image Layouts](chap7/chap7.md)
 * [Image Views](chap8/chap8.md)
-* [Acquiring and Presenting](chap9/chap9.md)
+* [Acquiring, Presenting, Cleaning Up](chap9/chap9.md)
 * Buffers
 * Shaders
 * Descriptor Pools and Pipelines
+
