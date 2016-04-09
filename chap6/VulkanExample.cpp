@@ -25,7 +25,7 @@ VulkanExample::~VulkanExample() {
   for (SwapChainBuffer buffer : buffers)
     vkDestroyImageView(device, buffer.view, NULL);
 
-  fpDestroySwapchainKHR(device, swapchain, NULL);
+  // fpDestroySwapchainKHR(device, swapchain, NULL);
   vkDestroySurfaceKHR(instance, surface, NULL);
   vkDestroyInstance(instance, NULL);
 }
@@ -321,7 +321,8 @@ void VulkanExample::initSurface() {
   result = fpGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface,
                                                 &formatCount, NULL);
 
-  assert(result == VK_SUCCESS && formatCount >= 1);
+  assert(result == VK_SUCCESS);
+  assert(formatCount >= 1);
 
   std::vector<VkSurfaceFormatKHR> surfaceFormats(formatCount);
   result = fpGetPhysicalDeviceSurfaceFormatsKHR(
@@ -358,7 +359,8 @@ void VulkanExample::initSwapchain(VkCommandBuffer cmdBuffer) {
   result = fpGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface,
                                                      &presentModeCount, NULL);
 
-  assert(result == VK_SUCCESS && presentModeCount >= 1);
+  assert(result == VK_SUCCESS);
+  assert(presentModeCount >= 1);
 
   std::vector<VkPresentModeKHR> presentModes(presentModeCount);
   result = fpGetPhysicalDeviceSurfacePresentModesKHR(
