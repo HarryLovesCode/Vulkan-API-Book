@@ -1,12 +1,12 @@
 # Image Layouts
 
-In this chapter, we'll be writing a `setImageLayout` method.
+In this chapter, we'll be writing a `setImageLayout` method. We'll make sure to come back to `initSwapchain` later.
 
 ```cpp
-void VulkanExample::setImageLayout(VkCommandBuffer cmdBuffer, VkImage image,
-                                   VkImageAspectFlags aspects,
-                                   VkImageLayout oldLayout,
-                                   VkImageLayout newLayout) {}
+void setImageLayout(VkCommandBuffer cmdBuffer, VkImage image,
+                    VkImageAspectFlags aspects,
+                    VkImageLayout oldLayout,
+                    VkImageLayout newLayout) {}
 ```
 
 This will take a `VkCommandBuffer` and a `VkImage` whose image layout we want to set. While it's not necessary to build out this method, it will be useful later on. We'll also take in two `VkImageLayout`s.
@@ -134,7 +134,7 @@ void vkCmdPipelineBarrier(
   const VkImageMemoryBarrier*   pImageMemoryBarriers);
 ```
 
-The only arguments we're not sure about are `srcFlags` and `dstFlags`. We want our execution / memory dependencies to be staged at the top of the command buffer. Thus, we'll use `VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT`. You can find more information on pipeline state flags like `VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT` [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#synchronization-pipeline-stage-flags). Our usage would look like:
+The only arguments we're not sure about are `srcFlags` and `dstFlags`. However, we know we want our execution / memory dependencies to be staged at the top of the command buffer. So, we'll use `VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT` to notify Vulkan of our intentions. You can find more information on pipeline state flags like `VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT` [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#synchronization-pipeline-stage-flags). Our usage would look like:
 
 ```cpp
 VkPipelineStageFlagBits srcFlags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
@@ -142,3 +142,5 @@ VkPipelineStageFlagBits dstFlags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 vkCmdPipelineBarrier(cmdBuffer, srcFlags, dstFlags, 0, 0, NULL, 0, NULL, 1,
                      &imageBarrier);
 ```
+
+That's all for image layouts. Onto image views!
