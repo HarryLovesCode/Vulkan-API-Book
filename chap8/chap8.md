@@ -1,6 +1,6 @@
 # `VkImageViewCreateInfo`
 
-For the next few sections, we'll be back in our `initSwapchain` method. We'll start with our `for` loop where we will be setting image layouts and creating image views. It will look like this:
+For this chapter, we'll be back in our `initSwapchain` method. We'll start with a `for` loop where we will be setting image layouts and creating image views. It will look like this:
 
 ```cpp
 for (uint32_t i = 0; i < imageCount; i++) {
@@ -141,4 +141,4 @@ result = vkCreateFramebuffer(device, &fbCreateInfo, NULL,
 assert(result == VK_SUCCESS);
 ```
 
-That's all we'll need for our `initSwapchain` method!
+That's all we'll need for our `initSwapchain` method! Now it's time for acquiring the next image in the swapchain and presenting images!
