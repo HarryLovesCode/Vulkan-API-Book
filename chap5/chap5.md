@@ -58,7 +58,7 @@ GET_DEVICE_PROC_ADDR(device, AcquireNextImageKHR);
 GET_DEVICE_PROC_ADDR(device, QueuePresentKHR);
 ```
 
-We'll insert that right after we call `initSurface` in our constructor. We also need to add a few members of our `VulkanExample` class:
+We also need to add a few members of our `VulkanExample` class:
 
 ```cpp
 PFN_vkGetPhysicalDeviceSurfaceSupportKHR fpGetPhysicalDeviceSurfaceSupportKHR;

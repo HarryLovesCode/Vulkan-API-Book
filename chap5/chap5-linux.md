@@ -35,7 +35,7 @@ Now we can create the surface. Also in section **29.2.4** is the definition for 
 VkResult vkCreateXcbSurfaceKHR(
   VkInstance                        instance,
   const VkXcbSurfaceCreateInfoKHR*  pCreateInfo,
-  const VkAllocationCallbacks*      pAllocator,  
+  const VkAllocationCallbacks*      pAllocator,
   VkSurfaceKHR*                     pSurface);
 ```
 
