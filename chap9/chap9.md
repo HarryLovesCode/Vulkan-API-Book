@@ -1,0 +1,128 @@
+# `fpAcquireNextImageKHR`
+
+For this section, we'll be writing a small helper method. The definition looks like this:
+
+```cpp
+void getSwapchainNext(VkSemaphore presentCompleteSemaphore, uint32_t buffer) {}
+```
+
+We already have the function pointer from earlier called `fpAcquireNextImageKHR`. You can find the documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#vkAcquireNextImageKHR) and this has the same definition as:
+
+```cpp
+VkResult vkAcquireNextImageKHR(
+  // The device assocated with swapchain.
+  VkDevice       device,
+  // The swapchain from which an image is being acquired.
+  VkSwapchainKHR swapchain,
+  // Indicates how long the function waits, in nanoseconds,
+  // if no image is available.
+  uint64_t       timeout,
+  // VK_NULL_HANDLE or a semaphore to signal.
+  VkSemaphore    semaphore,
+  // VK_NULL_HANDLE or a fence to signal.
+  VkFence        fence,
+  // A pointer to a uint32_t that is set to the index of the
+  // next image to use (i.e. an index into the array of images
+  // returned by vkGetSwapchainImagesKHR).
+  uint32_t*      pImageIndex);
+```
+
+Now that we know that, all we need to do is call the function and make sure we were successful:
+
+```cpp
+VkResult result =
+    fpAcquireNextImageKHR(device, swapchain, UINT64_MAX,
+                          presentCompleteSemaphore, (VkFence)0, &buffer);
+assert(result == VK_SUCCESS);
+```
+
+# `swapchainPresent`
+
+For the next two sections, we'll be writing the body of this method:
+
+```cpp
+void swapchainPresent(VkCommandBuffer cmdBuffer, VkQueue queue,
+                      uint32_t buffer) {}
+```
+
+# Presenting Images
+
+In order for the swapchain to present images, we'll have to inform Vulkan of some things. We can use `VkPresentInfoKHR` to do this. You can find documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#VkPresentInfoKHR) and the definition is below:
+
+```cpp
+typedef struct VkPresentInfoKHR {
+  // The type of this structure and must be
+  // VK_STRUCTURE_TYPE_PRESENT_INFO_KHR.
+  VkStructureType          sType;
+  // NULL or a pointer to an extension-specific structure.
+  const void*              pNext;
+  // The number of semaphores to wait for before issuing the
+  // present request. The number may be zero.
+  uint32_t                 waitSemaphoreCount;
+  // If non-NULL, is an array of VkSemaphore objects with
+  // waitSemaphoreCount entries, and specifies the semaphores to wait
+  // for before issuing the present request.
+  const VkSemaphore*       pWaitSemaphores;
+  // The number of swapchains being presented to by this command.
+  uint32_t                 swapchainCount;
+  // An array of VkSwapchainKHR objects with swapchainCount entries.
+  // A given swapchain must not appear in this list more than once.
+  const VkSwapchainKHR*    pSwapchains;
+  // An array of indices into the array of each swapchain’s
+  // presentable images, with swapchainCount entries. Each entry in
+  // this array identifies the image to present on the corresponding
+  // entry in the pSwapchains array.
+  const uint32_t*          pImageIndices;
+  // An array of VkResult typed elements with swapchainCount entries.
+  // Applications that don’t need per-swapchain results can use NULL
+  // for pResults. If non-NULL, each entry in pResults will be set to
+  // the VkResult for presenting the swapchain corresponding to the same
+  // index in pSwapchains.
+  VkResult*                pResults;
+} VkPresentInfoKHR;
+```
+
+Our usage will simply look like:
+
+```cpp
+VkPresentInfoKHR presentInfo = {};
+presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+presentInfo.pNext = NULL;
+presentInfo.swapchainCount = 1;
+presentInfo.pSwapchains = &swapchain;
+presentInfo.pImageIndices = &buffer;
+```
+
+# `fpQueuePresentKHR`
+
+As the last part of the `swapchainPresent` method, we actually get to present! We'll be using the function pointer from earlier called `fpQueuePresentKHR`. The documentation is [here](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#vkQueuePresentKHR) and the definition is the same as:
+
+```cpp
+VkResult vkQueuePresentKHR(
+  // A queue that is capable of presentation to the target
+  // surface’s platform on the same device as the image’s swapchain.
+  VkQueue                 queue,
+  // A pointer to an instance of the VkPresentInfoKHR structure
+  // specifying the parameters of the presentation.
+  const VkPresentInfoKHR* pPresentInfo);
+```
+
+# Cleaning Up
+
+For our new destructor, we will:
+
+- Destroy all image views we stored
+- Destroy the swapchain
+- Destroy the surface
+- Destroy the instance
+
+That can be done easily with the following lines of code:
+
+```cpp
+for (SwapChainBuffer buffer : buffers)
+  vkDestroyImageView(device, buffer.view, NULL);
+
+fpDestroySwapchainKHR(device, swapchain, NULL);
+vkDestroySurfaceKHR(instance, surface, NULL);
+vkDestroyInstance(instance, NULL);
+```
