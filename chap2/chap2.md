@@ -76,9 +76,9 @@ You'll notice that for `apiVersion`, I am using `VK_MAKE_VERSION` to set the API
 
 |                  	| Intel 6100 iGPU 	| Nvidia GT755m   	| Nvidia GTX 780  	|
 |-------------------|-------------------|-------------------|-------------------|
-| Vulkan Version   	| 1.0.5           	| 1.0.4           	| 1.0.5           	|
+| Vulkan Version   	| 1.0.5           	| 1.0.8           	| 1.0.5           	|
 | Operating System 	| Fedora Linux     	| Windows 10      	| Arch Linux      	|
-| Driver           	| `mesa`          	| `nvidia-364.51` 	| `nvidia-364.12` 	|
+| Driver           	| `mesa`          	| `nvidia-364.91` 	| `nvidia-364.12` 	|
 
 We'll see later that if the version we try to get is unsupported, we'll get an error (`VK_ERROR_INCOMPATIBLE_DRIVER`). We'll check for this error later in this chapter.
 
@@ -189,7 +189,7 @@ void VulkanExample::exitOnError(const char* msg) {
 
 ## Destructor
 
-For now, we will simply destroy the instance we created and then exit. The destructor therefore looks like this:
+For now, we will simply destroy the instance we created and then exit. The destructor looks like this:
 
 ```cpp
 VulkanExample::~VulkanExample() { vkDestroyInstance(instance, NULL); }
