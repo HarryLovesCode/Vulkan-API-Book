@@ -1,4 +1,4 @@
-# Physical Devices and Logical Connections
+# Physical Devices and Logical Devices
 
 Once we have created a Vulkan instance, we can use two objects to interact with our implementation. These objects are queues and devices. This chapter is going to focus on the two types of devices: physical and logical. A physical device is a single component in the system. It can also be multiple components working in conjunction to function like a single device. A logical device is basically our interface with the physical device.
 
