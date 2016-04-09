@@ -1,0 +1,6 @@
+[default]
+name=Default Configuration
+device=local
+runtime=host
+prefix=/home/hgould/.cache/gnome-builder/install/vulkan-api-book/host
+default=true

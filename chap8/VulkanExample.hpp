@@ -40,6 +40,9 @@ class VulkanExample {
   void initInstance();
   void initDevices();
   void initSwapchain(VkCommandBuffer cmdBuffer);
+  void setImageLayout(VkCommandBuffer cmdBuffer, VkImage image,
+                      VkImageAspectFlags aspects, VkImageLayout oldLayout,
+                      VkImageLayout newLayout);
 
   const char *applicationName = "Vulkan Example";
   const char *engineName = "Vulkan Engine";

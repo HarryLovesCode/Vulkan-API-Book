@@ -9,6 +9,9 @@ AC_CONFIG_FILES([
  chap4/Makefile
  chap5/Makefile
  chap6/Makefile
+ chap7/Makefile
+ chap8/Makefile
+ chap9/Makefile
 ])
 AC_OUTPUT
 
