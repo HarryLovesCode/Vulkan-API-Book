@@ -21,23 +21,12 @@ VkResult vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
   VkSurfaceCapabilitiesKHR*  pSurfaceCapabilities);
 ```
 
-Note that it takes a pointer to a `VkSurfaceCapabilitiesKHR` object. We'll have to create that to pass it in to be written:
-
-```cpp
-VkSurfaceCapabilitiesKHR caps = {};
-```
-
-Now let's get the information we need:
+Note that it takes a pointer to a `VkSurfaceCapabilitiesKHR` object. We'll have to create that to pass it in. Let's do that and verify we were successful:
 
 ```cpp
 VkSurfaceCapabilitiesKHR caps = {};
 VkResult result = fpGetPhysicalDeviceSurfaceCapabilitiesKHR(
     physicalDevice, surface, &caps);
-```
-
-Per usual, let's verify we were successful:
-
-```cpp
 assert(result == VK_SUCCESS);
 ```
 
@@ -158,7 +147,7 @@ Now let's say we want at least one image:
 uint32_t imageCount = caps.minImageCount + 1;
 ```
 
-If we asked for more images that are supported, we should just go with the maximum:
+If we asked for more images than the implementation supports, we'll have to settle for less:
 
 ```cpp
 if (imageCount > caps.maxImageCount)
@@ -197,15 +186,10 @@ VkResult vkCreateSwapchainKHR(
   VkSwapchainKHR*                             pSwapchain);
 ```
 
-Let's call the method:
+Let's call the method and then we can verify we were successful::
 
 ```cpp
 result = fpCreateSwapchainKHR(device, &swapchainCreateInfo, NULL, &swapchain);
-```
-
-And then we can verify we were successful:
-
-```cpp
 assert(result == VK_SUCCESS);
 ```
 
