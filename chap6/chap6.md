@@ -79,7 +79,8 @@ result = fpGetPhysicalDeviceSurfacePresentModesKHR(
 Before we move on, let's verify success. We should check the `result` and check make sure one or more present modes are available.
 
 ```cpp
-assert(result == VK_SUCCESS && presentModeCount >= 1);
+assert(result == VK_SUCCESS);
+assert(presentModeCount >= 1);
 ```
 
 Now let's go ahead and call the function again with our `std::vector<VkPresentModeKHR>`:
@@ -202,7 +203,7 @@ Let's call the method:
 result = fpCreateSwapchainKHR(device, &swapchainCreateInfo, NULL, &swapchain);
 ```
 
-and verify we were successful:
+And then we can verify we were successful:
 
 ```cpp
 assert(result == VK_SUCCESS);
@@ -214,9 +215,13 @@ We will need to get the available images from the swapchain. In a later section 
 
 ```cpp
 VkResult vkGetSwapchainImagesKHR(
+  // The VkDevice associated with swapchain.
   VkDevice device, 
+  // The swapchain.
   VkSwapchainKHR swapchain, 
+  // The number of elements in the array pointed by pSwapchainImages.
   uint32_t* pSwapchainImageCount, 
+  // The returned array of images.
   VkImage* pSwapchainImages);
 ```
 
@@ -224,7 +229,8 @@ Let's go ahead and make use of the function and check if we were successful:
 
 ```cpp
 result = fpGetSwapchainImagesKHR(device, swapchain, &imageCount, NULL);
-assert(result == VK_SUCCESS && imageCount > 0);
+assert(result == VK_SUCCESS);
+assert(imageCount > 0);
 ```
 
 We'll need to make a new `struct` to contain a few things. Let's look at it:
@@ -446,7 +452,7 @@ imageCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
 imageCreateInfo.flags = 0;
 ```
 
-Notice I did not finish the `components` line. You can see this [section](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkComponentMapping) for more information on component mapping. But, essentially what we're doing is telling Vulkan how to map components of the image to components of the vector output by our shaders. We'll simply tell Vulkan we want our `(R, G, B, A)` images to map to a vector in the form `<R, G, B, A>`. We can do that like so:
+Notice I did not finish the `components` line. You can see this [section](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkComponentMapping) for more information on component mapping. But, what we're doing is telling Vulkan how to map image components to vector components output by our shaders. We'll simply tell Vulkan we want our `(R, G, B, A)` images to map to a vector in the form `<R, G, B, A>`. We can do that like so:
 
 ```cpp
 imageCreateInfo.components = {
@@ -508,7 +514,9 @@ typedef struct VkFramebufferCreateInfo {
 } VkFramebufferCreateInfo;
 ```
 
-We'll fill out `sType` normally, we'll specify we only need `1` attachment which is our `VkImageView`, and we'll set the width and height to that of the `swapchainExtent` from earlier:
+1. We'll fill out `sType` normally.
+2. We'll specify we only need `1` attachment which is our `VkImageView`.
+3. We'll set the width and height to that of the `swapchainExtent` from earlier:
 
 ```cpp
 VkFramebufferCreateInfo fbCreateInfo = {};
@@ -657,3 +665,21 @@ VkResult vkQueuePresentKHR(
 ```
 
 # Cleaning Up
+
+For our new destructor, we will:
+
+- Destroy all image views we stored
+- Destroy the swapchain
+- Destroy the surface
+- Destroy the instance
+
+That can be done easily with the following lines of code:
+
+```cpp
+for (SwapChainBuffer buffer : buffers)
+  vkDestroyImageView(device, buffer.view, NULL);
+
+fpDestroySwapchainKHR(device, swapchain, NULL);
+vkDestroySurfaceKHR(instance, surface, NULL);
+vkDestroyInstance(instance, NULL);
+```
