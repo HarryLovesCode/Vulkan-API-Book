@@ -40,7 +40,6 @@ class VulkanExample {
   void getSwapchainNext(VkSemaphore presentCompleteSemaphore, uint32_t buffer);
   void initInstance();
   void initDevices();
-  void initSurface();
   void initSwapchain(VkCommandBuffer cmdBuffer);
   void setImageLayout(VkCommandBuffer cmdBuffer, VkImage image,
                       VkImageAspectFlags aspects, VkImageLayout oldLayout,
@@ -95,6 +94,7 @@ class VulkanExample {
 #elif defined(__linux__)
   void initWindow();
 #endif
+  void initSurface();
   void renderLoop();
 };
 

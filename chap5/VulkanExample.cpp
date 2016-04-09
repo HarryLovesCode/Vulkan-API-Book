@@ -19,7 +19,6 @@ VulkanExample::VulkanExample() {
   GET_DEVICE_PROC_ADDR(device, GetSwapchainImagesKHR);
   GET_DEVICE_PROC_ADDR(device, AcquireNextImageKHR);
   GET_DEVICE_PROC_ADDR(device, QueuePresentKHR);
-  initSurface();
 }
 
 VulkanExample::~VulkanExample() { vkDestroyInstance(instance, NULL); }
@@ -265,9 +264,9 @@ void VulkanExample::initSurface() {
       vkCreateWin32SurfaceKHR(instance, &surfaceCreateInfo, NULL, &surface);
 #elif defined(__linux__)
   VkXcbSurfaceCreateInfoKHR surfaceCreateInfo = {};
+  surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
   surfaceCreateInfo.pNext = NULL;
   surfaceCreateInfo.flags = 0;
-  surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
   surfaceCreateInfo.connection = connection;
   surfaceCreateInfo.window = window;
   VkResult result =

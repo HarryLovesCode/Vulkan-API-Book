@@ -19,7 +19,6 @@ VulkanExample::VulkanExample() {
   GET_DEVICE_PROC_ADDR(device, GetSwapchainImagesKHR);
   GET_DEVICE_PROC_ADDR(device, AcquireNextImageKHR);
   GET_DEVICE_PROC_ADDR(device, QueuePresentKHR);
-  initSurface();
 }
 
 VulkanExample::~VulkanExample() {

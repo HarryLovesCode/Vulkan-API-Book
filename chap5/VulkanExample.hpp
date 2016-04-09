@@ -33,7 +33,6 @@ class VulkanExample {
   void exitOnError(const char *msg);
   void initInstance();
   void initDevices();
-  void initSurface();
 
   const char *applicationName = "Vulkan Example";
   const char *engineName = "Vulkan Engine";
@@ -79,6 +78,7 @@ class VulkanExample {
 #elif defined(__linux__)
   void initWindow();
 #endif
+  void initSurface();
   void renderLoop();
 };
 
