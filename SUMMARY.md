@@ -6,7 +6,7 @@
    * Linux
    * Android
 * [Creating an Instance](chap2/chap2.md)
-* [Physical Devices and Logical Connections](chap3/chap3.md)
+* [Physical Devices and Logical Devices](chap3/chap3.md)
 * [Creating a Window](chap4/chap4.md)
    * [Windows](chap4/chap4-windows.md)
    * [Linux](chap4/chap4-linux.md)
