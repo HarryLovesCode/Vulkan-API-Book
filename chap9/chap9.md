@@ -1,3 +1,11 @@
+# Acquiring, Presenting, Cleaning Up
+
+For this chapter, we'll be focusing on:
+
+- Acquiring the next image in the swapchain
+- Presenting images
+- Cleaning up when we're done with the swapchain
+
 # `fpAcquireNextImageKHR`
 
 For this section, we'll be writing a small helper method. The definition looks like this:
@@ -38,14 +46,12 @@ assert(result == VK_SUCCESS);
 
 # `swapchainPresent`
 
-For the next two sections, we'll be writing the body of this method:
+For this section and the next, we'll be writing the body of this method:
 
 ```cpp
 void swapchainPresent(VkCommandBuffer cmdBuffer, VkQueue queue,
                       uint32_t buffer) {}
 ```
-
-# Presenting Images
 
 In order for the swapchain to present images, we'll have to inform Vulkan of some things. We can use `VkPresentInfoKHR` to do this. You can find documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#VkPresentInfoKHR) and the definition is below:
 
@@ -100,7 +106,8 @@ As the last part of the `swapchainPresent` method, we actually get to present! W
 ```cpp
 VkResult vkQueuePresentKHR(
   // A queue that is capable of presentation to the target
-  // surface’s platform on the same device as the image’s swapchain.
+  // surface’s platform on the same device as the image’s 
+  // swapchain.
   VkQueue                 queue,
   // A pointer to an instance of the VkPresentInfoKHR structure
   // specifying the parameters of the presentation.
