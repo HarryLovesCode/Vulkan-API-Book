@@ -15,18 +15,32 @@ Hello everyone. This is going to be a technical book about the newly published V
 # Resources
 
 - [Vulkan Quick Reference v1.0](https://www.khronos.org/files/vulkan10-reference-guide.pdf)
-- [Vulkan Specification v1.0.9](https://www.khronos.org/registry/vulkan/specs/1.0/pdf/vkspec.pdf)
+- [Vulkan Specification v1.0.9](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html)
 - [Vulkan Specification v1.0.9 + WSI Extensions](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html)
 - [Sascha Willem's Vulkan Samples](https://github.com/SaschaWillems/Vulkan)
 - [Vulkan in 30 Minutes](https://renderdoc.org/vulkan-in-30-minutes.html)
 
 # Code
 
-You can find the Github repository [here](https://github.com/HarryLovesCode/Vulkan-API-Book). For now, only Linux and Windows are supported. 
+You can find the Github repository [here](https://github.com/HarryLovesCode/Vulkan-API-Book). For now, only Linux and Windows are **officially** supported. 
 
 # Building the Book
 
-I'll need to write up a more detailed guide about how to use Pandoc, but for now, just use the `build.sh` script. It will build the book in both `.epub` and `.pdf` formats.
+Currently there are two ways of building the book. 
+
+### Pandoc (Preferred)
+
+Use the `book.sh` script which runs Pandoc and produces the book in `epub` and `pdf` formats.
+
+### Gitbook
+
+You can find information on how to get it [here](https://github.com/GitbookIO/gitbook-cli). Then simply run:
+
+```sh
+gitbook build
+```
+
+In the root directory.
 
 # Reading the Book
 
@@ -42,7 +56,7 @@ cd Vulkan-API-Book
 
 autoreconf --install
 ./configure
-make
+make -j4
 ```
 
 Once you've done that, you should find all the binaries located in the `./bin` folder.

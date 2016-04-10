@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Generate the .epub version of the book
 pandoc book.md                  \
   chap02/chap02.md              \
   chap03/chap03.md              \
@@ -13,8 +14,11 @@ pandoc book.md                  \
   chap07/chap07.md              \
   chap08/chap08.md              \
   chap09/chap09.md              \
--o VulkanApiBook.epub --epub-stylesheet book.css --toc
+--toc                           \
+--epub-stylesheet book.css      \
+-o VulkanApiBook.epub 
 
+# Generate the .pdf version of the book
 pandoc book.md                  \
   chap02/chap02.md              \
   chap03/chap03.md              \
@@ -28,4 +32,9 @@ pandoc book.md                  \
   chap07/chap07.md              \
   chap08/chap08.md              \
   chap09/chap09.md              \
--o VulkanApiBook.pdf --toc --latex-engine=xelatex
+--toc                           \
+--latex-engine=xelatex          \
+--variable mainfont="Ubuntu"    \
+--variable fontsize="11pt"      \
+-V geometry:margin="1.5cm"      \
+-o VulkanApiBook.pdf
