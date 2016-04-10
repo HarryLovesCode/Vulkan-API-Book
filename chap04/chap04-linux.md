@@ -1,8 +1,8 @@
-# Creating a Window on Linux
+## Creating a Window on Linux
 
 In order to create a window, we're going to be using platform specific code. Please note that this tutorial is for Linux **only**. None of this will apply to Windows, Android, GLFW, etc.
 
-## Including Headers
+### Including Headers
 
 For windowing on Linux, we're going to be using the **X protocol C-language Binding (XCB)**. This, while not as simple as using `GLFW` is a pretty easy API to use. However, before we can begin, we'll need to include the header:
 
@@ -12,7 +12,7 @@ For windowing on Linux, we're going to be using the **X protocol C-language Bind
 
 If you're targeting Windows as well, you should surround the include by the `#if defined(__linux__)` directives.
 
-## Our `initWindow` Method
+### Our `initWindow` Method
 
 For this chapter, we're going to be writing the contents of these two methods:
 
@@ -23,7 +23,7 @@ void VulkanExample::renderLoop() {}
 
 Again, if you're targeting Windows as well, you should surround both by the `#if defined(__linux__)` directives.
 
-## Our Variables
+### Our Variables
 
 We'll need to keep track of a few variables in our class. I'll be adding these:
 
@@ -37,7 +37,7 @@ xcb_atom_t wmDeleteWin;
 
 to our `VulkanExample` class.
 
-## Getting a Display
+### Getting a Display
 
 XCB will allow us to interact with the X server, but we'll need to get a display first. We can use the `xcb_connect` method to get the value of the `DISPLAY` environment variable. Because we don't know it already, we should pass in `NULL` for that argument. Here is the definition and usage:
 
@@ -83,7 +83,7 @@ We can then say:
 screen = iter.data;
 ```
 
-## Creating a Window
+### Creating a Window
 
 Before we can create a Window, we'll need to allocate a X Id for it. We can use the `xcb_generate_id` method for this. The definition and proper usage would be:
 
@@ -180,7 +180,7 @@ xcb_map_window(connection, window);
 xcb_flush(connection);
 ```
 
-## Close Button
+### Close Button
 
 I won't go too far into depth about the code below. Essentially what it does is tells the server we want to be alerted when the window manager attempts to destroy the window:
 
@@ -202,7 +202,7 @@ xcb_change_property(connection, XCB_PROP_MODE_REPLACE, window,
 
 That piece of code goes right before we map the window to the screen and flush the stream.
 
-## Update Loop
+### Update Loop
 
 All we need to do now is write the contents of the `renderLoop` method. Again, I'm not going to be going too far into depth because this is just glue and we're focused on Vulkan here. Anyways, we'll be using the `xcb_wait_for_event` method to do just that: wait for events. In order to convert the server's response to a value we can check in a **switch case** block, we need to use the bitwise `AND` (`&`) operator with the value: `~0x80`. You can see what I'm talking about below:
 

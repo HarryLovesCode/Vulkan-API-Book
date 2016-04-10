@@ -1,8 +1,8 @@
-# Windows
+## Creating a Window on Microsoft Windows
 
 In order to create a window, we're going to be using platform specific code. Please note that this tutorial is for Windows **only**. None of this will apply to Linux, Android, GLFW, etc.
 
-## Including Headers
+### Including Headers
 
 Because we're going to be writing this from scratch, we're going to have to interact with Windows directly. Before we can do anything, we need to include the Windows header. If you're only targeting Windows, you can write:
 
@@ -12,7 +12,7 @@ Because we're going to be writing this from scratch, we're going to have to inte
 
 If you're targeting Linux as well, you should surround both by the `#if defined(_WIN32)` directives.
 
-## Allocating a Console
+### Allocating a Console
 
 Because we're now switching from a **Windows Console Application** to a **Windows Application**, we'll need to make sure we have a console to view the output of `stdout` and `stderr`. In addition, because we're exiting right after we encounter an error, we should show a message box, wait for input, then close after the user has acknowledged the error. So, before we call any functions in our constructor, let's add the following code:
 
@@ -30,7 +30,7 @@ Now, let's modify our `exitOnError` method to show a error message box:
 MessageBox(NULL, msg, applicationName, MB_ICONERROR);
 ```
 
-## Creating a Window
+### Creating a Window
 
 As mentioned before, because we're writing this without any windowing libraries, we'll have to use the Win32 API. I won't go too much into detail because **our focus is Vulkan** and not Windows. Let's go ahead and list the variables we'll be using:
 
@@ -172,7 +172,7 @@ SetForegroundWindow(window);
 SetFocus(window);
 ```
 
-## `WndProc`
+### `WndProc`
 
 For this section, we'll be writing the body of this method:
 
@@ -197,7 +197,7 @@ switch (message) {
 }
 ```
 
-## Our Update Loop
+### Our Update Loop
 
 For this section, we'll write the body of this method:
 
@@ -216,7 +216,7 @@ while (GetMessage(&message, NULL, 0, 0)) {
 }
 ```
 
-## `WinMain`
+### `WinMain`
 
 This is our application's new entry-point. We will **not** be using your typical `int main(int argc, char * argv[])` entry-point. This is because Windows requires GUI applications to enter at `WinMain`. We need to:
 

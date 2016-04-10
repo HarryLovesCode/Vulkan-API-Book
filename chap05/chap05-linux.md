@@ -1,8 +1,8 @@
-# Linux
+## Linux
 
 We're going to be writing the Linux specific code for getting a surface in this section. Now, the code here does not exist in the specification. It is up to platforms like Linux to expose surface features on their own. For documentation, I recommend following the [Vulkan Quick Reference](https://www.khronos.org/files/vulkan10-reference-guide.pdf). You can find the platform specific WSI features on page 9.
 
-## `VkXcbSurfaceCreateInfoKHR`
+### `VkXcbSurfaceCreateInfoKHR`
 
 Before we create a surface, we must specify information ahead of time like most Vulkan objects. You'll see in section **29.2.4** that the structure we'll be using is `VkXcbSurfaceCreateInfoKHR`. Here is the definition:
 
@@ -27,7 +27,7 @@ surfaceCreateInfo.connection = connection;
 surfaceCreateInfo.window = window;
 ```
 
-## `vkCreateXcbSurfaceKHR`
+### `vkCreateXcbSurfaceKHR`
 
 Now we can create the surface. Also in section **29.2.4** is the definition for `vkCreateXcbSurfaceKHR`. It looks like:
 
@@ -51,7 +51,5 @@ Of course, we'll also need to verify our surface creation was successful using:
 ```cpp
 if (result != VK_SUCCESS) exitOnError("Failed to create VkSurfaceKHR.");
 ```
-
-## Color Formats and Color Spaces
 
 Please go back to the [Chapter 5 landing page](./chap05.md) to read about determining the color formats and color spaces for the surface.

@@ -173,7 +173,7 @@ if (res == VK_ERROR_INCOMPATIBLE_DRIVER) {
 }
 ```
 
-# `exitOnError`
+## `exitOnError`
 
 Our `exitOnError` method is very simple at the moment. It looks like this:
 
