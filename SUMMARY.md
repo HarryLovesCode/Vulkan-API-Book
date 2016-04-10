@@ -21,4 +21,5 @@
 * [Image Layouts](chap7/chap7.md)
 * [Image Views](chap8/chap8.md)
 * [Acquiring, Presenting, Cleaning Up](chap9/chap9.md)
+* Command Buffers and Command Pools
 
