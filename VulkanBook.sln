@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "chap2", "chap2\chap2.vcxproj", "{4D9D29F1-2C1E-4EEC-8F0E-D835E229E534}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "chap02", "chap02\chap02.vcxproj", "{4D9D29F1-2C1E-4EEC-8F0E-D835E229E534}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "chap3", "chap3\chap3.vcxproj", "{A7C084FC-F153-4593-8A62-5DDE94910172}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "chap03", "chap03\chap03.vcxproj", "{A7C084FC-F153-4593-8A62-5DDE94910172}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "chap4", "chap4\chap4.vcxproj", "{47E4C79C-8C7D-4560-98D8-B4BCBBC3DA3F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "chap04", "chap04\chap04.vcxproj", "{47E4C79C-8C7D-4560-98D8-B4BCBBC3DA3F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "chap5", "chap5\chap5.vcxproj", "{342EC729-2D76-46D1-A149-B7921783C5C1}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "chap05", "chap05\chap05.vcxproj", "{342EC729-2D76-46D1-A149-B7921783C5C1}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "chap6", "chap6\chap6.vcxproj", "{0E2C1177-83C3-4540-B67E-9822BEA30831}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "chap06", "chap06\chap06.vcxproj", "{0E2C1177-83C3-4540-B67E-9822BEA30831}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

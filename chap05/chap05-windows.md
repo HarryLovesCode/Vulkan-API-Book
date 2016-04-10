@@ -55,4 +55,4 @@ if (result != VK_SUCCESS) exitOnError("Failed to create VkSurfaceKHR.");
 
 ## Color Formats and Color Spaces
 
-Please go back to the [Chapter 5 landing page](./chap5.md) to read about determining the color formats and color spaces for the surface.
+Please go back to the [Chapter 5 landing page](./chap05.md) to read about determining the color formats and color spaces for the surface.

@@ -4,14 +4,15 @@ AC_PROG_CXX
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
  Makefile
- chap2/Makefile
- chap3/Makefile
- chap4/Makefile
- chap5/Makefile
- chap6/Makefile
- chap7/Makefile
- chap8/Makefile
- chap9/Makefile
+ chap02/Makefile
+ chap03/Makefile
+ chap04/Makefile
+ chap05/Makefile
+ chap06/Makefile
+ chap07/Makefile
+ chap08/Makefile
+ chap09/Makefile
+ chap10/Makefile
 ])
 AC_OUTPUT
 

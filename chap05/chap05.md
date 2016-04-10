@@ -80,8 +80,8 @@ These variables will be written to by our macros so we have the function pointer
 
 Now, please visit your platform (or all platforms) to get the specific code. You'll need this to create a surface.
 
-- [Windows](./chap5-windows.md)
-- [Linux](./chap5-linux.md)
+- [Windows](./chap05-windows.md)
+- [Linux](./chap05-linux.md)
 
 ## Checking Graphics / Present Support
 

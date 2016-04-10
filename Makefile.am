@@ -1,1 +1,1 @@
-SUBDIRS = chap2 chap3 chap4 chap5 chap6 chap7 chap8 chap9
+SUBDIRS = chap02 chap03 chap04 chap05 chap06 chap07 chap08 chap09 chap10

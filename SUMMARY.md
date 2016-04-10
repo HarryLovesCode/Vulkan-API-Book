@@ -5,21 +5,21 @@
    * Windows
    * Linux
    * Android
-* [Vulkan Instances](chap2/chap2.md)
-* [Physical Devices and Logical Devices](chap3/chap3.md)
-* [Cross-Platform Windows](chap4/chap4.md)
-   * [Windows](chap4/chap4-windows.md)
-   * [Linux](chap4/chap4-linux.md)
+* [Vulkan Instances](chap02/chap02.md)
+* [Physical Devices and Logical Devices](chap03/chap03.md)
+* [Cross-Platform Windows](chap04/chap04.md)
+   * [Windows](chap04/chap04-windows.md)
+   * [Linux](chap04/chap04-linux.md)
    * Android
    * GLFW
-* [Surfaces](chap5/chap5.md)
-   * [Windows](chap5/chap5-windows.md)
-   * [Linux](chap5/chap5-linux.md)
+* [Surfaces](chap05/chap05.md)
+   * [Windows](chap05/chap05-windows.md)
+   * [Linux](chap05/chap05-linux.md)
    * Android
    * GLFW
-* [Swapchains](chap6/chap6.md)
-* [Image Layouts](chap7/chap7.md)
-* [Image Views](chap8/chap8.md)
-* [Acquiring, Presenting, Cleaning Up](chap9/chap9.md)
+* [Swapchains](chap06/chap06.md)
+* [Image Layouts](chap07/chap07.md)
+* [Image Views](chap08/chap08.md)
+* [Acquiring, Presenting, Cleaning Up](chap09/chap09.md)
 * Command Buffers and Command Pools
 
