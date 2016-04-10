@@ -49,13 +49,13 @@ typedef struct VkApplicationInfo {
 } VkApplicationInfo;
 ```
 
-- `sType` - The type of this structure
-- `pNext` - `NULL` or a pointer to an extension-specific structure
-- `pApplicationName` - A pointer to a null-terminated UTF-8 string containing the name of the application
-- `applicationVersion` - An unsigned integer variable containing the developer-supplied
-- `pEngineName` - Pointer to a null-terminated UTF-8 string containing the name of the engine (if any) used to create the application
-- `engineVersion` - An unsigned integer variable containing the developer-supplied version number of the engine used to create the application
-- `apiVersion` -  The version of the Vulkan API that the application expects to have in order to run        ;
+- `sType` is the type of this structure.
+- `pNext` is `NULL` or a pointer to an extension-specific structure.
+- `pApplicationName` is a pointer to a null-terminated UTF-8 string containing the name of the application.
+- `applicationVersion` is an unsigned integer variable containing the developer-supplied version number of the application.
+- `pEngineName` is a pointer to a null-terminated UTF-8 string containing the name of the engine (if any) used to create the application.
+- `engineVersion` is an unsigned integer variable containing the developer-supplied version number of the engine used to create the application.
+- `apiVersion` is the version of the Vulkan API against which the application expects to run (encoded). If `apiVersion` is `0` the implementation must ignore it, otherwise if the implementation does not support the requested `apiVersion` it must return `VK_ERROR_INCOMPATIBLE_DRIVER`.
 
 Following the usage guidelines outlined in the specification, `VkApplicationInfo` usage would look something like this:
 
@@ -87,16 +87,14 @@ typedef struct VkInstanceCreateInfo {
 } VkInstanceCreateInfo;
 ```
 
-This is the documentation given for the fields:
-
-- `sType` - The type of this structure.
-- `pNext` - NULL or a pointer to an extension-specific structure.
-- `flags` - Reserved for future use.
-- `pApplicationInfo` - `NULL` or a pointer to an instance of `VkApplicationInfo`. If not `NULL`, this information helps implementations recognize behavior inherent to classes of applications.
-- `enabledLayerCount` - The number of global layers to enable.
-- `ppEnabledLayerNames` - A pointer to an array of enabledLayerCount null-terminated UTF-8 strings containing the names of layers to enable for the created instance.
-- `enabledExtensionCount` - The number of global extensions to enable.
-- `ppEnabledExtensionNames` - A pointer to an array of enabledExtensionCount null-terminated UTF-8 strings containing the names of extensions to enable.
+- `sType` is the type of this structure.
+- `pNext` is `NULL` or a pointer to an extension-specific structure.
+- `flags` is reserved for future use.
+- `pApplicationInfo` is `NULL` or a pointer to an instance of `VkApplicationInfo`. If not `NULL`, this information helps implementations recognize behavior inherent to classes of applications.
+- `enabledLayerCount` is the number of global layers to enable.
+- `ppEnabledLayerNames` is a pointer to an array of `enabledLayerCount` null-terminated UTF-8 strings containing the names of layers to enable for the created instance.
+- `enabledExtensionCount` is the number of global extensions to enable.
+- `ppEnabledExtensionNames` is a pointer to an array of `enabledExtensionCount` null-terminated UTF-8 strings containing the names of extensions to enable.
 
 Following the usage guidelines outlined in the specification, `VkInstanceCreateInfo` usage would look something like this:
 
@@ -140,13 +138,11 @@ VkResult vkCreateInstance(
   VkInstance*                                 pInstance);
 ```
 
-Let's look at the documentation for arguments:
+- `pCreateInfo` points to an instance of `VkInstanceCreateInfo` controlling creation of the instance.
+- `pAllocator` controls host memory allocation.
+- `pInstance` points a `VkInstance` handle in which the resulting instance is returned.
 
-- `pCreateInfo` - Must be a pointer to a valid `VkInstanceCreateInfo` structure.
-- `pAllocator` - If not NULL, must be a pointer to a valid `VkAllocationCallbacks` structure.
-- `pInstance` - Must be a pointer to a `VkInstance` handle.
-
-Notice this returns a `VkResult`. This value will tell us if the instance creation was successful or if it failed. Keep that information in the back of your head because we'll check the return type in a moment. Valid usage of `vkCreateInstance` would look like this:
+Notice this returns a `VkResult`. This value is used for many function calls in Vulkan to indicate failure during execution of the function body. In this case, the value will tell us if the instance creation was successful or if it failed. Valid usage of `vkCreateInstance` would look like this:
 
 ```cpp
 VkResult res = vkCreateInstance(&createInfo, NULL, &instance);

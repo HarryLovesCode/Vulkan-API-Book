@@ -8,17 +8,28 @@ You may remember a while back that when we created our instance, we enabled a fe
 
 ## Procedures
 
-Vulkan doesn't directly expose functions for all platforms. Thus, we'll have to query Vulkan for them at run-time. We'll be getting the function pointers at the instance level and device level using the `vkGetInstanceProcAddr` and `vkGetDeviceProcAddr` methods. You can find more information in the documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#vkGetInstanceProcAddr). The definitions look like:
+Vulkan doesn't directly expose functions for all platforms. Thus, we'll have to query Vulkan for them at run-time. We'll be getting the function pointers at the instance level and device level using the `vkGetInstanceProcAddr` and `vkGetDeviceProcAddr` methods. You can find more information in the documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#vkGetInstanceProcAddr) and [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#vkGetDeviceProcAddr) respectively. The definitions look like:
 
 ```cpp
 PFN_vkVoidFunction vkGetInstanceProcAddr(
   VkInstance  instance,
   const char* pName);
+```
 
+- `instance` is the instance that the function pointer will be compatible with.
+- `pName` is the name of the command to obtain.
+
+```cpp
 PFN_vkVoidFunction vkGetDeviceProcAddr(
   VkDevice    device,
   const char* pName);
 ```
+
+- `device` is the logical device that provides the function pointer.
+- `pName` is the name of any Vulkan command whose first parameter is one of
+  - `VkDevice`
+  - `VkQueue`
+  - `VkCommandBuffer`
 
 We can use two handy macros to do the heavy lifting for us:
 
@@ -38,7 +49,7 @@ We can use two handy macros to do the heavy lifting for us:
   }
 ```
 
-These are based on the macros from the GLFW Vulkan example [here](https://github.com/glfw/glfw/blob/master/tests/vulkan.c). The reason we're using macros is because it would be tedious to same process for every function pointer we want.
+These are based on the macros from the GLFW Vulkan example [here](https://github.com/glfw/glfw/blob/master/tests/vulkan.c). The reason we're using macros is because it would be tedious to repeat this for every time we want a function pointer.
 
 ## Using the Macros
 
@@ -85,7 +96,7 @@ Now, please visit your platform (or all platforms) to get the specific code. You
 
 ## Checking Graphics / Present Support
 
-In this section, we're going to find a queue that supports both graphics operations and presenting images. But first, we'll need to get the number of queues to store properties in. We'll be using `vkGetPhysicalDeviceQueueFamilyProperties` which you can find documented [here](https://www.khronos.org/registry/vulkan/specs/1.0/man/html/vkGetPhysicalDeviceQueueFamilyProperties.html). The definition looks like this:
+In this section, we're going to find a queue that supports both graphics operations and presenting images. But first, we'll need to get the number of queues to store properties in. We'll be using `vkGetPhysicalDeviceQueueFamilyProperties` which you can find documented [here](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#vkGetPhysicalDeviceQueueFamilyProperties). The definition looks like this:
 
 
 ```cpp
@@ -94,6 +105,11 @@ void vkGetPhysicalDeviceQueueFamilyProperties(
   uint32_t*                pQueueFamilyPropertyCount,
   VkQueueFamilyProperties* pQueueFamilyProperties);
 ```
+
+- `physicalDevice` is the handle to the physical device whose properties will be queried.
+- `pQueueFamilyPropertyCount` is a pointer to an integer related to the number of queue families available or queried.
+- `pQueueFamilyProperties` is either `NULL` or a pointer to an array of `VkQueueFamilyProperties` structures.
+
 
 Per usual, we'll call it with `NULL` as the last argument to get the number of queues before we allocate memory. Let's see how this method can be used:
 
@@ -114,7 +130,7 @@ Perfect! Now let's add a variable in our `VulkanExample` class called `queueInde
 uint32_t queueIndex;
 ```
 
-We'll make the default value `UINT32_MAX` so we can later check if we found any suitable queue. Next, we need to look for a device queue that allows for drawing images and presenting images like I mentioned before. You can use two different queues, but we'll discuss that in a later chapter. We can use the `fpGetPhysicalDeviceSurfaceSupportKHR` function pointer from earlier. The definition is the same as `vkGetPhysicalDeviceSurfaceSupportKHR` which looks like this:
+We'll make the default value `UINT32_MAX` so we can later check if we found any suitable queue. Next, we need to look for a device queue that allows for drawing images and presenting images like I mentioned before. You can use two different queues, but we'll discuss that in a later chapter. We can use the `fpGetPhysicalDeviceSurfaceSupportKHR` function pointer from earlier. The definition is the same as `vkGetPhysicalDeviceSurfaceSupportKHR` which can be found [here](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#vkGetPhysicalDeviceSurfaceSupportKHR) which looks like:
 
 ```cpp
 VkResult vkGetPhysicalDeviceSurfaceSupportKHR(
@@ -123,6 +139,12 @@ VkResult vkGetPhysicalDeviceSurfaceSupportKHR(
   VkSurfaceKHR surface,
   VkBool32* pSupported);
 ```
+
+- `physicalDevice` is the physical device.
+- `queueFamilyIndex` is the queue family.
+- `surface` is the surface.
+- `pSupported` is a pointer to a `VkBool32`, which is set to `VK_TRUE` to indicate support, and `VK_FALSE` otherwise.
+
 
 The usage would therefore look like this:
 
@@ -161,9 +183,9 @@ assert(queueIndex != UINT32_MAX);
 
 ## Color Formats and Color Spaces
 
-For rendering purposes, we'll need some information on the surface formats our device supports. Specifically, we're going to check right now for color support. Vulkan breaks up this into two categories: color formats and color spaces. Color formats can describe the number of components, size of components, compression types, etc. In contrast, color spaces tells the Vulkan implementation how to interpret that data. For example, if we are telling Vulkan we have an RGBA image with 8 bits for each component (`VK_FORMAT_B8G8R8A8_*`), it would need to understand what `0.0` and `1.0` mean. A color space describes the range of colors or gamut if you prefer.
+For rendering purposes, we'll need some information on the surface formats our device supports. Specifically, we're going to check right now for color support. Vulkan breaks up this into two categories: color formats and color spaces. Color formats can describe the number of components, size of components, compression types, etc. In contrast, color spaces tells the Vulkan implementation how to interpret that data. For example, if we are telling Vulkan we have an RGBA image, it would need to understand what `0` and `255` mean. A color space describes the range of colors or **gamut** if you prefer.
 
-A common and well supported color format in Vulkan is `VK_FORMAT_B8G8R8A8_UNORM`. You can find documentation on available formats [here](https://www.khronos.org/registry/vulkan/specs/1.0/man/html/VkFormat.html). Note, that page is a stub and lacks full documentation right now. We can use `fpGetPhysicalDeviceSurfaceFormatsKHR` to **directly** ask the device what formats it supports. You can find the documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0/refguide/Vulkan-1.0-web.pdf) on page 9. The definition is the same as `vkGetPhysicalDeviceSurfaceFormatsKHR` which looks like this:
+A common and well supported color format in Vulkan is `VK_FORMAT_B8G8R8A8_UNORM`. You can find documentation on available formats [here](https://www.khronos.org/registry/vulkan/specs/1.0/man/html/VkFormat.html). Note, that page is a stub and lacks full documentation right now. We can use `fpGetPhysicalDeviceSurfaceFormatsKHR` which has the definition is the same as `vkGetPhysicalDeviceSurfaceFormatsKHR`. Documentation can be found [here](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#vkGetPhysicalDeviceSurfaceFormatsKHR) and the definition looks like:
 
 ```cpp
 VkResult vkGetPhysicalDeviceSurfaceFormatsKHR(
@@ -173,32 +195,28 @@ VkResult vkGetPhysicalDeviceSurfaceFormatsKHR(
   VkSurfaceFormatKHR*  pSurfaceFormats);
 ```
 
-We will provide `NULL` as the last argument to get the number of supported formats. Valid usage would look like this:
+- `physicalDevice` is the physical device that will be associated with the swapchain to be created.
+- `surface` is the surface that will be associated with the swapchain.
+- `pSurfaceFormatCount` is a pointer to an integer related to the number of format pairs available or queried.
+- `pSurfaceFormats` is either `NULL` or a pointer to an array of `VkSurfaceFormatKHR` structures.
+
+Valid usage looks like this:
 
 ```cpp
 uint32_t formatCount = 0;
 result = fpGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface,
                                               &formatCount, NULL);
+assert(result == VK_SUCCESS);
+assert(formatCount >= 1);
 ```
 
-We should verify that we were successful and that the device supports at least one format:
-
-```cpp
-assert(result == VK_SUCCESS && formatCount >= 1);
-```
-
-Now we can get the actual formats:
+Now we can get the actual formats and verify success again:
 
 ```cpp
 std::vector<VkSurfaceFormatKHR> surfaceFormats(formatCount);
 result = fpGetPhysicalDeviceSurfaceFormatsKHR(
     physicalDevice, surface, &formatCount, surfaceFormats.data());
-```
-
-As you've seen in previous chapters, I prefer to verify success each time we call a method that returns a `VkResult`. We can make the same check as before:
-
-```cpp
-assert(result == VK_SUCCESS);
+  assert(result == VK_SUCCESS);
 ```
 
 Now that we've found the formats our device supports, we can go ahead and set them. Let's add two variables to our `VulkanExample` class:

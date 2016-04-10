@@ -1,10 +1,10 @@
 ## Linux
 
-We're going to be writing the Linux specific code for getting a surface in this section. Now, the code here does not exist in the specification. It is up to platforms like Linux to expose surface features on their own. For documentation, I recommend following the [Vulkan Quick Reference](https://www.khronos.org/files/vulkan10-reference-guide.pdf). You can find the platform specific WSI features on page 9.
+We're going to be writing the Linux specific code for getting a surface in this section. While this code may work on another operating system that uses the XCB library, I cannot guarantee it will.
 
 ### `VkXcbSurfaceCreateInfoKHR`
 
-Before we create a surface, we must specify information ahead of time like most Vulkan objects. You'll see in section **29.2.4** that the structure we'll be using is `VkXcbSurfaceCreateInfoKHR`. Here is the definition:
+Before we create a surface, we must specify information ahead of time like most Vulkan objects. We'll be using `VkXcbSurfaceCreateInfoKHR`. You can find documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#VkXcbSurfaceCreateInfoKHR) and the definition is below:
 
 ```cpp
 typedef struct VkXcbSurfaceCreateInfoKHR {
@@ -16,7 +16,13 @@ typedef struct VkXcbSurfaceCreateInfoKHR {
 } VkXcbSurfaceCreateInfoKHR;
 ```
 
-We should follow the valid usage for `sType`, `pNext`, and `flags` in other structures. That means `pNext = NULL` and `flags = 0`. We'll also grab our `windowInstance` and `window` from earlier. Here's what the code looks like:
+- `sType` is the type of this structure and must be `VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR`.
+- `pNext` is `NULL` or a pointer to an extension-specific structure.
+- `flags` is reserved for future use.
+- `connection` is a pointer to an `xcb_connection_t` to the X server.
+- `window` is the `xcb_window_t` for the X11 window to associate the surface with.
+
+Here's what the code looks like in use:
 
 ```cpp
 VkXcbSurfaceCreateInfoKHR surfaceCreateInfo = {};
@@ -29,7 +35,7 @@ surfaceCreateInfo.window = window;
 
 ### `vkCreateXcbSurfaceKHR`
 
-Now we can create the surface. Also in section **29.2.4** is the definition for `vkCreateXcbSurfaceKHR`. It looks like:
+Now we can create the surface. We'll be calling the `vkCreateXcbSurfaceKHR` method to do so. You can find documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#vkCreateXcbSurfaceKHR) and the definition is below:
 
 ```cpp
 VkResult vkCreateXcbSurfaceKHR(
@@ -39,17 +45,17 @@ VkResult vkCreateXcbSurfaceKHR(
   VkSurfaceKHR*                     pSurface);
 ```
 
-Again, we should follow the usage we've seen before for `pAllocator`. This would mean we pass in `NULL` to the function as the third argument. Let's look at the code:
+- `instance` is the instance to associate the surface with.
+- `pCreateInfo` is a pointer to an instance of the `VkXcbSurfaceCreateInfoKHR` structure containing parameters affecting the creation of the surface object.
+- `pAllocator` is the allocator used for host memory allocated for the surface object when there is no more specific allocator available.
+- `pSurface` points to a `VkSurfaceKHR` handle in which the created surface object is returned.
+
+Let's look at the code and verify we were successful:
 
 ```cpp
 VkResult result =
     vkCreateXcbSurfaceKHR(instance, &surfaceCreateInfo, NULL, &surface);
+assert(result == VK_SUCCESS);
 ```
 
-Of course, we'll also need to verify our surface creation was successful using:
-
-```cpp
-if (result != VK_SUCCESS) exitOnError("Failed to create VkSurfaceKHR.");
-```
-
-Please go back to the [Chapter 5 landing page](./chap05.md) to read about determining the color formats and color spaces for the surface.
+Please go back to the [Chapter 5 page](./chap05.md) to read about determining the color formats and color spaces for the surface.
