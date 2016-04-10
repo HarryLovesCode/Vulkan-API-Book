@@ -155,10 +155,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     case WM_PAINT:
       ValidateRect(hWnd, NULL);
       break;
-    default:
-      return DefWindowProc(hWnd, message, wParam, lParam);
-      break;
   }
+
+  return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
 void VulkanExample::initWindow(HINSTANCE hInstance) {
