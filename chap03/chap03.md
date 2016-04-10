@@ -6,9 +6,11 @@ Once we have created a Vulkan instance, we can use two objects to interact with 
 
 A `VkPhysicalDevice` is a data type that we will use to represent each piece of hardware. There's not much to say here other than we will pass a pointer to an array to the implementation. The implementation will then write handles for each physical device in the system to said array. You can find more information on physical devices [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#devsandqueues-physical-device-enumeration).
 
+<!--TODO: Add the definition and explanation -->
+
 ## `vkEnumeratePhysicalDevices`
 
-To get a list of all the physical devices in the system, we can call use this method. You can find more information [in the same section](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#devsandqueues-physical-device-enumeration) along with the definition itself. The definition looks like:
+To get a list of all the physical devices in the system, we can call use this method. You can find more information [in the same section](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#devsandqueues-physical-device-enumeration). The definition looks like:
 
 ```cpp
 VkResult vkEnumeratePhysicalDevices(
@@ -21,30 +23,37 @@ VkResult vkEnumeratePhysicalDevices(
   VkPhysicalDevice*                           pPhysicalDevices);
 ```
 
-Before we create a `std::vector` to house the physical devices, we need to figure out the count. We can do this by calling `vkEnumeratePhysicalDevices` with a value of `NULL` for `pPhysicalDevices`.
+The arguments are documented as follows:
+
+- `instance` - A handle to a Vulkan instance previously created with `vkCreateInstance`.
+- `pPhysicalDeviceCount` - A pointer to an integer related to the number of physical devices available or queried, as described below.
+- `pPhysicalDevices` - `NULL` or a pointer to an array of `VkPhysicalDevice` structures.
+
+Before we create allocate memory to store the physical devices, we need to figure out how many there are. We can do this by calling `vkEnumeratePhysicalDevices` with a value of `NULL` for `pPhysicalDevices`.
 
 ```cpp
 uint32_t deviceCount = 0;
 VkResult result = vkEnumeratePhysicalDevices(instance, &deviceCount, NULL);
 ```
 
-We should handle two possible issues. First, `result != VK_SUCCESS` means our call to `vkEnumeratePhysicalDevices` failed. Second, `deviceCount < 1` means we found no devices that support Vulkan.
+We should handle two possible issues:
+
+- Our call to `vkEnumeratePhysicalDevices` failed
+- No compatible Vulkan devices were found
+
+We can do this with the following code:
 
 ```cpp
 assert(result == VK_SUCCESS);
 assert(deviceCount >= 1);
 ```
 
-Following the usage guidelines outlined in the specification, a call to `vkEnumeratePhysicalDevices`would look like this:
+Following the usage guidelines outlined in the specification, a call to `vkEnumeratePhysicalDevices` with error checking would look like this:
 
 ```cpp
 std::vector<VkPhysicalDevice> physicalDevices(deviceCount);
 result = vkEnumeratePhysicalDevices(instance, &deviceCount, physicalDevices.data());
-```
 
-We should verify no error occurred like before:
-
-```cpp
 assert(result == VK_SUCCESS);
 ```
 
@@ -54,39 +63,31 @@ assert(result == VK_SUCCESS);
 
 ```cpp
 typedef struct VkPhysicalDeviceProperties {
-  // The version of Vulkan supported by the device (encoded)
   uint32_t                            apiVersion;
-  // The vendor-specified version of the driver
   uint32_t                            driverVersion;
-  // A unique identifier for the physical device vendor
   uint32_t                            vendorID;
-  // A unique identifier for the physical device among devices
-  // available from the vendor.
   uint32_t                            deviceID;
-  // A VkPhysicalDeviceType specifying the type of device
   VkPhysicalDeviceType                deviceType;
-  // A null-terminated UTF-8 string containing the name of the device
   char                                deviceName[VK_MAX_PHYSICAL_DEVICE_NAME_SIZE];
-  // An array of size VK_UUID_SIZE, containing 8-bit values that
-  // represent a universally unique identifier for the device
   uint8_t                             pipelineCacheUUID[VK_UUID_SIZE];
-  // The VkPhysicalDeviceLimits structure which specifies
-  // device-specific limits of the physical device.
   VkPhysicalDeviceLimits              limits;
-  // The VkPhysicalDeviceSparseProperties structure which specifies
-  // various sparse related properties of the physical device
   VkPhysicalDeviceSparseProperties    sparseProperties;
 } VkPhysicalDeviceProperties;
 ```
 
-In my mind, there are a few important fields that we get back.
+Here is the documentation for each field we get back:
 
-1. `apiVersion` - This is encoded, but we can use three macros to get this in a human readable format.
-2. `driverVersion` - Somewhat useful. Had an identifier for the driver, but not human readable
-3. `deviceName` - Usually the model of the GPU such as `GTX 780`
-4. `deviceType` - Tells us if we're using an integrated GPU, discrete GPU, virtual GPU, CPU, or something else.
+- `apiVersion` -  The version of Vulkan supported by the device (encoded).
+- `driverVersion` - The vendor-specified version of the driver.
+- `vendorID` - A unique identifier for the physical device vendor.
+- `deviceID` - A unique identifier for the physical device among devices available from the vendor.
+- `deviceType` - A `VkPhysicalDeviceType` specifying the type of device.
+- `deviceName` - A null-terminated UTF-8 string containing the name of the device.
+- `pipelineCacheUUID` - An array of size VK_UUID_SIZE, containing 8-bit values that represent a universally unique identifier for the device.
+- `limits` - The `VkPhysicalDeviceLimits` structure which specifies device-specific limits of the physical device.
+- `sparseProperties` - The `VkPhysicalDeviceSparseProperties` structure which specifies various sparse related properties of the physical device.
 
-For reference, the definition for `VkPhysicalDeviceType` looks like this:
+And, just for reference, the definition for `VkPhysicalDeviceType` looks like this:
 
 ```cpp
 typedef enum VkPhysicalDeviceType {
@@ -97,6 +98,8 @@ typedef enum VkPhysicalDeviceType {
   VK_PHYSICAL_DEVICE_TYPE_CPU = 4,
 } VkPhysicalDeviceType;
 ```
+
+This may be useful if you are trying to detect if you have an integrated GPU versus a discrete GPU.
 
 ## `vkGetPhysicalDeviceProperties`
 
@@ -111,18 +114,19 @@ void vkGetPhysicalDeviceProperties(
   VkPhysicalDeviceProperties*                 pProperties);
 ```
 
-Following the usage guidelines outlined in the specification, a call to `vkGetPhysicalDeviceProperties`would look like this:
+- `physicalDevice` - The handle to the physical device whose properties will be queried.
+- `pProperties` - Points to an instance of the `VkPhysicalDeviceProperties` structure, that will be filled with returned information.
+
+Following the usage guidelines outlined in the specification, a call to `vkGetPhysicalDeviceProperties()` would look like this:
 
 ```cpp
 VkPhysicalDeviceProperties physicalProperties = {};
 
-for (uint32_t i = 0; i < deviceCount; i++) {
+for (uint32_t i = 0; i < deviceCount; i++)
   vkGetPhysicalDeviceProperties(physicalDevices[i], & physicalProperties);
-  //Now do something with the properties:
-}
 ```
 
-We can output some useful parts of the information using this piece of code:
+If we want, we can output some useful parts of the information using this piece of code in the loop above:
 
 ```cpp
 fprintf(stdout, "Device Name:    %s\n", physicalProperties.deviceName);
@@ -130,15 +134,13 @@ fprintf(stdout, "Device Type:    %d\n", physicalProperties.deviceType);
 fprintf(stdout, "Driver Version: %d\n", physicalProperties.driverVersion);
 ```
 
-As I mentioned before, the API version is encoded. There are three macros that will help make it human readable:
+As I mentioned before, the API version is encoded. So if we want, we can use three macros that will help make it human readable:
 
-```cpp
-#define VK_VERSION_MAJOR(version) ((uint32_t)(version) >> 22)
-#define VK_VERSION_MINOR(version) (((uint32_t)(version) >> 12) & 0x3ff)
-#define VK_VERSION_PATCH(version) ((uint32_t)(version) & 0xfff)
-```
+- `VK_VERSION_MAJOR(version)`
+- `VK_VERSION_MINOR(version)`
+- `VK_VERSION_PATCH(version)`
 
-Thus, to output the API version, you can use this:
+So,, to output the API version, you can use this:
 
 ```cpp
 fprintf(stdout, "API Version:    %d.%d.%d\n",
@@ -146,8 +148,6 @@ fprintf(stdout, "API Version:    %d.%d.%d\n",
         VK_VERSION_MINOR(physicalProperties.apiVersion),
         VK_VERSION_PATCH(physicalProperties.apiVersion));
 ```
-
-For now we're just going to use one physical device. We'll always default to the first in the system.
 
 ## `VkDeviceQueueCreateInfo`
 

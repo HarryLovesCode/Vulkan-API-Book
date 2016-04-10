@@ -1,6 +1,6 @@
 # Creating an Instance
 
-Before we are able to start using Vulkan, we **must** first create an instance. A `VkInstance` is an object that contains all the information the implementation needs to work. Unlike OpenGL, Vulkan does not have a global state. Because of this, we must instead store our states in a `VkInstance` object. In this chapter, we'll be beginning a class we'll use for the rest of the book. Here is what it the skeleton code looks like:
+Before we are able to start using Vulkan, we must first create an instance. A `VkInstance` is an object that contains all the information the implementation needs to work. Unlike OpenGL, Vulkan does not have a global state. Because of this, we must instead store our states in this object. In this chapter, we'll be beginning a class we'll use for the rest of the book. Here is what it the skeleton code looks like:
 
 ```cpp
 #ifndef VULKAN_EXAMPLE_HPP
@@ -39,27 +39,23 @@ This object, while not required, is pretty standard in most applications. You ca
 
 ```cpp
 typedef struct VkApplicationInfo {
-  // The type of this structure
   VkStructureType    sType;
-  // NULL or a pointer to an extension-specific structure
   const void*        pNext;
-  // A pointer to a null-terminated UTF-8 string containing the
-  // name of the application
   const char*        pApplicationName;
-  // An unsigned integer variable containing the developer-supplied
-  // version number of the application
   uint32_t           applicationVersion;
-  // Pointer to a null-terminated UTF-8 string containing the name
-  // of the engine (if any) used to create the application
   const char*        pEngineName;
-  // An unsigned integer variable containing the developer-supplied
-  // version number of the engine used to create the application
   uint32_t           engineVersion;
-  // The version of the Vulkan API that the application expects to have
-  // in order to run
   uint32_t           apiVersion;
 } VkApplicationInfo;
 ```
+
+- `sType` - The type of this structure
+- `pNext` - `NULL` or a pointer to an extension-specific structure
+- `pApplicationName` - A pointer to a null-terminated UTF-8 string containing the name of the application
+- `applicationVersion` - An unsigned integer variable containing the developer-supplied
+- `pEngineName` - Pointer to a null-terminated UTF-8 string containing the name of the engine (if any) used to create the application
+- `engineVersion` - An unsigned integer variable containing the developer-supplied version number of the engine used to create the application
+- `apiVersion` -  The version of the Vulkan API that the application expects to have in order to run        ;
 
 Following the usage guidelines outlined in the specification, `VkApplicationInfo` usage would look something like this:
 
@@ -72,15 +68,7 @@ appInfo.pEngineName = engineName;
 appInfo.apiVersion = VK_MAKE_VERSION(1, 0, 3);
 ```
 
-You'll notice that for `apiVersion`, I am using `VK_MAKE_VERSION` to set the API version to `1.0.3`. The reason I'm choosing this version is because it's the lowest common version between my devices. Here is the layout of what version my devices support:
-
-|                  	| Intel 6100 iGPU 	| Nvidia GT755m   	| Nvidia GTX 780  	|
-|-------------------|-------------------|-------------------|-------------------|
-| Vulkan Version   	| 1.0.5           	| 1.0.8           	| 1.0.5           	|
-| Operating System 	| Fedora Linux     	| Windows 10      	| Arch Linux      	|
-| Driver           	| `mesa`          	| `nvidia-364.91` 	| `nvidia-364.12` 	|
-
-We'll see later that if the version we try to get is unsupported, we'll get an error (`VK_ERROR_INCOMPATIBLE_DRIVER`). We'll check for this error later in this chapter.
+You'll notice that for `apiVersion`, I am using `VK_MAKE_VERSION`. This allows the developer to specify a targeted Vulkan version. We'll see later that if the version we try to get is unsupported, we'll get an error called `VK_ERROR_INCOMPATIBLE_DRIVER`.
 
 ## `VkInstanceCreateInfo`
 
@@ -88,28 +76,27 @@ This object, **is** required. You can find it documented [here](https://www.khro
 
 ```cpp
 typedef struct VkInstanceCreateInfo {
-  // The type of this structure
   VkStructureType             sType;
-  // NULL or a pointer to an extension-specific structure
   const void*                 pNext;
-  // Reserved for future use.
   VkInstanceCreateFlags       flags;
-  // NULL or a pointer to an instance of VkApplicationInfo. If not NULL, this
-  // information helps implementations recognize behavior inherent to classes
-  // of applications.
   const VkApplicationInfo*    pApplicationInfo;
-  // The number of global layers to enable
   uint32_t                    enabledLayerCount;
-  // A pointer to an array of enabledLayerCount null-terminated UTF-8 strings
-  // containing the names of layers to enable for the created instance
   const char* const*          ppEnabledLayerNames;
-  // The number of global extensions to enable
   uint32_t                    enabledExtensionCount;
-  // A pointer to an array of enabledExtensionCount null-terminated UTF-8
-  // strings containing the names of extensions to enable.
   const char* const*          ppEnabledExtensionNames;
 } VkInstanceCreateInfo;
 ```
+
+This is the documentation given for the fields:
+
+- `sType` - The type of this structure.
+- `pNext` - NULL or a pointer to an extension-specific structure.
+- `flags` - Reserved for future use.
+- `pApplicationInfo` - `NULL` or a pointer to an instance of `VkApplicationInfo`. If not `NULL`, this information helps implementations recognize behavior inherent to classes of applications.
+- `enabledLayerCount` - The number of global layers to enable.
+- `ppEnabledLayerNames` - A pointer to an array of enabledLayerCount null-terminated UTF-8 strings containing the names of layers to enable for the created instance.
+- `enabledExtensionCount` - The number of global extensions to enable.
+- `ppEnabledExtensionNames` - A pointer to an array of enabledExtensionCount null-terminated UTF-8 strings containing the names of extensions to enable.
 
 Following the usage guidelines outlined in the specification, `VkInstanceCreateInfo` usage would look something like this:
 
@@ -148,13 +135,16 @@ Finally we're ready to create our instance. You can find the documentation for `
 
 ```cpp
 VkResult vkCreateInstance(
-  // Must be a pointer to a valid VkInstanceCreateInfo structure
   const VkInstanceCreateInfo*                 pCreateInfo,
-  // If not NULL, must be a pointer to a valid VkAllocationCallbacks structure
   const VkAllocationCallbacks*                pAllocator,
-  // Must be a pointer to a VkInstance handle
   VkInstance*                                 pInstance);
 ```
+
+Let's look at the documentation for arguments:
+
+- `pCreateInfo` - Must be a pointer to a valid `VkInstanceCreateInfo` structure.
+- `pAllocator` - If not NULL, must be a pointer to a valid `VkAllocationCallbacks` structure.
+- `pInstance` - Must be a pointer to a `VkInstance` handle.
 
 Notice this returns a `VkResult`. This value will tell us if the instance creation was successful or if it failed. Keep that information in the back of your head because we'll check the return type in a moment. Valid usage of `vkCreateInstance` would look like this:
 
@@ -162,7 +152,12 @@ Notice this returns a `VkResult`. This value will tell us if the instance creati
 VkResult res = vkCreateInstance(&createInfo, NULL, &instance);
 ```
 
-You'll see that `instance` was defined in our skeleton code we began with. We should of course check if the `VkResult` is an error. We can do this with the following code:
+We should check:
+
+- Is our driver compatible?
+- Was our call to `vkCreateInstance()` succcessful?
+
+We can do this with the following code:
 
 ```cpp
 if (res == VK_ERROR_INCOMPATIBLE_DRIVER) {
@@ -178,7 +173,9 @@ if (res == VK_ERROR_INCOMPATIBLE_DRIVER) {
 }
 ```
 
-Where our `exitOnError` method looks like this:
+# `exitOnError`
+
+Our `exitOnError` method is very simple at the moment. It looks like this:
 
 ```cpp
 void VulkanExample::exitOnError(const char* msg) {
@@ -186,6 +183,8 @@ void VulkanExample::exitOnError(const char* msg) {
   exit(EXIT_FAILURE);
 }
 ```
+
+We'll make some minor changes to that when we start working with windows.
 
 ## Destructor
 
