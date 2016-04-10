@@ -1,4 +1,4 @@
-# `VkImageViewCreateInfo`
+# Image Views
 
 For this chapter, we'll be back in our `initSwapchain` method. We'll start with a `for` loop where we will be setting image layouts and creating image views. It will look like this:
 
@@ -7,6 +7,8 @@ for (uint32_t i = 0; i < imageCount; i++) {
   // We'll be filling this out
 }
 ```
+
+## `VkImageViewCreateInfo`
 
 Now, in Vulkan, we don't directly access images via shaders for reading and writing. We make use of image views which represent subresources of the images and their metadata to do the same. You can find documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0/man/html/VkImageViewCreateInfo.html) and the definition is included below:
 
@@ -59,7 +61,7 @@ setImageLayout(cmdBuffer, buffers[i].image, VK_IMAGE_ASPECT_COLOR_BIT,
 imageCreateInfo.image = buffers[i].image;
 ```
 
-# `vkCreateImageView`
+## `vkCreateImageView`
 
 To create our image view, we simply call `vkCreateImageView`. You can find documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0/man/html/vkCreateImageView.html) and the definition is included below:
 
@@ -84,7 +86,7 @@ result =
 assert(result == VK_SUCCESS);
 ```
 
-# `VkFramebufferCreateInfo`
+## `VkFramebufferCreateInfo`
 
 We're going to be creating framebuffers for every image in the swapchain. Thus, we'll continue writing the body of our `for` loop. Like most types in Vulkan, we'll need to create an info structure before we can create a framebuffer. This will be `VkFramebufferCreateInfo`. You can find the documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0/man/html/VkFramebufferCreateInfo.html) and the definition below:
 
@@ -116,7 +118,7 @@ fbCreateInfo.height = swapchainExtent.height;
 fbCreateInfo.layers = 1;
 ```
 
-# `vkCreateFramebuffer`
+## `vkCreateFramebuffer`
 
 Now we can create each framebuffer. We'll call `vkCreateFramebuffer`. You can find more information [here](https://www.khronos.org/registry/vulkan/specs/1.0/man/html/vkCreateFramebuffer.html) and the definition is included below:
 

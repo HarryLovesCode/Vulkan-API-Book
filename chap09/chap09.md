@@ -6,7 +6,7 @@ For this chapter, we'll be focusing on:
 - Presenting images
 - Cleaning up when we're done with the swapchain
 
-# `fpAcquireNextImageKHR`
+## `fpAcquireNextImageKHR`
 
 For this section, we'll be writing a small helper method. The definition looks like this:
 
@@ -44,7 +44,7 @@ VkResult result =
 assert(result == VK_SUCCESS);
 ```
 
-# `swapchainPresent`
+## `swapchainPresent`
 
 For this section and the next, we'll be writing the body of this method:
 
@@ -99,14 +99,14 @@ presentInfo.pSwapchains = &swapchain;
 presentInfo.pImageIndices = &buffer;
 ```
 
-# `fpQueuePresentKHR`
+## `fpQueuePresentKHR`
 
 As the last part of the `swapchainPresent` method, we actually get to present! We'll be using the function pointer from earlier called `fpQueuePresentKHR`. The documentation is [here](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#vkQueuePresentKHR) and the definition is the same as:
 
 ```cpp
 VkResult vkQueuePresentKHR(
   // A queue that is capable of presentation to the target
-  // surface’s platform on the same device as the image’s 
+  // surface’s platform on the same device as the image’s
   // swapchain.
   VkQueue                 queue,
   // A pointer to an instance of the VkPresentInfoKHR structure
@@ -114,7 +114,7 @@ VkResult vkQueuePresentKHR(
   const VkPresentInfoKHR* pPresentInfo);
 ```
 
-# Cleaning Up
+## Cleaning Up
 
 For our new destructor, we will:
 
