@@ -23,5 +23,4 @@
 * [Acquiring, Presenting, Cleaning Up](chap9/chap9.md)
 * Buffers
 * Shaders
-* Descriptor Pools and Pipelines
 
