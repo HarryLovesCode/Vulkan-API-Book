@@ -22,5 +22,4 @@
 * [Image Views](chap8/chap8.md)
 * [Acquiring, Presenting, Cleaning Up](chap9/chap9.md)
 * Buffers
-* Shaders
 
