@@ -3,8 +3,6 @@
 
 #include <cassert>
 #include <stdio.h>
-#include <stdlib.h>
-#include <cstring>
 #include <vector>
 
 #include <vulkan/vulkan.h>

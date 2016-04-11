@@ -2,8 +2,6 @@
 #define VULKAN_EXAMPLE_HPP
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <vector>
 
 #include <vulkan/vulkan.h>

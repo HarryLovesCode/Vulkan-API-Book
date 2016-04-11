@@ -10,7 +10,7 @@ A `VkPhysicalDevice` is a data type that we will use to represent each piece of 
 
 ## `vkEnumeratePhysicalDevices`
 
-To get a list of all the physical devices in the system, we can call use this method.
+To get the handles of all the physical devices in the system, we can call use `vkEnumeratePhysicalDevices`. We will call it twice. First, we'll pass in `NULL` as the last parameter. This will allow us to get `pPhysicalDeviceCount` out by passing in the address to a variable for the second argument. After that, we can allocate the memory necessary to store the `pPhysicalDevices` and call it with that variable as the last argument.
 
 **Definition for `vkEnumeratePhysicalDevices`**:
 

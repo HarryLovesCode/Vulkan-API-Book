@@ -106,6 +106,10 @@ Now, please visit your platform (or all platforms) to get the specific code. You
 - [Windows](./chap05-windows.md)
 - [Linux](./chap05-linux.md)
 
+## Queues
+
+In Vulkan, we have a concept called command buffers. We'll get to this later, but for now, all you need to know is they make use of queues for executing operations. Queues are specific in the operations they support. Because we'll be rendering a 3D scene, we'll be looking to use a queue that supports graphics operations. And, because we want to display the images, we'll need to verify we have presentation support.
+
 ## Checking Graphics / Present Support
 
 In this section, we're going to find a queue that supports both graphics operations and presenting images. But first, we'll need to get the number of queues to store properties in. We'll be using `vkGetPhysicalDeviceQueueFamilyProperties`.
@@ -126,7 +130,6 @@ void vkGetPhysicalDeviceQueueFamilyProperties(
 - `pQueueFamilyProperties` is either `NULL` or a pointer to an array of `VkQueueFamilyProperties` structures.
 
 **Usage for `vkGetPhysicalDeviceQueueFamilyProperties`**:
-
 
 Per usual, we'll call it with `NULL` as the last argument to get the number of queues before we allocate memory.
 
