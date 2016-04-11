@@ -1,6 +1,6 @@
 ## Creating a Window on Microsoft Windows
 
-In order to create a window, we're going to be using platform specific code. Please note that this tutorial is for Windows **only**. None of this will apply to Linux, Android, GLFW, etc.
+In order to create a window, we're going to be using platform specific code. Please note that this tutorial is for Windows **only**. None of this will apply to Linux, Android, GLFW, etc. I'll make the warning ahead of time: this chapter makes use of a lot of functions. Their definitions are not super relevant to you as a Vulkan developer because this will be written once.
 
 ### Including Headers
 
@@ -14,20 +14,31 @@ If you're targeting Linux as well, you should surround both by the `#if defined(
 
 ### Setting Up a Console Window
 
-Because we're now switching from a **Windows Console Application** to a **Windows Application**, we'll need to make sure we have a console to view the output of `stdout` and `stderr`. In addition, because we're exiting right after we encounter an error, we should:
+Because we're now switching from a **Windows Console Application** to a **Windows Application**, we'll need to make sure we have a console to view the output of `stdout` and `stderr`. Also, because we're exiting right after we encounter an error, we should:
 
 - Show a message box
 - Wait for user input (keypress)
 - Close after the user has acknowledged the error
 
-We'll be using four methods to do this work:
+We'll be using four methods to do this work.
+
+**Definition for `AllocConsole`**:
 
 ```cpp
 BOOL WINAPI AllocConsole(void);
 ```
 
-- [Documentation](https://goo.gl/8k36tq)
+**[Documentation](https://goo.gl/8k36tq) for `AllocConsole`**:
+
 - This function takes no arguments
+
+**Usage for `AllocConsole`**:
+
+```cpp
+AllocConsole();
+```
+
+**Definition for `AttachConsole`**:
 
 ```cpp
 BOOL WINAPI AttachConsole(
@@ -35,8 +46,17 @@ BOOL WINAPI AttachConsole(
 );
 ```
 
-- [Documentation](https://goo.gl/EeSrhh)
+**[Documentation](https://goo.gl/EeSrhh) for `AttachConsole`**:
+
 - `dwProcessId` is the identifier of the process whose console is to be used.
+
+**Usage for `AttachConsole`**:
+
+```cpp
+AttachConsole(GetCurrentProcessId());
+```
+
+**Definition for `freopen`**:
 
 ```cpp
 FILE * freopen (
@@ -45,16 +65,24 @@ FILE * freopen (
   FILE * stream );
 ```
 
-- [Documentation](http://www.cplusplus.com/reference/cstdio/freopen/)
+**[Documentation](http://www.cplusplus.com/reference/cstdio/freopen/) for `freopen`**:
+
 - `fileName` is a C string containing the name of the file to be opened.
 - `mode` is a C string containing a file access mode. It can be: 
   - `"r"`
   - `"w"`
   - `"a"`
-  - `"r+"`
-  - `"w+"`
-  - `"a+"`
+  - etc.
 - `stream` is a pointer to a `FILE` object that identifies the stream to be reopened.
+
+**Usage for `freopen`**:
+
+```cpp
+freopen("CON", "w", stdout);
+freopen("CON", "w", stderr);
+```
+
+**Definition for `SetConsoleTitle`**:
 
 ```cpp
 BOOL WINAPI SetConsoleTitle(
@@ -62,8 +90,15 @@ BOOL WINAPI SetConsoleTitle(
 );
 ```
 
-- [Documentation](https://goo.gl/HAIfMd)
+**[Documentation](https://goo.gl/HAIfMd) for `SetConsoleTitle`**:
+
 - `lpConsoleTitle` is the string to be displayed in the title bar of the console window. The total size must be less than 64K.
+
+**Usage for `SetConsoleTitle`**:
+
+```cpp
+SetConsoleTitle(TEXT(applicationName));
+```
 
 If you put these methods together you can:
 
@@ -72,17 +107,9 @@ If you put these methods together you can:
 - Redirect `stdout` and `stderr` to said console
 - Set the title of the console window
 
-Let's look at the code:
+Now, let's modify our `exitOnError` method to show a error message box. We'll need to use the `MessageBox` method.
 
-```cpp
-AllocConsole();
-AttachConsole(GetCurrentProcessId());
-freopen("CON", "w", stdout);
-freopen("CON", "w", stderr);
-SetConsoleTitle(TEXT(applicationName));
-```
-
-Now, let's modify our `exitOnError` method to show a error message box. We'll need to use the `MessageBox` method:
+**Definition for `MessageBox`**:
 
 ```cpp
 int WINAPI MessageBox(
@@ -93,11 +120,14 @@ int WINAPI MessageBox(
 );
 ```
 
-- [Documentation](https://goo.gl/7tAVnv)
+**[Documentation](https://goo.gl/7tAVnv) for `MessageBox`**:
+
 - `hWnd` is a handle to the owner window of the message box to be created. If this parameter is `NULL`, the message box has no owner window.
 - `lpText` is the message to be displayed. If the string consists of more than one line, you can separate the lines using a carriage return and/or linefeed character between each line.
 - `lpCaption` is the dialog box title. If this parameter is `NULL`, the default title is "Error".
 - `uType` is the contents and behavior of the dialog box. This parameter can be a combination of flags.
+
+**Usage for `MessageBox`**:
 
 ```cpp
 MessageBox(NULL, msg, applicationName, MB_ICONERROR);
@@ -121,18 +151,9 @@ In this section we'll be writing the body this method:
 void createWindow(HINSTANCE hInstance) {}
 ```
 
-Don't worry about `hInstance` for now. It is simply passed from the `WinMain` method we'll write later on. To setup our window, we'll need to register it with Windows. You can find the documentation for the `RegisterClassEx` method [here](https://goo.gl/m3WViB). The definition looks like this:
+Don't worry about `hInstance` for now. It is passed from the `WinMain` method we'll write later on. To setup our window, we'll need to register it with Windows, but first, we need to create a `WNDCLASSEX` object to pass during registration.
 
 ```cpp
-ATOM WINAPI RegisterClassEx(
-  _In_ const WNDCLASSEX *lpwcx
-);
-```
-
-As you see, we'll need to call it with a `WNDCLASSEX` object. You can find the documentation [here](https://goo.gl/1M92FX). The definition and valid usage look like this:
-
-```cpp
-// Definition
 typedef struct WNDCLASSEX {
   UINT      cbSize;
   UINT      style;
@@ -147,8 +168,26 @@ typedef struct WNDCLASSEX {
   LPCTSTR   lpszClassName;
   HICON     hIconSm;
 } WNDCLASSEX, *PWNDCLASSEX;
+```
 
-// Usage
+**[Documentation](https://goo.gl/1M92FX) for `WNDCLASSEX`**:
+
+- `cbSize` is the size, in bytes, of this structure. Set this member to `sizeof(WNDCLASSEX)`. Be sure to set this member before calling the `GetClassInfoEx` function.
+- `style` is the class style(s). This member can be any combination of the Class Styles.
+- `lpfnWndProc` is a pointer to the window procedure. You must use the `CallWindowProc` function to call the window procedure.
+- `cbClsExtra` is the number of extra bytes to allocate following the window-class structure.
+- `cbWndExtra` is the number of extra bytes to allocate following the window instance.
+- `hInstance` is a handle to the instance that contains the window procedure for the class.
+- `hIcon` is a handle to the class icon. This member must be a handle to an icon resource. If this member is `NULL`, the system provides a default icon.
+- `hCursor` is a handle to the class cursor.
+- `hbrBackground` A handle to the class background brush.
+- `lpszMenuName` is a pointer to a null-terminated character string that specifies the resource name of the class menu, as the name appears in the resource file. If you use an integer to identify the menu, use the `MAKEINTRESOURCE` macro.
+- `lpszClassName` is a pointer to a null-terminated string or is an atom.
+- `hIconSm` is a handle to a small icon that is associated with the window class.
+
+**Usage for `WNDCLASSEX`**:
+
+```cpp
 WNDCLASSEX wcex;
 
 wcex.cbSize = sizeof(WNDCLASSEX);
@@ -165,10 +204,26 @@ wcex.lpszClassName = applicationName;
 wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
 ```
 
-As I said, I'm not going to go too much into detail on what each field means so we'll move on to registering the window. Calling `RegisterClassEx` returns `NULL` upon failure so we should make sure we check for that.
+Now, we can make a call to `RegisterClassEx` to get Windowss to register the Window class.
+
+**Definition for `RegisterClassEx`**:
 
 ```cpp
-if (!RegisterClassEx(&wcex))
+ATOM WINAPI RegisterClassEx(
+  _In_ const WNDCLASSEX *lpwcx
+);
+```
+
+**[Documentation](https://goo.gl/m3WViB) for `RegisterClassEx`**:
+
+- `lpwcx` is a pointer to a `WNDCLASSEX` structure. You must fill the structure with the appropriate class attributes before passing it to the function.
+
+**Usage for `RegisterClassEx`**:
+
+Calling `RegisterClassEx` returns `NULL` upon failure so we should make sure we check for that.
+
+```cpp
+if (!RegisterClassEx(&wcex)) 
   exitOnError("Failed to register window");
 ```
 
@@ -189,7 +244,7 @@ $$W_{left} = S_{width} / 2 - W_{width} / 2$$
 
 $$W_{top} = S_{height} / 2 - W_{height} / 2$$
 
-To get all of this information and compute the window's left and top positions, we can write the following code:
+To get this information and compute the window's left and top positions, we can write the following code:
 
 ```cpp
 int screenWidth = GetSystemMetrics(SM_CXSCREEN);
@@ -198,10 +253,11 @@ int windowLeft = screenWidth / 2 - windowWidth / 2;
 int windowTop = screenHeight / 2 - windowHeight / 2;
 ```
 
-Finally, we can call Window's `CreateWindow` method. You can find documentation [here](https://goo.gl/dmHFfS). The definition and valid usage look like this:
+Finally, we can call Window's `CreateWindow` method. This will, as the name suggests, create the window like we want. We'll specify dimensions, location, and other parameters.
+
+**Definition for `CreateWindow`**:
 
 ```cpp
-// Definition
 HWND WINAPI CreateWindow(
   _In_opt_ LPCTSTR   lpClassName,
   _In_opt_ LPCTSTR   lpWindowName,
@@ -215,8 +271,25 @@ HWND WINAPI CreateWindow(
   _In_opt_ HINSTANCE hInstance,
   _In_opt_ LPVOID    lpParam
 );
+```
 
-// Usage
+**[Documentation](https://goo.gl/dmHFfS) for `CreateWindow`**:
+
+- `lpClassName` is a null-terminated string or a class atom created by a previous call to the `RegisterClass` or `RegisterClassEx` function. The atom must be in the low-order word of `lpClassName`; the high-order word must be zero. If `lpClassName` is a string, it specifies the window class name.
+- `lpWindowName` is the window name. If the window style specifies a title bar, the window title pointed to by lpWindowName is displayed in the title bar.
+- `dwStyle` is the style of the window being created. This parameter can be a combination of the window style values.
+- `x` is the initial horizontal position of the window.
+- `y` is the initial vertical position of the window. 
+- `nWidth` is the width, in device units, of the window.
+- `nHeight` is the height, in device units, of the window.
+- `hWndParent` is a handle to the parent or owner window of the window being created or `NULL` in our case.
+- `hMenu` is a handle to a menu, or specifies a child-window identifier depending on the window style or `NULL` in our case.
+- `hInstance` is a handle to the instance of the module to be associated with the window.
+- `lpParam` is a pointer to a value to be passed to the window through the `CREATESTRUCT` structure (`lpCreateParams` member) pointed to by the `lParam` param of the `WM_CREATE` message or `NULL` in our case.
+
+**Usage for `CreateWindow`**:
+
+```
 window = CreateWindow(
   applicationName,
   applicationName,
@@ -234,10 +307,11 @@ window = CreateWindow(
 The `CreateWindow` method also returns `NULL` upon failure. Let's deal with that possibility before we move on:
 
 ```cpp
-if (!window) exitOnError("Failed to create window");
+if (!window) 
+  exitOnError("Failed to create window");
 ```
 
-Last, but not least, we should show the window, set it in the foreground, and focus it. Windows provides three methods that do exactly that:
+Last, but not least, we should show the window, set it in the foreground, and focus it. Windows provides three methods that do exactly that. These are very self explanatory:
 
 ```cpp
 ShowWindow(window, SW_SHOW);
@@ -253,7 +327,7 @@ For this section, we'll be writing the body of this method:
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {}
 ```
 
-We need to destroy the window and tell Windows we quit if the user attempted to close the window. If we're told we need to paint, we'll simply update the window. If neither of those cases we're met, we'll simply call the window's default procedure to handle events we didn't process. You can do this like so:
+We need to destroy the window and tell Windows we quit if the user attempted to close the window. If we're told we need to paint, we'll simply update the window. If neither of those cases we're met, we'll the default procedure to handle events we didn't process. You can do this like so:
 
 ```cpp
 switch (message) {
@@ -278,7 +352,13 @@ For this section, we'll write the body of this method:
 void VulkanExample::renderLoop() {}
 ```
 
-We're calling it `renderLoop` because later we'll make calls to rendering functions within it. For now, however, we're going to create a message, loop while we have Windows set it, Windows translate it into a character message then add it to the thread queue, and dispatch the message to the windows procedure. While that sounds complicated, it can be done with just a few lines of code:
+We're calling it `renderLoop` because later we'll make calls to rendering functions within it. For now, however, we're going to:
+
+- Create a message, loop while we have Windows set it
+- Windows translate it into a character message then add it to the thread queue
+- Dispatch the message to the windows procedure. 
+
+While that sounds complicated, it can be done with just a few lines of code:
 
 ```cpp
 MSG message;
@@ -297,18 +377,27 @@ This is our application's new entry-point. We will **not** be using your typical
 - Call our `initWindow` method
 - Call our `renderLoop`
 
-You can find documentation on the `WinMain` entry-point [here](https://goo.gl/uToSOo). The definition and our usage are:
+**Definition for `WinMain`**:
 
 ```cpp
-// Definition
 int CALLBACK WinMain(
   _In_ HINSTANCE hInstance,
   _In_ HINSTANCE hPrevInstance,
   _In_ LPSTR     lpCmdLine,
   _In_ int       nCmdShow
 );
+```
 
-// Our implementation
+**[Documentation](https://goo.gl/uToSOo) for `WinMain`**:
+
+- `hInstance` is a handle to the current instance of the application.
+- `hPrevInstance` is a handle to the previous instance of the application. This parameter is always `NULL`.
+- `lpCmdLine` is the command line for the application, excluding the program name.
+- `nCmdShow` controls how the window is to be shown.
+
+**Usage for `WinMain`**:
+
+```cpp
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
                    LPSTR lpCmdLine, int nCmdShow) {
   VulkanExample ve = VulkanExample();
