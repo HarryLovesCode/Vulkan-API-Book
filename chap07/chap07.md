@@ -30,6 +30,17 @@ typedef struct VkImageMemoryBarrier {
 } VkImageMemoryBarrier;
 ```
 
+- `sType` is the type of this structure.
+- `pNext` is `NULL` or a pointer to an extension-specific structure.
+- `srcAccessMask` is a mask of the classes of memory accesses performed by the first set of commands that will participate in the dependency.
+- `dstAccessMask` is a mask of the classes of memory accesses performed by the second set of commands that will participate in the dependency.
+- `oldLayout` describes the current layout of the image subresource(s).
+- `newLayout` describes the new layout of the image subresource(s).
+- `srcQueueFamilyIndex` is the queue family that is relinquishing ownership of the image subresource(s) to another queue, or `VK_QUEUE_FAMILY_IGNORED` if there is no transfer of ownership).
+- `dstQueueFamilyIndex` is the queue family that is acquiring ownership of the image subresource(s) from another queue, or `VK_QUEUE_FAMILY_IGNORED` if there is no transfer of ownership).
+- `image` is a handle to the image whose backing memory is affected by the barrier.
+- `subresourceRange` describes an area of the backing memory for image, as well as the set of subresources whose image layouts are modified.
+
 Valid usage in our `setImageLayout` would look like:
 
 ```cpp
@@ -45,7 +56,7 @@ imageBarrier.subresourceRange.levelCount = 1;
 imageBarrier.subresourceRange.layerCount = 1;
 ```
 
-Notice we left our two parts: `srcAccessMask` and `dstAccessMask`. Depending on the values `oldLayout` and `newLayout` take, we'll change how we set up our `VkImageMemoryBarrier`. Here is the way I handle the two layouts:
+Notice we left our two parts: `srcAccessMask` and `dstAccessMask`. Depending on the values `oldLayout` and `newLayout` take, we'll change how we set up our `VkImageMemoryBarrier`. Here is the way I handle the transition between the two layouts:
 
 ```cpp
 switch (oldLayout) {
@@ -91,7 +102,7 @@ switch (newLayout) {
 }
 ```
 
-While there is a `VK_IMAGE_LAYOUT_GENERAL` that will work in all cases, it's not always optimal. We have different layouts for:
+While there is a `VK_IMAGE_LAYOUT_GENERAL` that will work in all cases, it's not always optimal. For example, we have different layouts meant for:
 
 - Color attachments (framebuffer)
 - Depth stencils attachments (framebuffer)
@@ -105,36 +116,30 @@ Before we can finish our `setImageLayout` method, we need to call `vkCmdPipeline
 
 ```cpp
 void vkCmdPipelineBarrier(
-  // The command buffer into which the command is recorded.
   VkCommandBuffer               commandBuffer,
-  // A bitmask of VkPipelineStageFlagBits specifying a set
-  // of source pipeline stages
   VkPipelineStageFlags          srcStageMask,
-  // A bitmask specifying a set of destination pipeline stages.
-  // Specifies an execution dependency such that all work
-  // performed by the set of pipeline stages included in
-  // srcStageMask of the first set of commands completes before
-  // any work performed by the set of pipeline stages included
-  // in dstStageMask of the second set of commands begins.
   VkPipelineStageFlags          dstStageMask,
-  // A bitmask of VkDependencyFlagBits. The execution dependency
-  // is by-region if the mask includes VK_DEPENDENCY_BY_REGION_BIT.
   VkDependencyFlags             dependencyFlags,
-  // The length of the pMemoryBarriers array.
   uint32_t                      memoryBarrierCount,
-  // A pointer to an array of VkMemoryBarrier structures.
   const VkMemoryBarrier*        pMemoryBarriers,
-  // The length of the pBufferMemoryBarriers array.
   uint32_t                      bufferMemoryBarrierCount,
-  // A pointer to an array of VkBufferMemoryBarrier structures.
   const VkBufferMemoryBarrier*  pBufferMemoryBarriers,
-  // The length of the pImageMemoryBarriers array.
   uint32_t                      imageMemoryBarrierCount,
-  // A pointer to an array of VkImageMemoryBarrier structures.
   const VkImageMemoryBarrier*   pImageMemoryBarriers);
 ```
 
-The only arguments we're not sure about are `srcFlags` and `dstFlags`. However, we know we want our execution / memory dependencies to be staged at the top of the command buffer. So, we'll use `VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT` to notify Vulkan of our intentions. You can find more information on pipeline state flags like `VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT` [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#synchronization-pipeline-stage-flags). Our usage would look like:
+- `commandBuffer` is the command buffer into which the command is recorded.
+- `srcStageMask` is a bitmask of `VkPipelineStageFlagBits` specifying a set of source pipeline stages.
+- `dstStageMask` is a bitmask specifying a set of destination pipeline stages.
+- `dependencyFlags` is a bitmask of `VkDependencyFlagBits`. The execution dependency is by-region if the mask includes VK_DEPENDENCY_BY_REGION_BIT`.
+- `memoryBarrierCount` is the length of the `pMemoryBarriers` array.
+- `pMemoryBarriers` is a pointer to an array of `VkMemoryBarrier` structures.
+- `bufferMemoryBarrierCount` is the length of the `pBufferMemoryBarriers` array.
+- `pBufferMemoryBarriers` is a pointer to an array of `VkBufferMemoryBarrier` structures.
+- `imageMemoryBarrierCount` is the length of the `pImageMemoryBarriers` array.
+- `pImageMemoryBarriers` is a pointer to an array of `VkImageMemoryBarrier` structures.
+
+The only arguments we're not sure about are `srcFlags` and `dstFlags`. We know we want our execution / memory dependencies to be staged at the top of the command buffer. So, we'll use `VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT` to notify Vulkan of our intentions. You can find more information on pipeline state flags like `VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT` [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#synchronization-pipeline-stage-flags). Our usage would look like:
 
 ```cpp
 VkPipelineStageFlagBits srcFlags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
