@@ -34,7 +34,9 @@ pandoc book.md                  \
   chap09/chap09.md              \
 --toc                           \
 --latex-engine=xelatex          \
---variable mainfont="Ubuntu"    \
+--variable mainfont="Roboto"    \
+--variable sansfont="Fira Sans" \
+--variable monofont="Fira Mono" \
 --variable fontsize="11pt"      \
 -V geometry:margin="1.5cm"      \
 -o VulkanApiBook.pdf
