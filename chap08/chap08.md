@@ -10,7 +10,7 @@ for (uint32_t i = 0; i < imageCount; i++) {
 
 ## `VkImageViewCreateInfo`
 
-Now, in Vulkan, we don't directly access images via shaders for reading and writing. We make use of image views which represent subresources of the images and their metadata to do the same. You can find documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0/man/html/VkImageViewCreateInfo.html) and the definition is included below:
+Now, in Vulkan, we don't directly access images via shaders for reading and writing. We make use of image views which represent subresources of the images and their metadata to do the same. You can find documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkImageViewCreateInfo) and the definition is included below:
 
 ```cpp
 typedef struct VkImageViewCreateInfo {
@@ -25,7 +25,16 @@ typedef struct VkImageViewCreateInfo {
 } VkImageViewCreateInfo;
 ```
 
-There is a pretty typical way of setting up your `VkImageViewCreateInfo`. Let's look at my usage:
+- `sType` is the type of this structure.
+- `pNext` is `NULL` or a pointer to an extension-specific structure.
+- `flags` is reserved for future use.
+- `image` is a `VkImage` on which the view will be created.
+- `viewType` is the type of the image view.
+- `format` is a `VkFormat` describing the format and type used to interpret data elements in the image.
+- `components` specifies a remapping of color components (or of depth or stencil components after they have been converted into color components).
+- `subresourceRange` selects the set of mipmap levels and array layers to be accessible to the view.
+
+Let's look at proper usage:
 
 ```cpp
 VkImageViewCreateInfo imageCreateInfo = {};
@@ -63,20 +72,21 @@ imageCreateInfo.image = buffers[i].image;
 
 ## `vkCreateImageView`
 
-To create our image view, we simply call `vkCreateImageView`. You can find documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0/man/html/vkCreateImageView.html) and the definition is included below:
+To create our image view, we simply call `vkCreateImageView`. You can find documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkImageViewCreateInfo) and the definition is included below:
 
 ```cpp
 VkResult vkCreateImageView(
-  // Logical device which owns the image.
   VkDevice                     device,
-  // Specifies properties of the new view.
   const VkImageViewCreateInfo* pCreateInfo,
-  // A pointer to our VkImageViewCreateInfo structure.
   const VkAllocationCallbacks* pAllocator,
-  // Returns the requested object.
   VkImageView*                 pView);
   device
 ```
+
+- `device` is the logical device that creates the image view.
+- `pCreateInfo` is a pointer to an instance of the `VkImageViewCreateInfo` structure containing parameters to be used to create the image view.
+- `pAllocator` controls host memory allocation.
+- `pView` points to a `VkImageView` handle in which the resulting image view object is returned.
 
 Here is what it looks like in use with error checking:
 
@@ -88,7 +98,7 @@ assert(result == VK_SUCCESS);
 
 ## `VkFramebufferCreateInfo`
 
-We're going to be creating framebuffers for every image in the swapchain. Thus, we'll continue writing the body of our `for` loop. Like most types in Vulkan, we'll need to create an info structure before we can create a framebuffer. This will be `VkFramebufferCreateInfo`. You can find the documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0/man/html/VkFramebufferCreateInfo.html) and the definition below:
+We're going to be creating framebuffers for every image in the swapchain. Thus, we'll continue writing the body of our `for` loop. Like most types in Vulkan, we'll need to create an info structure before we can create a framebuffer. This will be `VkFramebufferCreateInfo`. You can find the documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#_framebuffers) and the definition below:
 
 ```cpp
 typedef struct VkFramebufferCreateInfo {
@@ -104,9 +114,15 @@ typedef struct VkFramebufferCreateInfo {
 } VkFramebufferCreateInfo;
 ```
 
-1. We'll fill out `sType` normally.
-2. We'll specify we only need `1` attachment which is our `VkImageView`.
-3. We'll set the width and height to that of the `swapchainExtent` from earlier:
+- `sType` is the type of this structure.
+- `pNext` is `NULL` or a pointer to an extension-specific structure.
+- `flags` is reserved for future use.
+- `renderPass` is a render pass that defines what render passes the framebuffer will be compatible with.
+- `attachmentCount` is the number of attachments.
+- `pAttachments` is an array of `VkImageView` handles, each of which will be used as the corresponding attachment in a render pass instance.
+width, height and layers define the dimensions of the framebuffer.
+
+We'll set the width and height to that of the `swapchainExtent` from earlier. Let's look at the usage:
 
 ```cpp
 VkFramebufferCreateInfo fbCreateInfo = {};
@@ -120,20 +136,20 @@ fbCreateInfo.layers = 1;
 
 ## `vkCreateFramebuffer`
 
-Now we can create each framebuffer. We'll call `vkCreateFramebuffer`. You can find more information [here](https://www.khronos.org/registry/vulkan/specs/1.0/man/html/vkCreateFramebuffer.html) and the definition is included below:
+Now we can create each framebuffer. We'll call `vkCreateFramebuffer`. You can find more information [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#_framebuffers) and the definition is included below:
 
 ```cpp
 VkResult vkCreateFramebuffer(
-  // The device with which to create the framebuffer object.
   VkDevice                       device,
-  // A pointer to a structure containing information about
-  // how to create the object.
   const VkFramebufferCreateInfo* pCreateInfo,
-  // A pointer to our VkFramebufferCreateInfo structure.
   const VkAllocationCallbacks*   pAllocator,
-  // A pointer to a variable which will receive the handle to the new object.
   VkFramebuffer*                 pFramebuffer);
 ```
+
+- `device` is the logical device that creates the framebuffer.
+- `pCreateInfo` points to a `VkFramebufferCreateInfo` structure which describes additional information about framebuffer creation.
+- `pAllocator` controls host memory allocation.
+- `pFramebuffer` points to a `VkFramebuffer` handle in which the resulting framebuffer object is returned.
 
 Let's look at valid usage and error checking:
 
