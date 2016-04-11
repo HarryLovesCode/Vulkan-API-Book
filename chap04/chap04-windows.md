@@ -12,9 +12,67 @@ Because we're going to be writing this from scratch, we're going to have to inte
 
 If you're targeting Linux as well, you should surround both by the `#if defined(_WIN32)` directives.
 
-### Allocating a Console
+### Setting Up a Console Window
 
-Because we're now switching from a **Windows Console Application** to a **Windows Application**, we'll need to make sure we have a console to view the output of `stdout` and `stderr`. In addition, because we're exiting right after we encounter an error, we should show a message box, wait for input, then close after the user has acknowledged the error. So, before we call any functions in our constructor, let's add the following code:
+Because we're now switching from a **Windows Console Application** to a **Windows Application**, we'll need to make sure we have a console to view the output of `stdout` and `stderr`. In addition, because we're exiting right after we encounter an error, we should:
+
+- Show a message box
+- Wait for user input (keypress)
+- Close after the user has acknowledged the error
+
+We'll be using four methods to do this work:
+
+```cpp
+BOOL WINAPI AllocConsole(void);
+```
+
+- [Documentation](https://goo.gl/8k36tq)
+- This function takes no arguments
+
+```cpp
+BOOL WINAPI AttachConsole(
+  _In_ DWORD dwProcessId
+);
+```
+
+- [Documentation](https://goo.gl/EeSrhh)
+- `dwProcessId` is the identifier of the process whose console is to be used.
+
+```cpp
+FILE * freopen (
+  const char * filename, 
+  const char * mode, 
+  FILE * stream );
+```
+
+- [Documentation](http://www.cplusplus.com/reference/cstdio/freopen/)
+- `fileName` is a C string containing the name of the file to be opened.
+- `mode` is a C string containing a file access mode. It can be: 
+  - `"r"`
+  - `"w"`
+  - `"a"`
+  - `"r+"`
+  - `"w+"`
+  - `"a+"`
+- `stream` is a pointer to a `FILE` object that identifies the stream to be reopened.
+
+```cpp
+BOOL WINAPI SetConsoleTitle(
+  _In_ LPCTSTR lpConsoleTitle
+);
+```
+
+- [Documentation](https://goo.gl/HAIfMd)
+- `lpConsoleTitle` is the string to be displayed in the title bar of the console window. The total size must be less than 64K.
+
+If you put these methods together you can:
+
+- Allocate a console
+- Attach the console to the current process
+- Redirect `stdout` and `stderr` to said console
+- Set the title of the console window
+
+Let's look at the code:
 
 ```cpp
 AllocConsole();
@@ -24,7 +82,22 @@ freopen("CON", "w", stderr);
 SetConsoleTitle(TEXT(applicationName));
 ```
 
-Now, let's modify our `exitOnError` method to show a error message box:
+Now, let's modify our `exitOnError` method to show a error message box. We'll need to use the `MessageBox` method:
+
+```cpp
+int WINAPI MessageBox(
+  _In_opt_ HWND    hWnd,
+  _In_opt_ LPCTSTR lpText,
+  _In_opt_ LPCTSTR lpCaption,
+  _In_     UINT    uType
+);
+```
+
+- [Documentation](https://goo.gl/7tAVnv)
+- `hWnd` is a handle to the owner window of the message box to be created. If this parameter is `NULL`, the message box has no owner window.
+- `lpText` is the message to be displayed. If the string consists of more than one line, you can separate the lines using a carriage return and/or linefeed character between each line.
+- `lpCaption` is the dialog box title. If this parameter is `NULL`, the default title is "Error".
+- `uType` is the contents and behavior of the dialog box. This parameter can be a combination of flags.
 
 ```cpp
 MessageBox(NULL, msg, applicationName, MB_ICONERROR);
@@ -45,7 +118,7 @@ HWND window;
 In this section we'll be writing the body this method:
 
 ```cpp
-void VulkanExample::createWindow(HINSTANCE hInstance) {}
+void createWindow(HINSTANCE hInstance) {}
 ```
 
 Don't worry about `hInstance` for now. It is simply passed from the `WinMain` method we'll write later on. To setup our window, we'll need to register it with Windows. You can find the documentation for the `RegisterClassEx` method [here](https://goo.gl/m3WViB). The definition looks like this:
