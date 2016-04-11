@@ -12,7 +12,7 @@ void VulkanExample::initSwapchain() {}
 
 ## `fpGetPhysicalDeviceSurfaceCapabilitiesKHR`
 
-We created a surface in the last chapter. Now we need to check the surface resolution so we can later inform our swapchain. To get the resolution of the surface, we'll have to ask it for its capabilities. You can find documentation [here](https://www.khronos.org/files/vulkan10-reference-guide.pdf) in section **29.5**. We'll be using `fpGetPhysicalDeviceSurfaceCapabilitiesKHR` which has a definition like:
+We created a surface in the last chapter. Now we need to check the surface resolution so we can later inform our swapchain. To get the resolution of the surface, we'll have to ask it for its capabilities. You can find documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#vkGetPhysicalDeviceSurfaceCapabilitiesKHR). We'll be using `fpGetPhysicalDeviceSurfaceCapabilitiesKHR` which has the same definition as:
 
 ```cpp
 VkResult vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
@@ -20,6 +20,10 @@ VkResult vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
   VkSurfaceKHR               surface,
   VkSurfaceCapabilitiesKHR*  pSurfaceCapabilities);
 ```
+
+- `physicalDevice` is the physical device that will be associated with the swapchain to be created, as described for `vkCreateSwapchainKHR`.
+- `surface` is the surface that will be associated with the swapchain.
+- `pSurfaceCapabilities` is a pointer to an instance of the `VkSurfaceCapabilitiesKHR` structure that will be filled with information.
 
 Note that it takes a pointer to a `VkSurfaceCapabilitiesKHR` object. We'll have to create that to pass it in. Let's do that and verify we were successful:
 
@@ -47,7 +51,7 @@ if (caps.currentExtent.width == -1 || caps.currentExtent.height == -1) {
 
 ## `fpGetPhysicalDeviceSurfacePresentModesKHR`
 
-In Vulkan, there are multiple ways images can be presented. We'll talk about the options later in this section, but for now, we need to figure out which are supported. We can use `fpGetPhysicalDeviceSurfacePresentModesKHR` to get the present modes as the name suggests. You can find documentation [here](https://www.khronos.org/files/vulkan10-reference-guide.pdf) in section **29.5**. The definition is the same as:
+In Vulkan, there are multiple ways images can be presented. We'll talk about the options later in this section, but for now, we need to figure out which are supported. We can use `fpGetPhysicalDeviceSurfacePresentModesKHR` to get the present modes as the name suggests. You can find documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#vkGetPhysicalDeviceSurfacePresentModesKHR) and the definition is the same as:
 
 ```cpp
 VkResult vkGetPhysicalDeviceSurfacePresentModesKHR(
@@ -57,7 +61,12 @@ VkResult vkGetPhysicalDeviceSurfacePresentModesKHR(
   VkPresentModeKHR*  pPresentModes);
 ```
 
-Like with other `vkGetX` methods, we should pass in `NULL` as the last argument to get `pPresentModeCount` before we allocate memory for `pPresentModes`. Let's look at how this is used:
+- `physicalDevice` is the physical device that will be associated with the swapchain to be created, as described for `vkCreateSwapchainKHR`.
+- `surface` is the surface that will be associated with the swapchain.
+- `pPresentModeCount` is a pointer to an integer related to the number of format pairs available or queried, as described below.
+- `pPresentModes` is either `NULL` or a pointer to an array of `VkPresentModeKHR` structures.
+
+Let's look at how this is used:
 
 ```cpp
 uint32_t presentModeCount = 0;
@@ -82,7 +91,7 @@ result = fpGetPhysicalDeviceSurfacePresentModesKHR(
 assert(result == VK_SUCCESS);
 ```
 
-Now let's look at the available present modes. There are a few different types:
+Let's take a look at the available present modes. There are a few different types:
 
 - `VK_PRESENT_MODE_IMMEDIATE_KHR` - Our engine **will not ever** wait for the vertical blanking interval. This *may* result in visible tearing if our frame misses the interval and is presented too late.
 - `VK_PRESENT_MODE_MAILBOX_KHR` - Our engine waits for the next vertical blanking interval to update the image. If we render another image, the image waiting to be displayed is overwritten.
@@ -110,7 +119,7 @@ for (uint32_t i = 0; i < presentModeCount; i++) {
 
 ## `VkSwapchainCreateInfoKHR`
 
-Next up, we're going to prepare the information needed to create our `VkSwapchainKHR`. You can find more information [here](https://www.khronos.org/files/vulkan10-reference-guide.pdf) in section **29.6**. The definition looks like this:
+Next up, we're going to prepare the information needed to create our `VkSwapchainKHR`. You can find more information [here](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#VkSwapchainCreateInfoKHR) and the definition looks like this:
 
 ```cpp
 typedef struct VkSwapchainCreateInfoKHR {
@@ -135,7 +144,25 @@ typedef struct VkSwapchainCreateInfoKHR {
 } VkSwapchainCreateInfoKHR
 ```
 
-That's quite a definition. Before we can fill in the values, we'll need to prepare a number for `minImageCount`. First let's check verify our surface supports images:
+- `sType` is the type of this structure and must be `VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR`.
+- `pNext` is `NULL` or a pointer to an extension-specific structure.
+- `flags` is reserved for future use, and must be zero.
+- `surface` is the surface that the swapchain will present images to.
+- `minImageCount` is the minimum number of presentable images that the application needs. The platform will either create the swapchain with at least that many images, or will fail to create the swapchain.
+- `imageFormat` is a `VkFormat` that is valid for swapchains on the specified surface.
+- `imageColorSpace` is a `VkColorSpaceKHR` that is valid for swapchains on the specified surface.
+- `imageExtent` is the size (in pixels) of the swapchain. Behavior is platform-dependent when the image extent does not match the surface’s `currentExtent` as returned by `vkGetPhysicalDeviceSurfaceCapabilitiesKHR`.
+- `imageArrayLayers` is the number of views in a multiview/stereo surface. For non-stereoscopic-3D applications, this value is `1`.
+- `imageUsage` is a bitfield of `VkImageUsageFlagBits`, indicating how the application will use the swapchain’s presentable images.
+- `imageSharingMode` is the sharing mode used for the images of the swapchain.
+- `queueFamilyIndexCount` is the number of queue families having access to the images of the swapchain in case `imageSharingMode` is `VK_SHARING_MODE_CONCURRENT`.
+- `pQueueFamilyIndices` is an array of queue family indices having access to the images of the swapchain in case `imageSharingMode` is `VK_SHARING_MODE_CONCURRENT`.
+- `preTransform` is a bitfield of `VkSurfaceTransformFlagBitsKHR`, describing the transform, relative to the presentation engine’s natural orientation, applied to the image content prior to presentation. If it does not match the `currentTransform` value returned by `vkGetPhysicalDeviceSurfaceCapabilitiesKHR`, the presentation engine will transform the image content as part of the presentation operation.
+- `compositeAlpha` is a bitfield of `VkCompositeAlphaFlagBitsKHR`, indicating the alpha compositing mode to use when this surface is composited together with other surfaces on certain window systems.
+- `presentMode` is the presentation mode the swapchain will use. A swapchain’s present mode determines how incoming present requests will be processed and queued internally.
+- `clipped` indicates whether the Vulkan implementation is allowed to discard rendering operations that affect regions of the surface which aren’t visible.
+
+That's quite a definition. Before we can fill in the values, we'll need to figure out `minImageCount`. First let's check verify our surface supports images:
 
 ```cpp
 assert(caps.maxImageCount >= 1);
@@ -186,6 +213,11 @@ VkResult vkCreateSwapchainKHR(
   VkSwapchainKHR*                             pSwapchain);
 ```
 
+- `device` is the device to create the swapchain for.
+- `pCreateInfo` is a pointer to an instance of the `VkSwapchainCreateInfoKHR` structure specifying the parameters of the created swapchain.
+- `pAllocator` is the allocator used for host memory allocated for the swapchain object when there is no more specific allocator available.
+- `pSwapchain` is a pointer to a `VkSwapchainKHR` handle in which the created swapchain object will be returned.
+
 Let's call the method and then we can verify we were successful::
 
 ```cpp
@@ -195,19 +227,20 @@ assert(result == VK_SUCCESS);
 
 ## `fpGetSwapchainImagesKHR`
 
-We will need to get the available images from the swapchain. In a later section of this chapter, we'll actually get them ready for use, but right now, let's focus on this part. We'll be using a function pointer we got earlier called ``. You can find documentation [here](https://www.khronos.org/files/vulkan10-reference-guide.pdf) in **29.6** and the definition is the same as:
+We will need to get the available images from the swapchain. In a later section of this chapter, we'll actually get them ready for use, but right now, let's focus on this part. We'll be using a function pointer we got earlier called `fpGetSwapchainImagesKHR`. You can find documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#vkGetSwapchainImagesKHR) and the definition is the same as:
 
 ```cpp
 VkResult vkGetSwapchainImagesKHR(
-  // The VkDevice associated with swapchain.
   VkDevice device,
-  // The swapchain.
   VkSwapchainKHR swapchain,
-  // The number of elements in the array pointed by pSwapchainImages.
   uint32_t* pSwapchainImageCount,
-  // The returned array of images.
   VkImage* pSwapchainImages);
 ```
+
+- `device` is the device associated with swapchain.
+- `swapchain` is the swapchain to query.
+- `pSwapchainImageCount` is a pointer to an integer related to the number of format pairs available or queried, as described below.
+- `pSwapchainImages` is either `NULL` or a pointer to an array of `VkSwapchainImageKHR` structures.
 
 Let's go ahead and make use of the function and check if we were successful:
 
