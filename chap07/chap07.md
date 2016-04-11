@@ -13,7 +13,9 @@ This will take a `VkCommandBuffer` and a `VkImage` whose image layout we want to
 
 ## `VkImageMemoryBarrier`
 
-In Vulkan, we have a new concept called barriers. They make sure our operations done on the GPU occur in a particular order which assure we get the expected result. A barrier separates two operations in a queue: before the barrier and after the barrier. Work done before the barrier will always finish before it can be used again. You can find more information [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#synchronization-image-memory-barrier). The definition for `VkImageMemoryBarrier` looks like:
+In Vulkan, we have a new concept called barriers. They make sure our operations done on the GPU occur in a particular order which assure we get the expected result. A barrier separates two operations in a queue: before the barrier and after the barrier. Work done before the barrier will always finish before it can be used again.
+
+**Definition for `VkImageMemoryBarrier`**:
 
 ```cpp
 typedef struct VkImageMemoryBarrier {
@@ -30,6 +32,8 @@ typedef struct VkImageMemoryBarrier {
 } VkImageMemoryBarrier;
 ```
 
+**[Documentation](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#synchronization-image-memory-barrier) for `VkImageMemoryBarrier`**:
+
 - `sType` is the type of this structure.
 - `pNext` is `NULL` or a pointer to an extension-specific structure.
 - `srcAccessMask` is a mask of the classes of memory accesses performed by the first set of commands that will participate in the dependency.
@@ -41,7 +45,7 @@ typedef struct VkImageMemoryBarrier {
 - `image` is a handle to the image whose backing memory is affected by the barrier.
 - `subresourceRange` describes an area of the backing memory for image, as well as the set of subresources whose image layouts are modified.
 
-Valid usage in our `setImageLayout` would look like:
+**Usage for `VkImageMemoryBarrier`**:
 
 ```cpp
 VkImageMemoryBarrier imageBarrier = {};
@@ -112,7 +116,9 @@ Images will start as `VK_IMAGE_LAYOUT_UNDEFINED` or `VK_IMAGE_LAYOUT_PREINITIALI
 
 ## `vkCmdPipelineBarrier`
 
-Before we can finish our `setImageLayout` method, we need to call `vkCmdPipelineBarrier`. This will record the command and insert our execution dependencies and memory dependencies between two sets of commands. You can find the documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#vkCmdPipelineBarrier). The definition looks like:
+Before we can finish our `setImageLayout` method, we need to call `vkCmdPipelineBarrier`. This will record the command and insert our execution dependencies and memory dependencies between two sets of commands.
+
+**Definition of `vkCmdPipelineBarrier`**:
 
 ```cpp
 void vkCmdPipelineBarrier(
@@ -128,6 +134,8 @@ void vkCmdPipelineBarrier(
   const VkImageMemoryBarrier*   pImageMemoryBarriers);
 ```
 
+**[Documentation](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#vkCmdPipelineBarrier) for `vkCmdPipelineBarrier`**:
+
 - `commandBuffer` is the command buffer into which the command is recorded.
 - `srcStageMask` is a bitmask of `VkPipelineStageFlagBits` specifying a set of source pipeline stages.
 - `dstStageMask` is a bitmask specifying a set of destination pipeline stages.
@@ -139,7 +147,10 @@ void vkCmdPipelineBarrier(
 - `imageMemoryBarrierCount` is the length of the `pImageMemoryBarriers` array.
 - `pImageMemoryBarriers` is a pointer to an array of `VkImageMemoryBarrier` structures.
 
-The only arguments we're not sure about are `srcFlags` and `dstFlags`. We know we want our execution / memory dependencies to be staged at the top of the command buffer. So, we'll use `VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT` to notify Vulkan of our intentions. You can find more information on pipeline state flags like `VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT` [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#synchronization-pipeline-stage-flags). Our usage would look like:
+
+The only arguments we're not sure about are `srcFlags` and `dstFlags`. We know we want our execution / memory dependencies to be staged at the top of the command buffer. So, we'll use `VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT` to notify Vulkan of our intentions. You can find more information on pipeline state flags like `VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT` [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#synchronization-pipeline-stage-flags).
+
+**Usage for `vkCmdPipelineBarrier`**:
 
 ```cpp
 VkPipelineStageFlagBits srcFlags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;

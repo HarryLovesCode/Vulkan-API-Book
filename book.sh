@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Generate the .epub version of the book
+echo "Generating EPUB"
 pandoc book.md                  \
   chap02/chap02.md              \
   chap03/chap03.md              \
@@ -19,6 +20,7 @@ pandoc book.md                  \
 -o VulkanApiBook.epub 
 
 # Generate the .pdf version of the book
+echo "Generating PDF"
 pandoc book.md                  \
   chap02/chap02.md              \
   chap03/chap03.md              \
@@ -38,5 +40,6 @@ pandoc book.md                  \
 --variable sansfont="Fira Sans" \
 --variable monofont="Fira Mono" \
 --variable fontsize="11pt"      \
--V geometry:margin="1.5cm"      \
+-V geometry:margin="2.0cm"      \
+--highlight-style tango         \
 -o VulkanApiBook.pdf

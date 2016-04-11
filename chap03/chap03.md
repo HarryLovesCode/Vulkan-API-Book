@@ -10,7 +10,9 @@ A `VkPhysicalDevice` is a data type that we will use to represent each piece of 
 
 ## `vkEnumeratePhysicalDevices`
 
-To get a list of all the physical devices in the system, we can call use this method. You can find more information [in the same section](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#devsandqueues-physical-device-enumeration). The definition looks like:
+To get a list of all the physical devices in the system, we can call use this method.
+
+**Definition for `vkEnumeratePhysicalDevices`**:
 
 ```cpp
 VkResult vkEnumeratePhysicalDevices(
@@ -19,13 +21,15 @@ VkResult vkEnumeratePhysicalDevices(
   VkPhysicalDevice*                           pPhysicalDevices);
 ```
 
-The arguments are documented as follows:
+**[Documentation](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#devsandqueues-physical-device-enumeration) for `vkEnumeratePhysicalDevices`**:
 
 - `instance` is a handle to a Vulkan instance previously created with `vkCreateInstance`.
 - `pPhysicalDeviceCount` is a pointer to an integer related to the number of physical devices available or queried.
 - `pPhysicalDevices` is either `NULL` or a pointer to an array of `VkPhysicalDevice` structures.
 
 Before we create allocate memory to store the physical devices, we need to figure out how many there are. We can do this by calling `vkEnumeratePhysicalDevices` with a value of `NULL` for `pPhysicalDevices`.
+
+**Usage for `vkEnumeratePhysicalDevices`**:
 
 ```cpp
 uint32_t deviceCount = 0;
@@ -49,7 +53,9 @@ assert(result == VK_SUCCESS);
 
 ## `VkPhysicalDeviceProperties`
 
-`VkPhysicalDeviceProperties` is a data type that we will use to represent properties of each physical device. There's not much to say here other than we will pass a pointer of this type to the implementation. The implementation will then write properties for the specified `VkPhysicalDevice`. You can find all the information you need [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkPhysicalDeviceProperties). The definition looks like this:
+`VkPhysicalDeviceProperties` is a data type that we will use to represent properties of each physical device. There's not much to say here other than we will pass a pointer of this type to the implementation. The implementation will then write properties for the specified `VkPhysicalDevice`.
+
+**Definition for `VkPhysicalDeviceProperties**:
 
 ```cpp
 typedef struct VkPhysicalDeviceProperties {
@@ -65,7 +71,7 @@ typedef struct VkPhysicalDeviceProperties {
 } VkPhysicalDeviceProperties;
 ```
 
-Here is the documentation for each field we get back:
+**[Documentation](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkPhysicalDeviceProperties) for `VkPhysicalDeviceProperties**:
 
 - `apiVersion` is the version of Vulkan supported by the device (encoded).
 - `driverVersion` is the vendor-specified version of the driver.
@@ -93,7 +99,9 @@ This may be useful if you are trying to detect if you have an integrated GPU ver
 
 ## `vkGetPhysicalDeviceProperties`
 
-A call to this method is not necessary in most cases. However, it can be useful in retrieving information about your device. You can find more information [in the same section]https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#vkGetPhysicalDeviceProperties) along with the definition itself. The definition looks like:
+A call to this method is not necessary in most cases. However, it can be useful in retrieving information about your device.
+
+**Definition for `vkGetPhysicalDeviceProperties`**:
 
 ```cpp
 void vkGetPhysicalDeviceProperties(
@@ -101,11 +109,13 @@ void vkGetPhysicalDeviceProperties(
   VkPhysicalDeviceProperties*                 pProperties);
 ```
 
+**[Documentation](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#vkGetPhysicalDeviceProperties) for `vkGetPhysicalDeviceProperties`**:
+
 - `instance` is a handle to a Vulkan instance previously created with `vkCreateInstance`.
 - `pPhysicalDeviceCount` is a pointer to an integer related to the number of physical devices available or queried.
 - `pPhysicalDevices` is either `NULL` or a pointer to an array of `VkPhysicalDevice` structures.
 
-Following the usage guidelines outlined in the specification, a call to `vkGetPhysicalDeviceProperties()` would look like this:
+**Usage for `vkGetPhysicalDeviceProperties`**:
 
 ```cpp
 VkPhysicalDeviceProperties physicalProperties = {};
@@ -128,7 +138,7 @@ As I mentioned before, the API version is encoded. So if we want, we can use thr
 - `VK_VERSION_MINOR(version)`
 - `VK_VERSION_PATCH(version)`
 
-So,, to output the API version, you can use this:
+So, to output the API version, you can use this:
 
 ```cpp
 fprintf(stdout, "API Version:    %d.%d.%d\n",
@@ -139,7 +149,9 @@ fprintf(stdout, "API Version:    %d.%d.%d\n",
 
 ## `VkDeviceQueueCreateInfo`
 
-The next step is to create a device using `vkCreateDevice`. However, in order to do that, we must have a `VkDeviceCreateInfo` object. And, as you may have guessed having seen the specification, we need a `VkDeviceQueueCreateInfo` object. You can find the documentation for this object [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkDeviceQueueCreateInfo). Let's look at the definition:
+The next step is to create a device using `vkCreateDevice`. However, in order to do that, we must have a `VkDeviceCreateInfo` object. And, as you may have guessed having seen the specification, we need a `VkDeviceQueueCreateInfo` object.
+
+**Definition for `VkDeviceQueueCreateInfo`**:
 
 ```cpp
 typedef struct VkDeviceQueueCreateInfo {
@@ -152,6 +164,8 @@ typedef struct VkDeviceQueueCreateInfo {
 } VkDeviceQueueCreateInfo;
 ```
 
+**[Documentation](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkDeviceQueueCreateInfo) for `VkDeviceQueueCreateInfo`**:
+
 - `sType` is the type of this structure.
 - `pNext` is NULL or a pointer to an extension-specific structure.
 - `flags` is reserved for future use.
@@ -159,7 +173,7 @@ typedef struct VkDeviceQueueCreateInfo {
 - `queueCount` is an unsigned integer specifying the number of queues to create in the queue family indicated by `queueFamilyIndex`.
 - `pQueuePriorities` is an array of `queueCount` normalized floating point values, specifying priorities of work that will be submitted to each created queue.
 
-Following the usage guidelines outlined in the specification, creating a `VkDeviceQueueCreateInfo` looks like this:
+**Usage for `VkDeviceQueueCreateInfo`**:
 
 ```cpp
 float priorities[] = { 1.0f };
@@ -176,7 +190,9 @@ You'll note that we create a `float` array with a single value. Each value in th
 
 ## `VkDeviceCreateInfo`
 
-The parent of `VkDeviceQueueCreateInfo` is `VkDeviceCreateInfo`. You can find more information [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkDeviceCreateInfo) and the definition is included below:
+The parent of `VkDeviceQueueCreateInfo` is `VkDeviceCreateInfo`.
+
+**Definition for `VkDeviceCreateInfo`**:
 
 ```cpp
 typedef struct VkDeviceCreateInfo {
@@ -193,6 +209,8 @@ typedef struct VkDeviceCreateInfo {
 } VkDeviceCreateInfo;
 ```
 
+**[Documentation](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkDeviceCreateInfo) for `VkDeviceCreateInfo`**:
+
 - `sType` is the type of this structure.
 - `pNext` is `NULL` or a pointer to an extension-specific structure.
 - `flags` is reserved for future use.
@@ -204,7 +222,7 @@ typedef struct VkDeviceCreateInfo {
 - `ppEnabledExtensionNames` is a pointer to an array of `enabledExtensionCount` null-terminated UTF-8 strings containing the names of extensions to enable for the created device.
 - `pEnabledFeatures` is NULL or a pointer to a `VkPhysicalDeviceFeatures` structure that contains boolean indicators of all the features to be enabled.
 
-Following the usage guidelines outlined in the specification, creating a `VkDeviceCreateInfo` looks like this:
+**Usage for `VkDeviceCreateInfo`**:
 
 ```cpp
 std::vector<const char *> enabledExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
@@ -221,7 +239,9 @@ deviceInfo.pEnabledFeatures = NULL;
 
 ## `vkCreateDevice`
 
-Finally, to wrap up this section, we need to create a logical device. We'll use the `vkCreateDevice` which you can find [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#vkCreateDevice) in the specification. This is how it is defined:
+Finally, to wrap up this section, we need to create a logical device. We'll use the `vkCreateDevice`.
+
+**Definition for `vkCreateDevice`**:
 
 ```cpp
 VkResult vkCreateDevice(
@@ -231,12 +251,14 @@ VkResult vkCreateDevice(
   VkDevice*                                   pDevice);
 ```
 
+**[Documentation](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#vkCreateDevice) for `vkCreateDevice`**:
+
 - `physicalDevice` must be one of the device handles returned from a call to `vkEnumeratePhysicalDevices`.
 - `pCreateInfo` is a pointer to a `VkDeviceCreateInfo` structure containing information about how to create the device.
 - `pAllocator` controls host memory allocation.
 - `pDevice` points to a handle in which the created `VkDevice` is returned.
 
-Following the usage guidelines outlined in the specification, calling `vkCreateDevice` looks like this:
+**Usage for `vkCreateDevice`**:
 
 ```cpp
 VkResult result = vkCreateDevice(physicalDevice, &deviceInfo, NULL, &logicalDevice);

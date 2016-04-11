@@ -4,7 +4,9 @@ We're going to be writing the Linux specific code for getting a surface in this 
 
 ### `VkXcbSurfaceCreateInfoKHR`
 
-Before we create a surface, we must specify information ahead of time like most Vulkan objects. We'll be using `VkXcbSurfaceCreateInfoKHR`. You can find documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#VkXcbSurfaceCreateInfoKHR) and the definition is below:
+Before we create a surface, we must specify information ahead of time like most Vulkan objects. We'll be using `VkXcbSurfaceCreateInfoKHR`.
+
+**Definition for `VkXcbSurfaceCreateInfoKHR`**:
 
 ```cpp
 typedef struct VkXcbSurfaceCreateInfoKHR {
@@ -16,13 +18,15 @@ typedef struct VkXcbSurfaceCreateInfoKHR {
 } VkXcbSurfaceCreateInfoKHR;
 ```
 
+**[Documentation](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#VkXcbSurfaceCreateInfoKHR) for `VkXcbSurfaceCreateInfoKHR`**:
+
 - `sType` is the type of this structure and must be `VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR`.
 - `pNext` is `NULL` or a pointer to an extension-specific structure.
 - `flags` is reserved for future use.
 - `connection` is a pointer to an `xcb_connection_t` to the X server.
 - `window` is the `xcb_window_t` for the X11 window to associate the surface with.
 
-Here's what the code looks like in use:
+**Usage for `VkXcbSurfaceCreateInfoKHR`**:
 
 ```cpp
 VkXcbSurfaceCreateInfoKHR surfaceCreateInfo = {};
@@ -35,7 +39,9 @@ surfaceCreateInfo.window = window;
 
 ### `vkCreateXcbSurfaceKHR`
 
-Now we can create the surface. We'll be calling the `vkCreateXcbSurfaceKHR` method to do so. You can find documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#vkCreateXcbSurfaceKHR) and the definition is below:
+Now we can create the surface. We'll be calling the `vkCreateXcbSurfaceKHR` method to do so.
+
+**Definition for `vkCreateXcbSurfaceKHR`**:
 
 ```cpp
 VkResult vkCreateXcbSurfaceKHR(
@@ -45,12 +51,14 @@ VkResult vkCreateXcbSurfaceKHR(
   VkSurfaceKHR*                     pSurface);
 ```
 
+**[Documentation](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#vkCreateXcbSurfaceKHR) for `vkCreateXcbSurfaceKHR`**:
+
 - `instance` is the instance to associate the surface with.
 - `pCreateInfo` is a pointer to an instance of the `VkXcbSurfaceCreateInfoKHR` structure containing parameters affecting the creation of the surface object.
 - `pAllocator` is the allocator used for host memory allocated for the surface object when there is no more specific allocator available.
 - `pSurface` points to a `VkSurfaceKHR` handle in which the created surface object is returned.
 
-Let's look at the code and verify we were successful:
+**Usage for `vkCreateXcbSurfaceKHR**:
 
 ```cpp
 VkResult result =

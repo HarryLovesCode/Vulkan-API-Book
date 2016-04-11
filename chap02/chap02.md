@@ -35,7 +35,9 @@ We'll be writing the contents of the constructor and the `initInstance` method.
 
 ## `VkApplicationInfo`
 
-This object, while not required, is pretty standard in most applications. You can find it documented [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkApplicationInfo). It is defined in the Vulkan header as:
+This object, while not required, is pretty standard in most applications.
+
+**Definition for `VkApplicationInfo`**:
 
 ```cpp
 typedef struct VkApplicationInfo {
@@ -49,6 +51,8 @@ typedef struct VkApplicationInfo {
 } VkApplicationInfo;
 ```
 
+**[Documentation](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkApplicationInfo) for `VkApplicationInfo`**:
+
 - `sType` is the type of this structure.
 - `pNext` is `NULL` or a pointer to an extension-specific structure.
 - `pApplicationName` is a pointer to a null-terminated UTF-8 string containing the name of the application.
@@ -57,7 +61,7 @@ typedef struct VkApplicationInfo {
 - `engineVersion` is an unsigned integer variable containing the developer-supplied version number of the engine used to create the application.
 - `apiVersion` is the version of the Vulkan API against which the application expects to run (encoded). If `apiVersion` is `0` the implementation must ignore it, otherwise if the implementation does not support the requested `apiVersion` it must return `VK_ERROR_INCOMPATIBLE_DRIVER`.
 
-Following the usage guidelines outlined in the specification, `VkApplicationInfo` usage would look something like this:
+**Usage for `VkApplicationInfo`**:
 
 ```cpp
 VkApplicationInfo appInfo = {};
@@ -72,7 +76,9 @@ You'll notice that for `apiVersion`, I am using `VK_MAKE_VERSION`. This allows t
 
 ## `VkInstanceCreateInfo`
 
-This object, **is** required. You can find it documented [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkInstanceCreateInfo). It is defined in the Vulkan header as:
+This object, **is** required unlike `VkApplicationInfo`. This will be used to inform the instance of our application info, layers we'll be using, and extensions we'll be using.
+
+**Definition for `VkInstanceCreateInfo`**:
 
 ```cpp
 typedef struct VkInstanceCreateInfo {
@@ -87,6 +93,8 @@ typedef struct VkInstanceCreateInfo {
 } VkInstanceCreateInfo;
 ```
 
+**[Documentation](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkInstanceCreateInfo) for `VkInstanceCreateInfo`**:
+
 - `sType` is the type of this structure.
 - `pNext` is `NULL` or a pointer to an extension-specific structure.
 - `flags` is reserved for future use.
@@ -96,7 +104,7 @@ typedef struct VkInstanceCreateInfo {
 - `enabledExtensionCount` is the number of global extensions to enable.
 - `ppEnabledExtensionNames` is a pointer to an array of `enabledExtensionCount` null-terminated UTF-8 strings containing the names of extensions to enable.
 
-Following the usage guidelines outlined in the specification, `VkInstanceCreateInfo` usage would look something like this:
+**Usage for `VkInstanceCreateInfo`**:
 
 ```cpp
 VkInstanceCreateInfo createInfo = {};
@@ -129,7 +137,9 @@ createInfo.ppEnabledExtensionNames = enabledExtensions.data();
 
 ## `vkCreateInstance`
 
-Finally we're ready to create our instance. You can find the documentation for `vkCreateInstance` [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#initialization-instances). Let's look at the definition:
+Finally we're ready to create our instance.
+
+**Definition for `vkCreateInstance`**:
 
 ```cpp
 VkResult vkCreateInstance(
@@ -138,11 +148,15 @@ VkResult vkCreateInstance(
   VkInstance*                                 pInstance);
 ```
 
+**[Documentation](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#initialization-instances) for `vkCreateInstance`**:
+
 - `pCreateInfo` points to an instance of `VkInstanceCreateInfo` controlling creation of the instance.
 - `pAllocator` controls host memory allocation.
 - `pInstance` points a `VkInstance` handle in which the resulting instance is returned.
 
-Notice this returns a `VkResult`. This value is used for many function calls in Vulkan to indicate failure during execution of the function body. In this case, the value will tell us if the instance creation was successful or if it failed. Valid usage of `vkCreateInstance` would look like this:
+Notice this returns a `VkResult`. This value is used for many function calls in Vulkan to indicate failure during execution of the function body. In this case, the value will tell us if the instance creation was successful or if it failed.
+
+**Usage for `vkCreateInstance`**:
 
 ```cpp
 VkResult res = vkCreateInstance(&createInfo, NULL, &instance);

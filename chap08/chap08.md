@@ -10,7 +10,9 @@ for (uint32_t i = 0; i < imageCount; i++) {
 
 ## `VkImageViewCreateInfo`
 
-Now, in Vulkan, we don't directly access images via shaders for reading and writing. We make use of image views which represent subresources of the images and their metadata to do the same. You can find documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkImageViewCreateInfo) and the definition is included below:
+Now, in Vulkan, we don't directly access images via shaders for reading and writing. We make use of image views which represent subresources of the images and their metadata to do the same.
+
+**Definition for `VkImageViewCreateInfo`**:
 
 ```cpp
 typedef struct VkImageViewCreateInfo {
@@ -25,6 +27,8 @@ typedef struct VkImageViewCreateInfo {
 } VkImageViewCreateInfo;
 ```
 
+**[Documentation](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkImageViewCreateInfo) for `VkImageViewCreateInfo`**:
+
 - `sType` is the type of this structure.
 - `pNext` is `NULL` or a pointer to an extension-specific structure.
 - `flags` is reserved for future use.
@@ -34,7 +38,7 @@ typedef struct VkImageViewCreateInfo {
 - `components` specifies a remapping of color components (or of depth or stencil components after they have been converted into color components).
 - `subresourceRange` selects the set of mipmap levels and array layers to be accessible to the view.
 
-Let's look at proper usage:
+**Usage for `VkImageViewCreateInfo`**:
 
 ```cpp
 VkImageViewCreateInfo imageCreateInfo = {};
@@ -72,7 +76,9 @@ imageCreateInfo.image = buffers[i].image;
 
 ## `vkCreateImageView`
 
-To create our image view, we simply call `vkCreateImageView`. You can find documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkImageViewCreateInfo) and the definition is included below:
+To create our image view, we simply call `vkCreateImageView`.
+
+**Definition for `vkCreateImageView`**:
 
 ```cpp
 VkResult vkCreateImageView(
@@ -83,12 +89,14 @@ VkResult vkCreateImageView(
   device
 ```
 
+**[Documentation](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#VkImageViewCreateInfo) for `vkCreateImageView`**:
+
 - `device` is the logical device that creates the image view.
 - `pCreateInfo` is a pointer to an instance of the `VkImageViewCreateInfo` structure containing parameters to be used to create the image view.
 - `pAllocator` controls host memory allocation.
 - `pView` points to a `VkImageView` handle in which the resulting image view object is returned.
 
-Here is what it looks like in use with error checking:
+**Usage for `vkCreateImageView`**:
 
 ```cpp
 result =
@@ -98,7 +106,9 @@ assert(result == VK_SUCCESS);
 
 ## `VkFramebufferCreateInfo`
 
-We're going to be creating framebuffers for every image in the swapchain. Thus, we'll continue writing the body of our `for` loop. Like most types in Vulkan, we'll need to create an info structure before we can create a framebuffer. This will be `VkFramebufferCreateInfo`. You can find the documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#_framebuffers) and the definition below:
+We're going to be creating framebuffers for every image in the swapchain. Thus, we'll continue writing the body of our `for` loop. Like most types in Vulkan, we'll need to create an info structure before we can create a framebuffer. This is called `VkFramebufferCreateInfo`.
+
+**Definition for `VkFramebufferCreateInfo`**:
 
 ```cpp
 typedef struct VkFramebufferCreateInfo {
@@ -114,6 +124,8 @@ typedef struct VkFramebufferCreateInfo {
 } VkFramebufferCreateInfo;
 ```
 
+**[Documentation](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#_framebuffers) for `VkFramebufferCreateInfo`**:
+
 - `sType` is the type of this structure.
 - `pNext` is `NULL` or a pointer to an extension-specific structure.
 - `flags` is reserved for future use.
@@ -122,7 +134,9 @@ typedef struct VkFramebufferCreateInfo {
 - `pAttachments` is an array of `VkImageView` handles, each of which will be used as the corresponding attachment in a render pass instance.
 width, height and layers define the dimensions of the framebuffer.
 
-We'll set the width and height to that of the `swapchainExtent` from earlier. Let's look at the usage:
+**Usage for `VkFramebufferCreateInfo`**:
+
+We'll set the width and height to that of the `swapchainExtent` from earlier.
 
 ```cpp
 VkFramebufferCreateInfo fbCreateInfo = {};
@@ -136,7 +150,9 @@ fbCreateInfo.layers = 1;
 
 ## `vkCreateFramebuffer`
 
-Now we can create each framebuffer. We'll call `vkCreateFramebuffer`. You can find more information [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#_framebuffers) and the definition is included below:
+Now we can create each framebuffer. We'll call `vkCreateFramebuffer`.
+
+**Definition for `vkCreateFramebuffer`**:
 
 ```cpp
 VkResult vkCreateFramebuffer(
@@ -146,12 +162,14 @@ VkResult vkCreateFramebuffer(
   VkFramebuffer*                 pFramebuffer);
 ```
 
+**[Documentation](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#_framebuffers) for `vkCreateFramebuffer`**:
+
 - `device` is the logical device that creates the framebuffer.
 - `pCreateInfo` points to a `VkFramebufferCreateInfo` structure which describes additional information about framebuffer creation.
 - `pAllocator` controls host memory allocation.
 - `pFramebuffer` points to a `VkFramebuffer` handle in which the resulting framebuffer object is returned.
 
-Let's look at valid usage and error checking:
+**Usage for `vkCreateFramebuffer`**:
 
 ```cpp
 result = vkCreateFramebuffer(device, &fbCreateInfo, NULL,

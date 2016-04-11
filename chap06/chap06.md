@@ -12,7 +12,9 @@ void VulkanExample::initSwapchain() {}
 
 ## `fpGetPhysicalDeviceSurfaceCapabilitiesKHR`
 
-We created a surface in the last chapter. Now we need to check the surface resolution so we can later inform our swapchain. To get the resolution of the surface, we'll have to ask it for its capabilities. You can find documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#vkGetPhysicalDeviceSurfaceCapabilitiesKHR). We'll be using `fpGetPhysicalDeviceSurfaceCapabilitiesKHR` which has the same definition as:
+We created a surface in the last chapter. Now we need to check the surface resolution so we can later inform our swapchain. To get the resolution of the surface, we'll have to ask it for its capabilities. We'll be using `vkGetPhysicalDeviceSurfaceCapabilitiesKHR` which has the same definition as `fpGetPhysicalDeviceSurfaceCapabilitiesKHR`.
+
+**Usage for `vkGetPhysicalDeviceSurfaceCapabilitiesKHR`**:
 
 ```cpp
 VkResult vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
@@ -21,9 +23,13 @@ VkResult vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
   VkSurfaceCapabilitiesKHR*  pSurfaceCapabilities);
 ```
 
+**[Documentation](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#vkGetPhysicalDeviceSurfaceCapabilitiesKHR) for `vkGetPhysicalDeviceSurfaceCapabilitiesKHR**:
+
 - `physicalDevice` is the physical device that will be associated with the swapchain to be created, as described for `vkCreateSwapchainKHR`.
 - `surface` is the surface that will be associated with the swapchain.
 - `pSurfaceCapabilities` is a pointer to an instance of the `VkSurfaceCapabilitiesKHR` structure that will be filled with information.
+
+**Usage for `vkGetPhysicalDeviceSurfaceCapabilitiesKHR`**:
 
 Note that it takes a pointer to a `VkSurfaceCapabilitiesKHR` object. We'll have to create that to pass it in. Let's do that and verify we were successful:
 
@@ -51,7 +57,9 @@ if (caps.currentExtent.width == -1 || caps.currentExtent.height == -1) {
 
 ## `fpGetPhysicalDeviceSurfacePresentModesKHR`
 
-In Vulkan, there are multiple ways images can be presented. We'll talk about the options later in this section, but for now, we need to figure out which are supported. We can use `fpGetPhysicalDeviceSurfacePresentModesKHR` to get the present modes as the name suggests. You can find documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#vkGetPhysicalDeviceSurfacePresentModesKHR) and the definition is the same as:
+In Vulkan, there are multiple ways images can be presented. We'll talk about the options later in this section, but for now, we need to figure out which are supported. We can use `fpGetPhysicalDeviceSurfacePresentModesKHR` to get the present modes as the name suggests. The definition is the same as `vkGetPhysicalDeviceSurfacePresentModesKHR`.
+
+**Definition for `vkGetPhysicalDeviceSurfacePresentModesKHR`**:
 
 ```cpp
 VkResult vkGetPhysicalDeviceSurfacePresentModesKHR(
@@ -61,12 +69,14 @@ VkResult vkGetPhysicalDeviceSurfacePresentModesKHR(
   VkPresentModeKHR*  pPresentModes);
 ```
 
+**[Documentation](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#vkGetPhysicalDeviceSurfacePresentModesKHR) for `vkGetPhysicalDeviceSurfacePresentModesKHR`**:
+
 - `physicalDevice` is the physical device that will be associated with the swapchain to be created, as described for `vkCreateSwapchainKHR`.
 - `surface` is the surface that will be associated with the swapchain.
 - `pPresentModeCount` is a pointer to an integer related to the number of format pairs available or queried, as described below.
 - `pPresentModes` is either `NULL` or a pointer to an array of `VkPresentModeKHR` structures.
 
-Let's look at how this is used:
+**Usage for `vkGetPhysicalDeviceSurfacePresentModesKHR`**:
 
 ```cpp
 uint32_t presentModeCount = 0;
@@ -81,7 +91,7 @@ assert(result == VK_SUCCESS);
 assert(presentModeCount >= 1);
 ```
 
-Now let's go ahead and call the function again with our `std::vector<VkPresentModeKHR>`:
+Now let's go ahead and call the function again with our `vector`:
 
 ```cpp
 std::vector<VkPresentModeKHR> presentModes(presentModeCount);
@@ -91,7 +101,7 @@ result = fpGetPhysicalDeviceSurfacePresentModesKHR(
 assert(result == VK_SUCCESS);
 ```
 
-Let's take a look at the available present modes. There are a few different types:
+Now we should take a look at the available present modes. There are a few different types:
 
 - `VK_PRESENT_MODE_IMMEDIATE_KHR` - Our engine **will not ever** wait for the vertical blanking interval. This *may* result in visible tearing if our frame misses the interval and is presented too late.
 - `VK_PRESENT_MODE_MAILBOX_KHR` - Our engine waits for the next vertical blanking interval to update the image. If we render another image, the image waiting to be displayed is overwritten.
@@ -119,7 +129,9 @@ for (uint32_t i = 0; i < presentModeCount; i++) {
 
 ## `VkSwapchainCreateInfoKHR`
 
-Next up, we're going to prepare the information needed to create our `VkSwapchainKHR`. You can find more information [here](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#VkSwapchainCreateInfoKHR) and the definition looks like this:
+Next up, we're going to prepare the information needed to create our `VkSwapchainKHR`.
+
+**Definition for `VkSwapchainCreateInfoKHR`**:
 
 ```cpp
 typedef struct VkSwapchainCreateInfoKHR {
@@ -143,6 +155,8 @@ typedef struct VkSwapchainCreateInfoKHR {
   VkSwapchainKHR oldSwapchain;
 } VkSwapchainCreateInfoKHR
 ```
+
+**[Documentation](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#VkSwapchainCreateInfoKHR) for `VkSwapchainCreateInfoKHR`**:
 
 - `sType` is the type of this structure and must be `VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR`.
 - `pNext` is `NULL` or a pointer to an extension-specific structure.
@@ -181,7 +195,7 @@ if (imageCount > caps.maxImageCount)
   imageCount = caps.maxImageCount;
 ```
 
-Let's go ahead and fill in `VkSwapchainCreateInfoKHR`:
+**Usage for `VkSwapchainCreateInfoKHR`**:
 
 ```cpp
 VkSwapchainCreateInfoKHR swapchainCreateInfo = {};
@@ -203,7 +217,9 @@ swapchainCreateInfo.presentMode = presentMode;
 
 ## `vkCreateSwapchainKHR`
 
-You can find documentation on this function [here](https://www.khronos.org/registry/vulkan/specs/1.0/man/html/vkCreateSwapchainKHR.html). The definition looks like this:
+This function will simply take in our `swapchainCreateInfo` and create the swapchain with that configuration.
+
+**Definition for `vkCreateSwapchainKHR`**:
 
 ```cpp
 VkResult vkCreateSwapchainKHR(
@@ -213,12 +229,14 @@ VkResult vkCreateSwapchainKHR(
   VkSwapchainKHR*                             pSwapchain);
 ```
 
+**[Documentation](https://www.khronos.org/registry/vulkan/specs/1.0/man/html/vkCreateSwapchainKHR.html) for `vkCreateSwapchainKHR`**:
+
 - `device` is the device to create the swapchain for.
 - `pCreateInfo` is a pointer to an instance of the `VkSwapchainCreateInfoKHR` structure specifying the parameters of the created swapchain.
 - `pAllocator` is the allocator used for host memory allocated for the swapchain object when there is no more specific allocator available.
 - `pSwapchain` is a pointer to a `VkSwapchainKHR` handle in which the created swapchain object will be returned.
 
-Let's call the method and then we can verify we were successful::
+**Usage for `vkCreateSwapchainKHR`**:
 
 ```cpp
 result = fpCreateSwapchainKHR(device, &swapchainCreateInfo, NULL, &swapchain);
@@ -227,7 +245,9 @@ assert(result == VK_SUCCESS);
 
 ## `fpGetSwapchainImagesKHR`
 
-We will need to get the available images from the swapchain. In a later section of this chapter, we'll actually get them ready for use, but right now, let's focus on this part. We'll be using a function pointer we got earlier called `fpGetSwapchainImagesKHR`. You can find documentation [here](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#vkGetSwapchainImagesKHR) and the definition is the same as:
+We will need to get the available images from the swapchain. In a later section of this chapter, we'll actually get them ready for use, but right now, let's focus on this part. We'll be using a function pointer we got earlier called `fpGetSwapchainImagesKHR`. The definition is the same as `vkGetSwapchainImagesKHR`.
+
+**Definition for `vkGetSwapchainImagesKHR`**:
 
 ```cpp
 VkResult vkGetSwapchainImagesKHR(
@@ -237,12 +257,14 @@ VkResult vkGetSwapchainImagesKHR(
   VkImage* pSwapchainImages);
 ```
 
+**[Documentation](https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/xhtml/vkspec.html#vkGetSwapchainImagesKHR) for `vkGetSwapchainImagesKHR`**:
+
 - `device` is the device associated with swapchain.
 - `swapchain` is the swapchain to query.
 - `pSwapchainImageCount` is a pointer to an integer related to the number of format pairs available or queried, as described below.
 - `pSwapchainImages` is either `NULL` or a pointer to an array of `VkSwapchainImageKHR` structures.
 
-Let's go ahead and make use of the function and check if we were successful:
+**Usage for `vkGetSwapchainImagesKHR`**:
 
 ```cpp
 result = fpGetSwapchainImagesKHR(device, swapchain, &imageCount, NULL);
