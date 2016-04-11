@@ -225,7 +225,6 @@ Finally, to wrap up this section, we need to create a logical device. We'll use 
 
 ```cpp
 VkResult vkCreateDevice(
-  // vkEnumeratePhysicalDevices
   VkPhysicalDevice                            physicalDevice,
   const VkDeviceCreateInfo*                   pCreateInfo,
   const VkAllocationCallbacks*                pAllocator,
