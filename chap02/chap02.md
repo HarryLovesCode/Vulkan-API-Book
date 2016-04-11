@@ -1,41 +1,36 @@
 # Creating an Instance
 
-Before we are able to start using Vulkan, we must first create an instance. A `VkInstance` is an object that contains all the information the implementation needs to work. Unlike OpenGL, Vulkan does not have a global state. Because of this, we must instead store our states in this object. In this chapter, we'll be beginning a class we'll use for the rest of the book. Here is what it the skeleton code looks like:
+Before we are able to start using Vulkan, we must first create an instance. A `VkInstance` is an object that contains all the information the implementation needs to work. Unlike OpenGL, Vulkan does not have a global state. Because of this, we must instead store our states in this object. In this chapter, we'll be beginning a class we'll use for the rest of the book. Here are the headers we will need to include:
 
 ```cpp
-#ifndef VULKAN_EXAMPLE_HPP
-#define VULKAN_EXAMPLE_HPP
-
-#include <cassert>
 #include <stdio.h>
-#include <stdlib.h>
 #include <vector>
-
 #include <vulkan/vulkan.h>
+```
 
+We'll be storing all of our variables in a class we'll call `VulkanExample` for now. The code will start out looking like:
+
+```cpp
 class VulkanExample {
  private:
   void exitOnError(const char* msg);
   void initInstance();
-
+  
   const char* applicationName = "Vulkan Example";
   const char* engineName = "Vulkan Engine";
-
+  
   VkInstance instance;
-
  public:
   VulkanExample();
   virtual ~VulkanExample();
 };
-
-#endif  // VULKAN_EXAMPLE_HPP
 ```
 
-We'll be writing the contents of the constructor and the `initInstance` method.
+In this chapter, we'll be focusing on the constructor and the `initInstance` method. 
 
-## `VkApplicationInfo`
+## Application Information
 
-This object, while not required, is pretty standard in most applications.
+Before we can use `VkInstanceCreateInfo`, we need to use another type to describe our application. The `VkApplicationInfo` contains the name of the application, application version, engine name, engine version, and API version. Like OpenGL, if the driver does not support the version we request, we most likely will not be able to recover.
 
 **Definition for `VkApplicationInfo`**:
 
@@ -74,9 +69,9 @@ appInfo.apiVersion = VK_MAKE_VERSION(1, 0, 3);
 
 You'll notice that for `apiVersion`, I am using `VK_MAKE_VERSION`. This allows the developer to specify a targeted Vulkan version. We'll see later that if the version we try to get is unsupported, we'll get an error called `VK_ERROR_INCOMPATIBLE_DRIVER`.
 
-## `VkInstanceCreateInfo`
+## Instance Creation Information
 
-This object, **is** required unlike `VkApplicationInfo`. This will be used to inform the instance of our application info, layers we'll be using, and extensions we'll be using.
+`VkInstanceCreateInfo` will be used to inform Vulkan of our application info, layers we'll be using, and extensions we want.
 
 **Definition for `VkInstanceCreateInfo`**:
 
@@ -135,9 +130,9 @@ createInfo.enabledExtensionCount = enabledExtensions.size();
 createInfo.ppEnabledExtensionNames = enabledExtensions.data();
 ```
 
-## `vkCreateInstance`
+## Creating an Instance
 
-Finally we're ready to create our instance.
+Finally we're ready to create our instance. A Vulkan instance is similar, in concept, to an OpenGL rendering context. Like I alluded to before, we'll store the engine state here including layers and extensions. To create an instance, we'll be using the `vkCreateInstance` function.
 
 **Definition for `vkCreateInstance`**:
 
@@ -154,7 +149,7 @@ VkResult vkCreateInstance(
 - `pAllocator` controls host memory allocation.
 - `pInstance` points a `VkInstance` handle in which the resulting instance is returned.
 
-Notice this returns a `VkResult`. This value is used for many function calls in Vulkan to indicate failure during execution of the function body. In this case, the value will tell us if the instance creation was successful or if it failed.
+You'll want to note two things. First, we're not going to use `pAllocator`. Instead, we'll pass in `NULL` for this argument. Second, the call to this function returns a `VkResult`. This value is used for many function calls in Vulkan. It will tell us if we were successful, failed, or if something else happened. In this case, the value will tell us if the instance creation was successful or if it failed.
 
 **Usage for `vkCreateInstance`**:
 
@@ -162,12 +157,7 @@ Notice this returns a `VkResult`. This value is used for many function calls in 
 VkResult res = vkCreateInstance(&createInfo, NULL, &instance);
 ```
 
-We should check:
-
-- Is our driver compatible?
-- Was our call to `vkCreateInstance()` succcessful?
-
-We can do this with the following code:
+After we've made the call, we should first check if our driver compatible. If it is not, we need to exit. We cannot recover. However, we should provide some sort of useful error. This error is extremely common in my experience. Second, we'll check if our call to `vkCreateInstance` successful. Again, if it was not, we need to exit. We cannot continue. These checks can be made with the following code:
 
 ```cpp
 if (res == VK_ERROR_INCOMPATIBLE_DRIVER) {
@@ -183,9 +173,9 @@ if (res == VK_ERROR_INCOMPATIBLE_DRIVER) {
 }
 ```
 
-## `exitOnError`
+## Termination on Error
 
-Our `exitOnError` method is very simple at the moment. It looks like this:
+Our `exitOnError` method is simple at the moment. We'll make some minor changes to it when we start working with windows, but for now, this will fulfill our needs:
 
 ```cpp
 void VulkanExample::exitOnError(const char* msg) {
@@ -194,12 +184,12 @@ void VulkanExample::exitOnError(const char* msg) {
 }
 ```
 
-We'll make some minor changes to that when we start working with windows.
+## Cleaning Up (Destructor)
 
-## Destructor
-
-For now, we will simply destroy the instance we created and then exit. The destructor looks like this:
+Exiting should be graceful if possible. In the case that our destructor is called, we will destroy the instance we created. Afterwards, the program will exit. The destructor looks like this:
 
 ```cpp
-VulkanExample::~VulkanExample() { vkDestroyInstance(instance, NULL); }
+VulkanExample::~VulkanExample() { 
+  vkDestroyInstance(instance, NULL); 
+}
 ```
