@@ -8,16 +8,17 @@ pandoc book.md                  \
   chap04/chap04.md              \
   chap04/chap04-linux.md        \
   chap04/chap04-windows.md      \
-  chap05/chap05.md              \
+  chap05/chap05_0.md            \
   chap05/chap05-windows.md      \
   chap05/chap05-linux.md        \
+  chap05/chap05_1.md            \
   chap06/chap06.md              \
   chap07/chap07.md              \
   chap08/chap08.md              \
   chap09/chap09.md              \
 --toc                           \
 --epub-stylesheet book.css      \
--o VulkanApiBook.epub 
+-o VulkanApiBook.epub
 
 # Generate the .pdf version of the book
 echo "Generating PDF"
@@ -27,9 +28,10 @@ pandoc book.md                  \
   chap04/chap04.md              \
   chap04/chap04-linux.md        \
   chap04/chap04-windows.md      \
-  chap05/chap05.md              \
+  chap05/chap05_0.md            \
   chap05/chap05-windows.md      \
   chap05/chap05-linux.md        \
+  chap05/chap05_1.md            \
   chap06/chap06.md              \
   chap07/chap07.md              \
   chap08/chap08.md              \

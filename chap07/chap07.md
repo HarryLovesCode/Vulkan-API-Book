@@ -11,9 +11,9 @@ void setImageLayout(VkCommandBuffer cmdBuffer, VkImage image,
 
 This will take a `VkCommandBuffer` and a `VkImage` whose image layout we want to set. While it's not necessary to build out this method, it will be useful later on. We'll also take in two `VkImageLayout`s.
 
-## `VkImageMemoryBarrier`
+## Image Memory Barriers
 
-In Vulkan, we have a new concept called barriers. They make sure our operations done on the GPU occur in a particular order which assure we get the expected result. A barrier separates two operations in a queue: before the barrier and after the barrier. Work done before the barrier will always finish before it can be used again.
+In Vulkan, we have a new concept called barriers which are called `VkImageMemoryBarrier`. They make sure our operations done on the GPU occur in a particular order which assure we get the expected result. A barrier separates two operations in a queue: before the barrier and after the barrier. Work done before the barrier will always finish before it can be used again.
 
 **Definition for `VkImageMemoryBarrier`**:
 
@@ -114,7 +114,7 @@ While there is a `VK_IMAGE_LAYOUT_GENERAL` that will work in all cases, it's not
 
 Images will start as `VK_IMAGE_LAYOUT_UNDEFINED` or `VK_IMAGE_LAYOUT_PREINITIALIZED` depending on which you pick. Note that moving from `VK_IMAGE_LAYOUT_UNDEFINED` to another layout may not preserve the existing data. However, moving from `VK_IMAGE_LAYOUT_PREINITIALIZED` to another gurantees the data is preserved. The documentation says that any layout can be used for `oldLayout` while `newLayout` cannot use `VK_IMAGE_LAYOUT_UNDEFINED` or `VK_IMAGE_LAYOUT_PREINITIALIZED`. You can find the documentation I'm reading from [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#synchronization-image-memory-barrier).
 
-## `vkCmdPipelineBarrier`
+## Recording Commands Image Layout Commands
 
 Before we can finish our `setImageLayout` method, we need to call `vkCmdPipelineBarrier`. This will record the command and insert our execution dependencies and memory dependencies between two sets of commands.
 
@@ -147,7 +147,6 @@ void vkCmdPipelineBarrier(
 - `imageMemoryBarrierCount` is the length of the `pImageMemoryBarriers` array.
 - `pImageMemoryBarriers` is a pointer to an array of `VkImageMemoryBarrier` structures.
 
-
 The only arguments we're not sure about are `srcFlags` and `dstFlags`. We know we want our execution / memory dependencies to be staged at the top of the command buffer. So, we'll use `VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT` to notify Vulkan of our intentions. You can find more information on pipeline state flags like `VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT` [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#synchronization-pipeline-stage-flags).
 
 **Usage for `vkCmdPipelineBarrier`**:
@@ -158,5 +157,3 @@ VkPipelineStageFlagBits dstFlags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 vkCmdPipelineBarrier(cmdBuffer, srcFlags, dstFlags, 0, 0, NULL, 0, NULL, 1,
                      &imageBarrier);
 ```
-
-That's all for image layouts. Onto image views!

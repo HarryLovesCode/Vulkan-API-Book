@@ -2,7 +2,9 @@
 #define VULKAN_EXAMPLE_HPP
 
 #include <cassert>
+#include <cstring>
 #include <stdio.h>
+#include <stdlib.h>
 #include <vector>
 
 #include <vulkan/vulkan.h>
@@ -12,7 +14,7 @@
 #include <xcb/xcb.h>
 #endif
 
-class VulkanExample {
+class VulkanSwapchain {
  private:
   void exitOnError(const char *msg);
   void initInstance();
@@ -38,8 +40,8 @@ class VulkanExample {
   xcb_atom_t wmDeleteWin;
 #endif
  public:
-  VulkanExample();
-  virtual ~VulkanExample();
+  VulkanSwapchain();
+  virtual ~VulkanSwapchain();
 
 #if defined(_WIN32)
   void initWindow(HINSTANCE hInstance);

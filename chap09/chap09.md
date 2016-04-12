@@ -6,7 +6,7 @@ For this chapter, we'll be focusing on:
 - Presenting images
 - Cleaning up when we're done with the swapchain
 
-## `fpAcquireNextImageKHR`
+## Acquiring the Next Image
 
 For this section, we'll be writing a small helper method. The definition looks like this:
 
@@ -46,7 +46,7 @@ VkResult result =
 assert(result == VK_SUCCESS);
 ```
 
-## `swapchainPresent`
+## Swapchain Image Presentation
 
 For this section and the next, we'll be writing the body of this method:
 
@@ -94,7 +94,7 @@ presentInfo.pSwapchains = &swapchain;
 presentInfo.pImageIndices = &buffer;
 ```
 
-## `fpQueuePresentKHR`
+## Queue Presentation
 
 As the last part of the `swapchainPresent` method, we actually get to present! We'll be using the function pointer from earlier called `fpQueuePresentKHR` which has the definition is the same as `vkQueuePresentKHR`.
 
@@ -110,6 +110,13 @@ VkResult vkQueuePresentKHR(
 
 - `queue `is a queue that is capable of presentation to the target surface’s platform on the same device as the image’s swapchain.
 - `pPresentInfo` is a pointer to an instance of the `VkPresentInfoKHR` structure specifying the parameters of the presentation.
+
+**Usage for `vkQueuePresentKHR`**:
+
+```cpp
+VkResult result = fpQueuePresentKHR(queue, &presentInfo);
+assert(result == VK_SUCCESS);
+```
 
 ## Cleaning Up
 

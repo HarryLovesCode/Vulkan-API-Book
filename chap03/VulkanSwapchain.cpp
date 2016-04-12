@@ -1,18 +1,18 @@
-#include "VulkanExample.hpp"
+#include "VulkanSwapchain.hpp"
 
-VulkanExample::VulkanExample() {
+VulkanSwapchain::VulkanSwapchain() {
   initInstance();
   initDevices();
 }
 
-VulkanExample::~VulkanExample() { vkDestroyInstance(instance, NULL); }
+VulkanSwapchain::~VulkanSwapchain() { vkDestroyInstance(instance, NULL); }
 
-void VulkanExample::exitOnError(const char *msg) {
+void VulkanSwapchain::exitOnError(const char *msg) {
   fputs(msg, stderr);
   exit(EXIT_FAILURE);
 }
 
-void VulkanExample::initInstance() {
+void VulkanSwapchain::initInstance() {
   VkApplicationInfo appInfo = {};
   appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   appInfo.pNext = NULL;
@@ -53,7 +53,7 @@ void VulkanExample::initInstance() {
   }
 }
 
-void VulkanExample::initDevices() {
+void VulkanSwapchain::initDevices() {
   uint32_t deviceCount = 0;
   VkResult result = vkEnumeratePhysicalDevices(instance, &deviceCount, NULL);
 

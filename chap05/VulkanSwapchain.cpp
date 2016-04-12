@@ -1,6 +1,6 @@
-#include "VulkanExample.hpp"
+#include "VulkanSwapchain.hpp"
 
-VulkanExample::VulkanExample() {
+VulkanSwapchain::VulkanSwapchain() {
 #if defined(_WIN32)
   AllocConsole();
   AttachConsole(GetCurrentProcessId());
@@ -21,9 +21,9 @@ VulkanExample::VulkanExample() {
   GET_DEVICE_PROC_ADDR(device, QueuePresentKHR);
 }
 
-VulkanExample::~VulkanExample() { vkDestroyInstance(instance, NULL); }
+VulkanSwapchain::~VulkanSwapchain() { vkDestroyInstance(instance, NULL); }
 
-void VulkanExample::exitOnError(const char *msg) {
+void VulkanSwapchain::exitOnError(const char *msg) {
 #if defined(_WIN32)
   MessageBox(NULL, msg, applicationName, MB_ICONERROR);
 #elif defined(__linux__)
@@ -32,7 +32,7 @@ void VulkanExample::exitOnError(const char *msg) {
   exit(EXIT_FAILURE);
 }
 
-void VulkanExample::initInstance() {
+void VulkanSwapchain::initInstance() {
   VkApplicationInfo appInfo = {};
   appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   appInfo.pNext = NULL;
@@ -73,7 +73,7 @@ void VulkanExample::initInstance() {
   }
 }
 
-void VulkanExample::initDevices() {
+void VulkanSwapchain::initDevices() {
   uint32_t deviceCount = 0;
   VkResult result = vkEnumeratePhysicalDevices(instance, &deviceCount, NULL);
 
@@ -143,7 +143,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
   return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
-void VulkanExample::initWindow(HINSTANCE hInstance) {
+void VulkanSwapchain::initWindow(HINSTANCE hInstance) {
   WNDCLASSEX wcex;
 
   wcex.cbSize = sizeof(WNDCLASSEX);
@@ -178,7 +178,7 @@ void VulkanExample::initWindow(HINSTANCE hInstance) {
   SetFocus(window);
 }
 
-void VulkanExample::renderLoop() {
+void VulkanSwapchain::renderLoop() {
   MSG message;
 
   while (GetMessage(&message, NULL, 0, 0)) {
@@ -188,7 +188,7 @@ void VulkanExample::renderLoop() {
 }
 
 #elif defined(__linux__)
-void VulkanExample::initWindow() {
+void VulkanSwapchain::initWindow() {
   int screenp = 0;
   connection = xcb_connect(NULL, &screenp);
 
@@ -230,16 +230,21 @@ void VulkanExample::initWindow() {
   xcb_flush(connection);
 }
 
-void VulkanExample::renderLoop() {
+void VulkanSwapchain::renderLoop() {
   bool running = true;
+  xcb_generic_event_t *event;
+  xcb_client_message_event_t *cm;
 
   while (running) {
-    xcb_generic_event_t *event = xcb_wait_for_event(connection);
+    event = xcb_wait_for_event(connection);
 
     switch (event->response_type & ~0x80) {
       case XCB_CLIENT_MESSAGE: {
-        xcb_client_message_event_t *cm = (xcb_client_message_event_t *)event;
-        if (cm->data.data32[0] == wmDeleteWin) running = false;
+        cm = (xcb_client_message_event_t *)event;
+
+        if (cm->data.data32[0] == wmDeleteWin)
+          running = false;
+
         break;
       }
     }
@@ -251,7 +256,7 @@ void VulkanExample::renderLoop() {
 }
 #endif
 
-void VulkanExample::initSurface() {
+void VulkanSwapchain::initSurface() {
 #if defined(_WIN32)
   VkWin32SurfaceCreateInfoKHR surfaceCreateInfo = {};
   surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;

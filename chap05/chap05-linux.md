@@ -2,7 +2,7 @@
 
 We're going to be writing the Linux specific code for getting a surface in this section. While this code may work on another operating system that uses the XCB library, I cannot guarantee it will.
 
-### `VkXcbSurfaceCreateInfoKHR`
+### Surface Create Information
 
 Before we create a surface, we must specify information ahead of time like most Vulkan objects. We'll be using `VkXcbSurfaceCreateInfoKHR`.
 
@@ -37,7 +37,7 @@ surfaceCreateInfo.connection = connection;
 surfaceCreateInfo.window = window;
 ```
 
-### `vkCreateXcbSurfaceKHR`
+### Creating the Surface
 
 Now we can create the surface. We'll be calling the `vkCreateXcbSurfaceKHR` method to do so.
 

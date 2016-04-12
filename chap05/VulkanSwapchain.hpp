@@ -2,7 +2,9 @@
 #define VULKAN_EXAMPLE_HPP
 
 #include <cassert>
+#include <cstring>
 #include <stdio.h>
+#include <stdlib.h>
 #include <vector>
 
 #include <vulkan/vulkan.h>
@@ -26,21 +28,11 @@
       exitOnError("vkGetDeviceProcAddr failed to find vk" #entry);    \
   }
 
-struct SwapChainBuffer {
-  VkImage image;
-  VkImageView view;
-  VkFramebuffer frameBuffer;
-};
-
-class VulkanExample {
+class VulkanSwapchain {
  private:
   void exitOnError(const char *msg);
   void initInstance();
   void initDevices();
-  void initSwapchain(VkCommandBuffer cmdBuffer);
-  void setImageLayout(VkCommandBuffer cmdBuffer, VkImage image,
-                      VkImageAspectFlags aspects, VkImageLayout oldLayout,
-                      VkImageLayout newLayout);
 
   const char *applicationName = "Vulkan Example";
   const char *engineName = "Vulkan Engine";
@@ -55,9 +47,6 @@ class VulkanExample {
   VkFormat colorFormat;
   VkColorSpaceKHR colorSpace;
   uint32_t queueIndex;
-  VkSwapchainKHR swapchain;
-  std::vector<VkImage> images;
-  std::vector<SwapChainBuffer> buffers;
 
   PFN_vkGetPhysicalDeviceSurfaceSupportKHR fpGetPhysicalDeviceSurfaceSupportKHR;
   PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR
@@ -81,8 +70,8 @@ class VulkanExample {
   xcb_atom_t wmDeleteWin;
 #endif
  public:
-  VulkanExample();
-  virtual ~VulkanExample();
+  VulkanSwapchain();
+  virtual ~VulkanSwapchain();
 
 #if defined(_WIN32)
   void initWindow(HINSTANCE hInstance);

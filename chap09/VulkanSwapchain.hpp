@@ -2,7 +2,9 @@
 #define VULKAN_EXAMPLE_HPP
 
 #include <cassert>
+#include <cstring>
 #include <stdio.h>
+#include <stdlib.h>
 #include <vector>
 
 #include <vulkan/vulkan.h>
@@ -32,7 +34,7 @@ struct SwapChainBuffer {
   VkFramebuffer frameBuffer;
 };
 
-class VulkanExample {
+class VulkanSwapchain {
  private:
   void exitOnError(const char *msg);
   void getSwapchainNext(VkSemaphore presentCompleteSemaphore, uint32_t buffer);
@@ -84,8 +86,8 @@ class VulkanExample {
   xcb_atom_t wmDeleteWin;
 #endif
  public:
-  VulkanExample();
-  virtual ~VulkanExample();
+  VulkanSwapchain();
+  virtual ~VulkanSwapchain();
 
 #if defined(_WIN32)
   void initWindow(HINSTANCE hInstance);

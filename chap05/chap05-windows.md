@@ -2,7 +2,7 @@
 
 We're going to be writing the Windows specific code for getting a surface in this section.
 
-### `VkWin32SurfaceCreateInfoKHR`
+### Surface Create Information
 
 Before we create a surface, we must specify information ahead of time like most Vulkan objects. We'll be using `VkWin32SurfaceCreateInfoKHR`.
 
@@ -36,7 +36,7 @@ surfaceCreateInfo.hinstance = windowInstance;
 surfaceCreateInfo.hwnd = window;
 ```
 
-### `vkCreateWin32SurfaceKHR`
+### Creating the Surface
 
 Now we can create the surface. We can make a call to the `vkCreateWin32SurfaceKHR` method.
 

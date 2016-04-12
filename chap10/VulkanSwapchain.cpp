@@ -1,6 +1,6 @@
-#include "VulkanExample.hpp"
+#include "VulkanSwapchain.hpp"
 
-VulkanExample::VulkanExample() {
+VulkanSwapchain::VulkanSwapchain() {
 #if defined(_WIN32)
   AllocConsole();
   AttachConsole(GetCurrentProcessId());
@@ -21,7 +21,7 @@ VulkanExample::VulkanExample() {
   GET_DEVICE_PROC_ADDR(device, QueuePresentKHR);
 }
 
-VulkanExample::~VulkanExample() {
+VulkanSwapchain::~VulkanSwapchain() {
   for (SwapChainBuffer buffer : buffers)
     vkDestroyImageView(device, buffer.view, NULL);
 
@@ -30,7 +30,7 @@ VulkanExample::~VulkanExample() {
   vkDestroyInstance(instance, NULL);
 }
 
-void VulkanExample::exitOnError(const char *msg) {
+void VulkanSwapchain::exitOnError(const char *msg) {
 #if defined(_WIN32)
   MessageBox(NULL, msg, applicationName, MB_ICONERROR);
 #elif defined(__linux__)
@@ -39,7 +39,17 @@ void VulkanExample::exitOnError(const char *msg) {
   exit(EXIT_FAILURE);
 }
 
-void VulkanExample::initInstance() {
+void VulkanSwapchain::getSwapchainNext(VkSemaphore presentCompleteSemaphore,
+                                     uint32_t buffer) {
+  VkResult result =
+      fpAcquireNextImageKHR(device, swapchain, UINT64_MAX,
+                            presentCompleteSemaphore, (VkFence)0, &buffer);
+
+  if (result != VK_SUCCESS)
+    exitOnError("Failed to get next image in swapchain");
+}
+
+void VulkanSwapchain::initInstance() {
   VkApplicationInfo appInfo = {};
   appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   appInfo.pNext = NULL;
@@ -80,7 +90,7 @@ void VulkanExample::initInstance() {
   }
 }
 
-void VulkanExample::initDevices() {
+void VulkanSwapchain::initDevices() {
   uint32_t deviceCount = 0;
   VkResult result = vkEnumeratePhysicalDevices(instance, &deviceCount, NULL);
 
@@ -150,7 +160,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
   return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
-void VulkanExample::initWindow(HINSTANCE hInstance) {
+void VulkanSwapchain::initWindow(HINSTANCE hInstance) {
   WNDCLASSEX wcex;
 
   wcex.cbSize = sizeof(WNDCLASSEX);
@@ -185,7 +195,7 @@ void VulkanExample::initWindow(HINSTANCE hInstance) {
   SetFocus(window);
 }
 
-void VulkanExample::renderLoop() {
+void VulkanSwapchain::renderLoop() {
   MSG message;
 
   while (GetMessage(&message, NULL, 0, 0)) {
@@ -195,7 +205,7 @@ void VulkanExample::renderLoop() {
 }
 
 #elif defined(__linux__)
-void VulkanExample::initWindow() {
+void VulkanSwapchain::initWindow() {
   int screenp = 0;
   connection = xcb_connect(NULL, &screenp);
 
@@ -237,16 +247,21 @@ void VulkanExample::initWindow() {
   xcb_flush(connection);
 }
 
-void VulkanExample::renderLoop() {
+void VulkanSwapchain::renderLoop() {
   bool running = true;
+  xcb_generic_event_t *event;
+  xcb_client_message_event_t *cm;
 
   while (running) {
-    xcb_generic_event_t *event = xcb_wait_for_event(connection);
+    event = xcb_wait_for_event(connection);
 
     switch (event->response_type & ~0x80) {
       case XCB_CLIENT_MESSAGE: {
-        xcb_client_message_event_t *cm = (xcb_client_message_event_t *)event;
-        if (cm->data.data32[0] == wmDeleteWin) running = false;
+        cm = (xcb_client_message_event_t *)event;
+
+        if (cm->data.data32[0] == wmDeleteWin)
+          running = false;
+
         break;
       }
     }
@@ -258,7 +273,7 @@ void VulkanExample::renderLoop() {
 }
 #endif
 
-void VulkanExample::initSurface() {
+void VulkanSwapchain::initSurface() {
 #if defined(_WIN32)
   VkWin32SurfaceCreateInfoKHR surfaceCreateInfo = {};
   surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
@@ -327,7 +342,7 @@ void VulkanExample::initSurface() {
   colorSpace = surfaceFormats[0].colorSpace;
 }
 
-void VulkanExample::initSwapchain(VkCommandBuffer cmdBuffer) {
+void VulkanSwapchain::initSwapchain(VkCommandBuffer cmdBuffer) {
   VkSurfaceCapabilitiesKHR caps = {};
   VkResult result =
       fpGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &caps);
@@ -407,9 +422,48 @@ void VulkanExample::initSwapchain(VkCommandBuffer cmdBuffer) {
       fpGetSwapchainImagesKHR(device, swapchain, &imageCount, images.data());
 
   assert(result == VK_SUCCESS);
+
+  for (uint32_t i = 0; i < imageCount; i++) {
+    VkImageViewCreateInfo imageCreateInfo = {};
+    imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    imageCreateInfo.pNext = NULL;
+    imageCreateInfo.format = colorFormat;
+    imageCreateInfo.components = {
+        VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B,
+        VK_COMPONENT_SWIZZLE_A};
+    imageCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    imageCreateInfo.subresourceRange.baseMipLevel = 0;
+    imageCreateInfo.subresourceRange.levelCount = 1;
+    imageCreateInfo.subresourceRange.baseArrayLayer = 0;
+    imageCreateInfo.subresourceRange.layerCount = 1;
+    imageCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    imageCreateInfo.flags = 0;
+
+    buffers[i].image = images[i];
+    setImageLayout(cmdBuffer, buffers[i].image, VK_IMAGE_ASPECT_COLOR_BIT,
+                   VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+    imageCreateInfo.image = buffers[i].image;
+    result =
+        vkCreateImageView(device, &imageCreateInfo, NULL, &buffers[i].view);
+
+    assert(result == VK_SUCCESS);
+
+    VkFramebufferCreateInfo fbCreateInfo = {};
+    fbCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    fbCreateInfo.attachmentCount = 1;
+    fbCreateInfo.pAttachments = &buffers[i].view;
+    fbCreateInfo.width = swapchainExtent.width;
+    fbCreateInfo.height = swapchainExtent.height;
+    fbCreateInfo.layers = 1;
+
+    result = vkCreateFramebuffer(device, &fbCreateInfo, NULL,
+                                 &buffers[i].frameBuffer);
+
+    assert(result == VK_SUCCESS);
+  }
 }
 
-void VulkanExample::setImageLayout(VkCommandBuffer cmdBuffer, VkImage image,
+void VulkanSwapchain::setImageLayout(VkCommandBuffer cmdBuffer, VkImage image,
                                    VkImageAspectFlags aspects,
                                    VkImageLayout oldLayout,
                                    VkImageLayout newLayout) {
@@ -472,3 +526,16 @@ void VulkanExample::setImageLayout(VkCommandBuffer cmdBuffer, VkImage image,
                        &imageBarrier);
 }
 
+void VulkanSwapchain::swapchainPresent(VkCommandBuffer cmdBuffer, VkQueue queue,
+                                     uint32_t buffer) {
+  VkPresentInfoKHR presentInfo = {};
+  presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+  presentInfo.pNext = NULL;
+  presentInfo.swapchainCount = 1;
+  presentInfo.pSwapchains = &swapchain;
+  presentInfo.pImageIndices = &buffer;
+
+  VkResult result = fpQueuePresentKHR(queue, &presentInfo);
+
+  assert(result == VK_SUCCESS);
+}

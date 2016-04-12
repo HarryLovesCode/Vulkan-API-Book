@@ -4,14 +4,16 @@ Before we are able to start using Vulkan, we must first create an instance. A `V
 
 ```cpp
 #include <stdio.h>
+#include <stdlib.h>
 #include <vector>
+
 #include <vulkan/vulkan.h>
 ```
 
-We'll be storing all of our variables in a class we'll call `VulkanExample` for now. The code will start out looking like:
+We'll be storing all of our variables in a class we'll call `VulkanSwapchain` for now. The code will start out looking like:
 
 ```cpp
-class VulkanExample {
+class VulkanSwapchain {
  private:
   void exitOnError(const char* msg);
   void initInstance();
@@ -21,8 +23,8 @@ class VulkanExample {
   
   VkInstance instance;
  public:
-  VulkanExample();
-  virtual ~VulkanExample();
+  VulkanSwapchain();
+  virtual ~VulkanSwapchain();
 };
 ```
 
@@ -69,7 +71,7 @@ appInfo.apiVersion = VK_MAKE_VERSION(1, 0, 3);
 
 You'll notice that for `apiVersion`, I am using `VK_MAKE_VERSION`. This allows the developer to specify a targeted Vulkan version. We'll see later that if the version we try to get is unsupported, we'll get an error called `VK_ERROR_INCOMPATIBLE_DRIVER`.
 
-## Instance Creation Information
+## Instance Create Information
 
 `VkInstanceCreateInfo` will be used to inform Vulkan of our application info, layers we'll be using, and extensions we want.
 
@@ -178,7 +180,7 @@ if (res == VK_ERROR_INCOMPATIBLE_DRIVER) {
 Our `exitOnError` method is simple at the moment. We'll make some minor changes to it when we start working with windows, but for now, this will fulfill our needs:
 
 ```cpp
-void VulkanExample::exitOnError(const char* msg) {
+void VulkanSwapchain::exitOnError(const char* msg) {
   fputs(msg, stderr);
   exit(EXIT_FAILURE);
 }
@@ -189,7 +191,7 @@ void VulkanExample::exitOnError(const char* msg) {
 Exiting should be graceful if possible. In the case that our destructor is called, we will destroy the instance we created. Afterwards, the program will exit. The destructor looks like this:
 
 ```cpp
-VulkanExample::~VulkanExample() { 
+VulkanSwapchain::~VulkanSwapchain() {
   vkDestroyInstance(instance, NULL); 
 }
 ```

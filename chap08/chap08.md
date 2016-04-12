@@ -8,9 +8,9 @@ for (uint32_t i = 0; i < imageCount; i++) {
 }
 ```
 
-## `VkImageViewCreateInfo`
+## Image View Create Information
 
-Now, in Vulkan, we don't directly access images via shaders for reading and writing. We make use of image views which represent subresources of the images and their metadata to do the same.
+In Vulkan, we don't directly access images from shaders for reading and writing. Instead, we make use of image views. We can use `VkImageViewCreateInfo` to specify certain traits for each image view we want to create. Essentially, image views wrap up image objects and can provide additional metadata.
 
 **Definition for `VkImageViewCreateInfo`**:
 
@@ -74,7 +74,7 @@ setImageLayout(cmdBuffer, buffers[i].image, VK_IMAGE_ASPECT_COLOR_BIT,
 imageCreateInfo.image = buffers[i].image;
 ```
 
-## `vkCreateImageView`
+## Creating an Image View
 
 To create our image view, we simply call `vkCreateImageView`.
 
@@ -104,7 +104,7 @@ result =
 assert(result == VK_SUCCESS);
 ```
 
-## `VkFramebufferCreateInfo`
+## Framebuffer Create Information
 
 We're going to be creating framebuffers for every image in the swapchain. Thus, we'll continue writing the body of our `for` loop. Like most types in Vulkan, we'll need to create an info structure before we can create a framebuffer. This is called `VkFramebufferCreateInfo`.
 
@@ -148,7 +148,7 @@ fbCreateInfo.height = swapchainExtent.height;
 fbCreateInfo.layers = 1;
 ```
 
-## `vkCreateFramebuffer`
+## Creating a Framebuffer
 
 Now we can create each framebuffer. We'll call `vkCreateFramebuffer`.
 

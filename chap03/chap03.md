@@ -2,13 +2,13 @@
 
 Once we have created a Vulkan instance, we can use two objects to interact with our implementation. These objects are queues and devices. This chapter is going to focus on the two types of devices: physical and logical. A physical device is a single component in the system. It can also be multiple components working in conjunction to function like a single device. A logical device is basically our interface with the physical device.
 
-## `VkPhysicalDevice`
+## Physical Devices
 
 A `VkPhysicalDevice` is a data type that we will use to represent each piece of hardware. There's not much to say here other than we will pass a pointer to an array to the implementation. The implementation will then write handles for each physical device in the system to said array. You can find more information on physical devices [here](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#devsandqueues-physical-device-enumeration).
 
 <!--TODO: Add the definition and explanation -->
 
-## `vkEnumeratePhysicalDevices`
+## Enumerating Physical Devices
 
 To get the handles of all the physical devices in the system, we can call use `vkEnumeratePhysicalDevices`. We will call it twice. First, we'll pass in `NULL` as the last parameter. This will allow us to get `pPhysicalDeviceCount` out by passing in the address to a variable for the second argument. After that, we can allocate the memory necessary to store the `pPhysicalDevices` and call it with that variable as the last argument.
 
@@ -36,14 +36,21 @@ uint32_t deviceCount = 0;
 VkResult result = vkEnumeratePhysicalDevices(instance, &deviceCount, NULL);
 ```
 
-We should make two assertions:
+We should make two assertions.
+
+- The function call was successful
 
 ```cpp
-assert(result == VK_SUCCESS); // Function call was successful
-assert(deviceCount >= 1);     // We found 1 or more Vulkan compatible devices
+assert(result == VK_SUCCESS);
 ```
 
-Following the usage guidelines outlined in the specification, a call to `vkEnumeratePhysicalDevices` with error checking would look like this:
+- We found one or more Vulkan compatible device:
+
+```cpp
+assert(deviceCount >= 1);
+```
+
+Following the usage guidelines outlined in the specification, a second call to `vkEnumeratePhysicalDevices` with error checking would look like this:
 
 ```cpp
 std::vector<VkPhysicalDevice> physicalDevices(deviceCount);
@@ -51,11 +58,13 @@ result = vkEnumeratePhysicalDevices(instance, &deviceCount, physicalDevices.data
 assert(result == VK_SUCCESS);
 ```
 
-## `VkPhysicalDeviceProperties`
+For now, we will simply choose the first device (at index `0`) in the array of `physicalDevices`.
+
+## Physical Device Properties
 
 `VkPhysicalDeviceProperties` is a data type that we will use to represent properties of each physical device. There's not much to say here other than we will pass a pointer of this type to the implementation. The implementation will then write properties for the specified `VkPhysicalDevice`.
 
-**Definition for `VkPhysicalDeviceProperties**:
+**Definition for `VkPhysicalDeviceProperties`**:
 
 ```cpp
 typedef struct VkPhysicalDeviceProperties {
@@ -95,11 +104,11 @@ typedef enum VkPhysicalDeviceType {
 } VkPhysicalDeviceType;
 ```
 
-This may be useful if you are trying to detect if you have an integrated GPU versus a discrete GPU.
+This may be useful if you are trying to detect (for example) if you have an integrated GPU versus a discrete GPU.
 
-## `vkGetPhysicalDeviceProperties`
+## Getting Physical Device Properties
 
-A call to this method is not necessary in most cases. However, it can be useful in retrieving information about your device.
+A call to `vkGetPhysicalDeviceProperties` can be useful if you are interested in retrieving information about the physical devices in the system. It will tell you API version, driver version, limitations, sparse properties, etc.
 
 **Definition for `vkGetPhysicalDeviceProperties`**:
 
@@ -121,10 +130,10 @@ void vkGetPhysicalDeviceProperties(
 VkPhysicalDeviceProperties physicalProperties = {};
 
 for (uint32_t i = 0; i < deviceCount; i++)
-  vkGetPhysicalDeviceProperties(physicalDevices[i], & physicalProperties);
+  vkGetPhysicalDeviceProperties(physicalDevices[i], &physicalProperties);
 ```
 
-If we want, we can output some useful parts of the information using this piece of code in the loop above:
+We can output some useful parts of the information using this piece of code in the loop above:
 
 ```cpp
 fprintf(stdout, "Device Name:    %s\n", physicalProperties.deviceName);
@@ -147,7 +156,7 @@ fprintf(stdout, "API Version:    %d.%d.%d\n",
         VK_VERSION_PATCH(physicalProperties.apiVersion));
 ```
 
-## `VkDeviceQueueCreateInfo`
+## Device Queue Create Information
 
 The next step is to create a device using `vkCreateDevice`. However, in order to do that, we must have a `VkDeviceCreateInfo` object. And, as you may have guessed having seen the specification, we need a `VkDeviceQueueCreateInfo` object.
 
@@ -188,7 +197,7 @@ queueInfo.pQueuePriorities = &priorities[0];
 
 You'll note that we create a `float` array with a single value. Each value in that array will tell the implementation the priority of the queue. Values must be between `0.0` and `1.0`. Certain implementations will give higher-priority queues more processing time. However, this is not necessarily true because the specification doesn't require this behavior.
 
-## `VkDeviceCreateInfo`
+## Device Create Info
 
 The parent of `VkDeviceQueueCreateInfo` is `VkDeviceCreateInfo`.
 
@@ -237,7 +246,7 @@ deviceInfo.ppEnabledExtensionNames = enabledExtensions.data();
 deviceInfo.pEnabledFeatures = NULL;
 ```
 
-## `vkCreateDevice`
+## Creating a Device
 
 Finally, to wrap up this section, we need to create a logical device. We'll use the `vkCreateDevice`.
 
@@ -261,6 +270,7 @@ VkResult vkCreateDevice(
 **Usage for `vkCreateDevice`**:
 
 ```cpp
-VkResult result = vkCreateDevice(physicalDevice, &deviceInfo, NULL, &logicalDevice);
+VkResult result = vkCreateDevice(physicalDevice, &deviceInfo,
+                                 NULL, &logicalDevice);
 assert(result != VK_SUCCESS);
 ```

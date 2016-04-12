@@ -1,15 +1,15 @@
-#include "VulkanExample.hpp"
+#include "VulkanSwapchain.hpp"
 
-VulkanExample::VulkanExample() { initInstance(); }
+VulkanSwapchain::VulkanSwapchain() { initInstance(); }
 
-VulkanExample::~VulkanExample() { vkDestroyInstance(instance, NULL); }
+VulkanSwapchain::~VulkanSwapchain() { vkDestroyInstance(instance, NULL); }
 
-void VulkanExample::exitOnError(const char* msg) {
+void VulkanSwapchain::exitOnError(const char* msg) {
   fputs(msg, stderr);
   exit(EXIT_FAILURE);
 }
 
-void VulkanExample::initInstance() {
+void VulkanSwapchain::initInstance() {
   VkApplicationInfo appInfo = {};
   appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   appInfo.pNext = NULL;

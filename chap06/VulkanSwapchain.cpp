@@ -1,6 +1,6 @@
-#include "VulkanExample.hpp"
+#include "VulkanSwapchain.hpp"
 
-VulkanExample::VulkanExample() {
+VulkanSwapchain::VulkanSwapchain() {
 #if defined(_WIN32)
   AllocConsole();
   AttachConsole(GetCurrentProcessId());
@@ -10,11 +10,27 @@ VulkanExample::VulkanExample() {
 #endif
   initInstance();
   initDevices();
+  GET_INSTANCE_PROC_ADDR(instance, GetPhysicalDeviceSurfaceSupportKHR);
+  GET_INSTANCE_PROC_ADDR(instance, GetPhysicalDeviceSurfaceCapabilitiesKHR);
+  GET_INSTANCE_PROC_ADDR(instance, GetPhysicalDeviceSurfaceFormatsKHR);
+  GET_INSTANCE_PROC_ADDR(instance, GetPhysicalDeviceSurfacePresentModesKHR);
+  GET_DEVICE_PROC_ADDR(device, CreateSwapchainKHR);
+  GET_DEVICE_PROC_ADDR(device, DestroySwapchainKHR);
+  GET_DEVICE_PROC_ADDR(device, GetSwapchainImagesKHR);
+  GET_DEVICE_PROC_ADDR(device, AcquireNextImageKHR);
+  GET_DEVICE_PROC_ADDR(device, QueuePresentKHR);
 }
 
-VulkanExample::~VulkanExample() { vkDestroyInstance(instance, NULL); }
+VulkanSwapchain::~VulkanSwapchain() {
+  for (SwapChainBuffer buffer : buffers)
+    vkDestroyImageView(device, buffer.view, NULL);
 
-void VulkanExample::exitOnError(const char *msg) {
+  // fpDestroySwapchainKHR(device, swapchain, NULL);
+  vkDestroySurfaceKHR(instance, surface, NULL);
+  vkDestroyInstance(instance, NULL);
+}
+
+void VulkanSwapchain::exitOnError(const char *msg) {
 #if defined(_WIN32)
   MessageBox(NULL, msg, applicationName, MB_ICONERROR);
 #elif defined(__linux__)
@@ -23,7 +39,7 @@ void VulkanExample::exitOnError(const char *msg) {
   exit(EXIT_FAILURE);
 }
 
-void VulkanExample::initInstance() {
+void VulkanSwapchain::initInstance() {
   VkApplicationInfo appInfo = {};
   appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   appInfo.pNext = NULL;
@@ -64,7 +80,7 @@ void VulkanExample::initInstance() {
   }
 }
 
-void VulkanExample::initDevices() {
+void VulkanSwapchain::initDevices() {
   uint32_t deviceCount = 0;
   VkResult result = vkEnumeratePhysicalDevices(instance, &deviceCount, NULL);
 
@@ -134,7 +150,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
   return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
-void VulkanExample::initWindow(HINSTANCE hInstance) {
+void VulkanSwapchain::initWindow(HINSTANCE hInstance) {
   WNDCLASSEX wcex;
 
   wcex.cbSize = sizeof(WNDCLASSEX);
@@ -169,7 +185,7 @@ void VulkanExample::initWindow(HINSTANCE hInstance) {
   SetFocus(window);
 }
 
-void VulkanExample::renderLoop() {
+void VulkanSwapchain::renderLoop() {
   MSG message;
 
   while (GetMessage(&message, NULL, 0, 0)) {
@@ -179,7 +195,7 @@ void VulkanExample::renderLoop() {
 }
 
 #elif defined(__linux__)
-void VulkanExample::initWindow() {
+void VulkanSwapchain::initWindow() {
   int screenp = 0;
   connection = xcb_connect(NULL, &screenp);
 
@@ -221,16 +237,21 @@ void VulkanExample::initWindow() {
   xcb_flush(connection);
 }
 
-void VulkanExample::renderLoop() {
+void VulkanSwapchain::renderLoop() {
   bool running = true;
+  xcb_generic_event_t *event;
+  xcb_client_message_event_t *cm;
 
   while (running) {
-    xcb_generic_event_t *event = xcb_wait_for_event(connection);
+    event = xcb_wait_for_event(connection);
 
     switch (event->response_type & ~0x80) {
       case XCB_CLIENT_MESSAGE: {
-        xcb_client_message_event_t *cm = (xcb_client_message_event_t *)event;
-        if (cm->data.data32[0] == wmDeleteWin) running = false;
+        cm = (xcb_client_message_event_t *)event;
+
+        if (cm->data.data32[0] == wmDeleteWin)
+          running = false;
+
         break;
       }
     }
@@ -241,3 +262,154 @@ void VulkanExample::renderLoop() {
   xcb_destroy_window(connection, window);
 }
 #endif
+
+void VulkanSwapchain::initSurface() {
+#if defined(_WIN32)
+  VkWin32SurfaceCreateInfoKHR surfaceCreateInfo = {};
+  surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+  surfaceCreateInfo.pNext = NULL;
+  surfaceCreateInfo.flags = 0;
+  surfaceCreateInfo.hinstance = windowInstance;
+  surfaceCreateInfo.hwnd = window;
+  VkResult result =
+      vkCreateWin32SurfaceKHR(instance, &surfaceCreateInfo, NULL, &surface);
+#elif defined(__linux__)
+  VkXcbSurfaceCreateInfoKHR surfaceCreateInfo = {};
+  surfaceCreateInfo.pNext = NULL;
+  surfaceCreateInfo.flags = 0;
+  surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
+  surfaceCreateInfo.connection = connection;
+  surfaceCreateInfo.window = window;
+  VkResult result =
+      vkCreateXcbSurfaceKHR(instance, &surfaceCreateInfo, NULL, &surface);
+#endif
+
+  assert(result == VK_SUCCESS);
+
+  uint32_t queueCount = 0;
+  vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueCount, NULL);
+
+  assert(queueCount >= 1);
+
+  std::vector<VkQueueFamilyProperties> queueProperties(queueCount);
+  vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueCount,
+                                           queueProperties.data());
+
+  queueIndex = UINT32_MAX;
+  std::vector<VkBool32> supportsPresenting(queueCount);
+
+  for (uint32_t i = 0; i < queueCount; i++) {
+    fpGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface,
+                                         &supportsPresenting[i]);
+    if ((queueProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) != 0) {
+      if (supportsPresenting[i] == VK_TRUE) {
+        queueIndex = i;
+        break;
+      }
+    }
+  }
+
+  assert(queueIndex != UINT32_MAX);
+
+  uint32_t formatCount = 0;
+  result = fpGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface,
+                                                &formatCount, NULL);
+
+  assert(result == VK_SUCCESS);
+  assert(formatCount >= 1);
+
+  std::vector<VkSurfaceFormatKHR> surfaceFormats(formatCount);
+  result = fpGetPhysicalDeviceSurfaceFormatsKHR(
+      physicalDevice, surface, &formatCount, surfaceFormats.data());
+
+  assert(result == VK_SUCCESS);
+
+  if (formatCount == 1 && surfaceFormats[0].format == VK_FORMAT_UNDEFINED)
+    colorFormat = VK_FORMAT_B8G8R8A8_UNORM;
+  else
+    colorFormat = surfaceFormats[0].format;
+
+  colorSpace = surfaceFormats[0].colorSpace;
+}
+
+void VulkanSwapchain::initSwapchain(VkCommandBuffer cmdBuffer) {
+  VkSurfaceCapabilitiesKHR caps = {};
+  VkResult result =
+      fpGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &caps);
+
+  if (result != VK_SUCCESS)
+    exitOnError("Failed to get physical device surface capabilities");
+
+  VkExtent2D swapchainExtent = {};
+
+  if (caps.currentExtent.width == -1 || caps.currentExtent.height == -1) {
+    swapchainExtent.width = windowWidth;
+    swapchainExtent.height = windowHeight;
+  } else {
+    swapchainExtent = caps.currentExtent;
+  }
+
+  uint32_t presentModeCount = 0;
+  result = fpGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface,
+                                                     &presentModeCount, NULL);
+
+  assert(result == VK_SUCCESS);
+  assert(presentModeCount >= 1);
+
+  std::vector<VkPresentModeKHR> presentModes(presentModeCount);
+  result = fpGetPhysicalDeviceSurfacePresentModesKHR(
+      physicalDevice, surface, &presentModeCount, presentModes.data());
+
+  assert(result == VK_SUCCESS);
+
+  VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
+
+  for (uint32_t i = 0; i < presentModeCount; i++) {
+    if (presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR) {
+      presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+      break;
+    }
+
+    if (presentModes[i] == VK_PRESENT_MODE_IMMEDIATE_KHR)
+      presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+  }
+
+  assert(caps.maxImageCount >= 1);
+
+  uint32_t imageCount = caps.minImageCount + 1;
+
+  if (imageCount > caps.maxImageCount) imageCount = caps.maxImageCount;
+
+  VkSwapchainCreateInfoKHR swapchainCreateInfo = {};
+  swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+  swapchainCreateInfo.surface = surface;
+  swapchainCreateInfo.minImageCount = imageCount;
+  swapchainCreateInfo.imageFormat = colorFormat;
+  swapchainCreateInfo.imageColorSpace = colorSpace;
+  swapchainCreateInfo.imageExtent = {swapchainExtent.width,
+                                     swapchainExtent.height};
+  swapchainCreateInfo.imageArrayLayers = 1;
+  swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+  swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+  swapchainCreateInfo.queueFamilyIndexCount = 1;
+  swapchainCreateInfo.pQueueFamilyIndices = {0};
+  swapchainCreateInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+  swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+  swapchainCreateInfo.presentMode = presentMode;
+
+  result = fpCreateSwapchainKHR(device, &swapchainCreateInfo, NULL, &swapchain);
+
+  assert(result == VK_SUCCESS);
+
+  result = fpGetSwapchainImagesKHR(device, swapchain, &imageCount, NULL);
+
+  assert(result == VK_SUCCESS);
+
+  images.resize(imageCount);
+  buffers.resize(imageCount);
+
+  result =
+      fpGetSwapchainImagesKHR(device, swapchain, &imageCount, images.data());
+
+  assert(result == VK_SUCCESS);
+}

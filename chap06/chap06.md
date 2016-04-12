@@ -2,17 +2,17 @@
 
 You might have noticed that in a previous section, we made used this value: `VK_KHR_SWAPCHAIN_EXTENSION_NAME`. So, what *is* a swap chain? It is essentially an **array of images** ready to be presented. One use is frame rate control. Using two buffers is called **double buffering**. The GPU renders completely to a single frame and then displays it. Once it has finished drawing the first frame, it begins drawing the second frame. This occurs even if we're rendering above the rate we're supposed to. Let's assume we're rendering faster than the physical display can display our images. We would then wait and **flip** the second buffer onto the screen. By flipping the image onto the screen during the **vertical blanking interval**, we can write our data while the display is blank. When it refreshes, our image appears on the screen. Other techniques such as **triple buffering** exist.
 
-## `initSwapchain`
+## Initializing the Swapchain
 
-For the next few sections, we're going to be focusing on writing this method in our `VulkanExample` class. It is defined simply as:
+For the next few sections, we're going to be focusing on writing the `initSwapchain` method in our `VulkanSwapchain` class. It is defined simply as:
 
 ```cpp
-void VulkanExample::initSwapchain() {}
+void VulkanSwapchain::initSwapchain() {}
 ```
 
-## `fpGetPhysicalDeviceSurfaceCapabilitiesKHR`
+## Getting Physical Device Surface Capabilities
 
-We created a surface in the last chapter. Now we need to check the surface resolution so we can later inform our swapchain. To get the resolution of the surface, we'll have to ask it for its capabilities. We'll be using `vkGetPhysicalDeviceSurfaceCapabilitiesKHR` which has the same definition as `fpGetPhysicalDeviceSurfaceCapabilitiesKHR`.
+We created a surface in the last chapter. Now we need to check the surface resolution so we can later inform our swapchain. To get the resolution of the surface, we'll have to ask it for its capabilities. We'll be using `fpGetPhysicalDeviceSurfaceCapabilitiesKHR` which has the same definition as `vkGetPhysicalDeviceSurfaceCapabilitiesKHR`.
 
 **Usage for `vkGetPhysicalDeviceSurfaceCapabilitiesKHR`**:
 
@@ -40,7 +40,7 @@ VkResult result = fpGetPhysicalDeviceSurfaceCapabilitiesKHR(
 assert(result == VK_SUCCESS);
 ```
 
-## `VkExtent2D`
+## Vulkan Extents
 
 Windows uses `RECT` to define properties of rectangles. Similarly, Vulkan uses `VkExtent2D` for the same purpose. The `VkExtent2D` object will be used later, but for now, let's check something. The `caps` variable has a `currentExtent` field. This informs us about the surface's size. In the case that either the `width` or `height` are `-1`, we'll need to set the extent size ourselves. Otherwise, we can just use `caps.currentExtent` for the swapchain. Let's see how this looks in code:
 
@@ -55,7 +55,7 @@ if (caps.currentExtent.width == -1 || caps.currentExtent.height == -1) {
 }
 ```
 
-## `fpGetPhysicalDeviceSurfacePresentModesKHR`
+## Get Physical Device Surface Present Modes
 
 In Vulkan, there are multiple ways images can be presented. We'll talk about the options later in this section, but for now, we need to figure out which are supported. We can use `fpGetPhysicalDeviceSurfacePresentModesKHR` to get the present modes as the name suggests. The definition is the same as `vkGetPhysicalDeviceSurfacePresentModesKHR`.
 
@@ -127,7 +127,7 @@ for (uint32_t i = 0; i < presentModeCount; i++) {
 }
 ```
 
-## `VkSwapchainCreateInfoKHR`
+## Swapchain Create Information
 
 Next up, we're going to prepare the information needed to create our `VkSwapchainKHR`.
 
@@ -176,6 +176,8 @@ typedef struct VkSwapchainCreateInfoKHR {
 - `presentMode` is the presentation mode the swapchain will use. A swapchain’s present mode determines how incoming present requests will be processed and queued internally.
 - `clipped` indicates whether the Vulkan implementation is allowed to discard rendering operations that affect regions of the surface which aren’t visible.
 
+**Usage for `VkSwapchainCreateInfoKHR`**:
+
 That's quite a definition. Before we can fill in the values, we'll need to figure out `minImageCount`. First let's check verify our surface supports images:
 
 ```cpp
@@ -195,7 +197,7 @@ if (imageCount > caps.maxImageCount)
   imageCount = caps.maxImageCount;
 ```
 
-**Usage for `VkSwapchainCreateInfoKHR`**:
+Finally, we can put it all together:
 
 ```cpp
 VkSwapchainCreateInfoKHR swapchainCreateInfo = {};
@@ -215,7 +217,7 @@ swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 swapchainCreateInfo.presentMode = presentMode;
 ```
 
-## `vkCreateSwapchainKHR`
+## Creating the Swapchain
 
 This function will simply take in our `swapchainCreateInfo` and create the swapchain with that configuration.
 
@@ -243,7 +245,7 @@ result = fpCreateSwapchainKHR(device, &swapchainCreateInfo, NULL, &swapchain);
 assert(result == VK_SUCCESS);
 ```
 
-## `fpGetSwapchainImagesKHR`
+## Getting Swapchain Images
 
 We will need to get the available images from the swapchain. In a later section of this chapter, we'll actually get them ready for use, but right now, let's focus on this part. We'll be using a function pointer we got earlier called `fpGetSwapchainImagesKHR`. The definition is the same as `vkGetSwapchainImagesKHR`.
 
@@ -282,7 +284,7 @@ struct SwapChainBuffer {
 };
 ```
 
-This will become more relevant later on when we get closer to rendering. For now, we'll create two variables in the `VulkanExample` class. These will be:
+This will become more relevant later on when we get closer to rendering. For now, we'll create two variables in the `VulkanSwapchain` class. These will be:
 
 ```cpp
 std::vector<VkImage> images;

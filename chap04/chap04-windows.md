@@ -42,7 +42,7 @@ AllocConsole();
 
 ```cpp
 BOOL WINAPI AttachConsole(
-  _In_ DWORD dwProcessId
+  DWORD dwProcessId
 );
 ```
 
@@ -60,15 +60,15 @@ AttachConsole(GetCurrentProcessId());
 
 ```cpp
 FILE * freopen (
-  const char * filename, 
-  const char * mode, 
+  const char * filename,
+  const char * mode,
   FILE * stream );
 ```
 
 **[Documentation](http://www.cplusplus.com/reference/cstdio/freopen/) for `freopen`**:
 
 - `fileName` is a C string containing the name of the file to be opened.
-- `mode` is a C string containing a file access mode. It can be: 
+- `mode` is a C string containing a file access mode. It can be:
   - `"r"`
   - `"w"`
   - `"a"`
@@ -86,7 +86,7 @@ freopen("CON", "w", stderr);
 
 ```cpp
 BOOL WINAPI SetConsoleTitle(
-  _In_ LPCTSTR lpConsoleTitle
+  LPCTSTR lpConsoleTitle
 );
 ```
 
@@ -113,10 +113,10 @@ Now, let's modify our `exitOnError` method to show a error message box. We'll ne
 
 ```cpp
 int WINAPI MessageBox(
-  _In_opt_ HWND    hWnd,
-  _In_opt_ LPCTSTR lpText,
-  _In_opt_ LPCTSTR lpCaption,
-  _In_     UINT    uType
+  HWND    hWnd,
+  LPCTSTR lpText,
+  LPCTSTR lpCaption,
+  UINT    uType
 );
 ```
 
@@ -148,7 +148,7 @@ HWND window;
 In this section we'll be writing the body this method:
 
 ```cpp
-void createWindow(HINSTANCE hInstance) {}
+void initWindow(HINSTANCE hInstance) {}
 ```
 
 Don't worry about `hInstance` for now. It is passed from the `WinMain` method we'll write later on. To setup our window, we'll need to register it with Windows, but first, we need to create a `WNDCLASSEX` object to pass during registration.
@@ -210,7 +210,7 @@ Now, we can make a call to `RegisterClassEx` to get Windowss to register the Win
 
 ```cpp
 ATOM WINAPI RegisterClassEx(
-  _In_ const WNDCLASSEX *lpwcx
+  const WNDCLASSEX *lpwcx
 );
 ```
 
@@ -223,7 +223,7 @@ ATOM WINAPI RegisterClassEx(
 Calling `RegisterClassEx` returns `NULL` upon failure so we should make sure we check for that.
 
 ```cpp
-if (!RegisterClassEx(&wcex)) 
+if (!RegisterClassEx(&wcex))
   exitOnError("Failed to register window");
 ```
 
@@ -259,17 +259,17 @@ Finally, we can call Window's `CreateWindow` method. This will, as the name sugg
 
 ```cpp
 HWND WINAPI CreateWindow(
-  _In_opt_ LPCTSTR   lpClassName,
-  _In_opt_ LPCTSTR   lpWindowName,
-  _In_     DWORD     dwStyle,
-  _In_     int       x,
-  _In_     int       y,
-  _In_     int       nWidth,
-  _In_     int       nHeight,
-  _In_opt_ HWND      hWndParent,
-  _In_opt_ HMENU     hMenu,
-  _In_opt_ HINSTANCE hInstance,
-  _In_opt_ LPVOID    lpParam
+  LPCTSTR  lpClassName,
+  LPCTSTR   lpWindowName,
+  DWORD     dwStyle,
+  int       x,
+  int       y,
+  int       nWidth,
+  int       nHeight,
+  HWND      hWndParent,
+  HMENU     hMenu,
+  HINSTANCE hInstance,
+  LPVOID    lpParam
 );
 ```
 
@@ -279,7 +279,7 @@ HWND WINAPI CreateWindow(
 - `lpWindowName` is the window name. If the window style specifies a title bar, the window title pointed to by lpWindowName is displayed in the title bar.
 - `dwStyle` is the style of the window being created. This parameter can be a combination of the window style values.
 - `x` is the initial horizontal position of the window.
-- `y` is the initial vertical position of the window. 
+- `y` is the initial vertical position of the window.
 - `nWidth` is the width, in device units, of the window.
 - `nHeight` is the height, in device units, of the window.
 - `hWndParent` is a handle to the parent or owner window of the window being created or `NULL` in our case.
@@ -289,7 +289,7 @@ HWND WINAPI CreateWindow(
 
 **Usage for `CreateWindow`**:
 
-```
+```cpp
 window = CreateWindow(
   applicationName,
   applicationName,
@@ -304,10 +304,10 @@ window = CreateWindow(
   NULL);
 ```
 
-The `CreateWindow` method also returns `NULL` upon failure. Let's deal with that possibility before we move on:
+The `CreateWindow` method returns `NULL` upon failure. Let's deal with that possibility before we move on:
 
 ```cpp
-if (!window) 
+if (!window)
   exitOnError("Failed to create window");
 ```
 
@@ -319,15 +319,15 @@ SetForegroundWindow(window);
 SetFocus(window);
 ```
 
-### `WndProc`
+### Window Process
 
-For this section, we'll be writing the body of this method:
+For this section, we'll be writing the body of a method called `WndProc`. This is required by Windows to process window events.
 
 ```cpp
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {}
+LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {}
 ```
 
-We need to destroy the window and tell Windows we quit if the user attempted to close the window. If we're told we need to paint, we'll simply update the window. If neither of those cases we're met, we'll the default procedure to handle events we didn't process. You can do this like so:
+We need to destroy the window and tell Windows we quit if the user attempted to close the window. If we're told we need to paint, we'll simply update the window. If neither of those cases we're met, we'll use the default procedure to handle events we didn't process. You can do this like so:
 
 ```cpp
 switch (message) {
@@ -349,14 +349,14 @@ switch (message) {
 For this section, we'll write the body of this method:
 
 ```cpp
-void VulkanExample::renderLoop() {}
+void VulkanSwapchain::renderLoop() {}
 ```
 
 We're calling it `renderLoop` because later we'll make calls to rendering functions within it. For now, however, we're going to:
 
 - Create a message, loop while we have Windows set it
 - Windows translate it into a character message then add it to the thread queue
-- Dispatch the message to the windows procedure. 
+- Dispatch the message to the windows procedure.
 
 While that sounds complicated, it can be done with just a few lines of code:
 
@@ -369,9 +369,9 @@ while (GetMessage(&message, NULL, 0, 0)) {
 }
 ```
 
-### `WinMain`
+### A New Entry-Point
 
-This is our application's new entry-point. We will **not** be using your typical `int main(int argc, char * argv[])` entry-point. This is because Windows requires GUI applications to enter at `WinMain`. We need to:
+This is our application's new entry-point. We will **not** be using your typical `int main()` entry-point. This is because Windows requires GUI applications to enter at `WinMain`. We need to:
 
 - Create an instance of our class
 - Call our `initWindow` method
@@ -381,10 +381,10 @@ This is our application's new entry-point. We will **not** be using your typical
 
 ```cpp
 int CALLBACK WinMain(
-  _In_ HINSTANCE hInstance,
-  _In_ HINSTANCE hPrevInstance,
-  _In_ LPSTR     lpCmdLine,
-  _In_ int       nCmdShow
+  HINSTANCE hInstance,
+  HINSTANCE hPrevInstance,
+  LPSTR     lpCmdLine,
+  int       nCmdShow
 );
 ```
 
@@ -400,7 +400,7 @@ int CALLBACK WinMain(
 ```cpp
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
                    LPSTR lpCmdLine, int nCmdShow) {
-  VulkanExample ve = VulkanExample();
+  VulkanSwapchain ve = VulkanSwapchain();
   ve.initWindow(hInstance);
   ve.renderLoop();
 }

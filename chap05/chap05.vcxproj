@@ -155,10 +155,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="VulkanExample.cpp" />
+    <ClCompile Include="VulkanSwapchain.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="VulkanExample.hpp" />
+    <ClInclude Include="VulkanSwapchain.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

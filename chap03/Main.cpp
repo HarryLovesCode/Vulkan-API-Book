@@ -1,3 +1,3 @@
-#include "VulkanExample.hpp"
+#include "VulkanSwapchain.hpp"
 
-int main(int argc, char* argv[]) { VulkanExample ve = VulkanExample(); }
+int main(int argc, char* argv[]) { VulkanSwapchain ve = VulkanSwapchain(); }
