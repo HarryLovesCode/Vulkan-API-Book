@@ -41,5 +41,6 @@ pandoc book.md                  \
 --variable monofont="Fira Mono" \
 --variable fontsize="11pt"      \
 -V geometry:margin="2.0cm"      \
+--chapters                      \
 --highlight-style tango         \
 -o VulkanApiBook.pdf

@@ -1,4 +1,4 @@
-## Linux
+## Surface Creation on Linux
 
 We're going to be writing the Linux specific code for getting a surface in this section. While this code may work on another operating system that uses the XCB library, I cannot guarantee it will.
 
