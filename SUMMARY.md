@@ -17,6 +17,7 @@
    * [Linux](chap05/chap05-linux.md)
    * Android
    * GLFW
+   * Wrapping Up Surfaces
 * [Swapchains](chap06/chap06.md)
 * [Image Layouts](chap07/chap07.md)
 * [Image Views](chap08/chap08.md)
