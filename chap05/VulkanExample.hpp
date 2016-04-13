@@ -14,9 +14,11 @@
 #include <xcb/xcb.h>
 #endif
 
-class VulkanSwapchain {
+#include "VulkanMisc.hpp"
+#include "VulkanSwapchain.hpp"
+
+class VulkanExample {
  private:
-  void exitOnError(const char *msg);
   void initInstance();
   void initDevices();
 
@@ -29,6 +31,7 @@ class VulkanSwapchain {
   VkInstance instance;
   VkPhysicalDevice physicalDevice;
   VkDevice device;
+  VulkanSwapchain swapchain;
 #if defined(_WIN32)
   HINSTANCE windowInstance;
   HWND window;
@@ -40,9 +43,10 @@ class VulkanSwapchain {
   xcb_atom_t wmDeleteWin;
 #endif
  public:
-  VulkanSwapchain();
-  virtual ~VulkanSwapchain();
+  VulkanExample();
+  virtual ~VulkanExample();
 
+  void initSwapchain();
 #if defined(_WIN32)
   void initWindow(HINSTANCE hInstance);
 #elif defined(__linux__)

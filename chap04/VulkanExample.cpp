@@ -1,6 +1,6 @@
-#include "VulkanSwapchain.hpp"
+#include "VulkanExample.hpp"
 
-VulkanSwapchain::VulkanSwapchain() {
+VulkanExample::VulkanExample() {
 #if defined(_WIN32)
   AllocConsole();
   AttachConsole(GetCurrentProcessId());
@@ -10,20 +10,11 @@ VulkanSwapchain::VulkanSwapchain() {
 #endif
   initInstance();
   initDevices();
-  GET_INSTANCE_PROC_ADDR(instance, GetPhysicalDeviceSurfaceSupportKHR);
-  GET_INSTANCE_PROC_ADDR(instance, GetPhysicalDeviceSurfaceCapabilitiesKHR);
-  GET_INSTANCE_PROC_ADDR(instance, GetPhysicalDeviceSurfaceFormatsKHR);
-  GET_INSTANCE_PROC_ADDR(instance, GetPhysicalDeviceSurfacePresentModesKHR);
-  GET_DEVICE_PROC_ADDR(device, CreateSwapchainKHR);
-  GET_DEVICE_PROC_ADDR(device, DestroySwapchainKHR);
-  GET_DEVICE_PROC_ADDR(device, GetSwapchainImagesKHR);
-  GET_DEVICE_PROC_ADDR(device, AcquireNextImageKHR);
-  GET_DEVICE_PROC_ADDR(device, QueuePresentKHR);
 }
 
-VulkanSwapchain::~VulkanSwapchain() { vkDestroyInstance(instance, NULL); }
+VulkanExample::~VulkanExample() { vkDestroyInstance(instance, NULL); }
 
-void VulkanSwapchain::exitOnError(const char *msg) {
+void VulkanExample::exitOnError(const char *msg) {
 #if defined(_WIN32)
   MessageBox(NULL, msg, applicationName, MB_ICONERROR);
 #elif defined(__linux__)
@@ -32,7 +23,7 @@ void VulkanSwapchain::exitOnError(const char *msg) {
   exit(EXIT_FAILURE);
 }
 
-void VulkanSwapchain::initInstance() {
+void VulkanExample::initInstance() {
   VkApplicationInfo appInfo = {};
   appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   appInfo.pNext = NULL;
@@ -73,7 +64,7 @@ void VulkanSwapchain::initInstance() {
   }
 }
 
-void VulkanSwapchain::initDevices() {
+void VulkanExample::initDevices() {
   uint32_t deviceCount = 0;
   VkResult result = vkEnumeratePhysicalDevices(instance, &deviceCount, NULL);
 
@@ -143,7 +134,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
   return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
-void VulkanSwapchain::initWindow(HINSTANCE hInstance) {
+void VulkanExample::initWindow(HINSTANCE hInstance) {
   WNDCLASSEX wcex;
 
   wcex.cbSize = sizeof(WNDCLASSEX);
@@ -178,7 +169,7 @@ void VulkanSwapchain::initWindow(HINSTANCE hInstance) {
   SetFocus(window);
 }
 
-void VulkanSwapchain::renderLoop() {
+void VulkanExample::renderLoop() {
   MSG message;
 
   while (GetMessage(&message, NULL, 0, 0)) {
@@ -188,7 +179,7 @@ void VulkanSwapchain::renderLoop() {
 }
 
 #elif defined(__linux__)
-void VulkanSwapchain::initWindow() {
+void VulkanExample::initWindow() {
   int screenp = 0;
   connection = xcb_connect(NULL, &screenp);
 
@@ -230,7 +221,7 @@ void VulkanSwapchain::initWindow() {
   xcb_flush(connection);
 }
 
-void VulkanSwapchain::renderLoop() {
+void VulkanExample::renderLoop() {
   bool running = true;
   xcb_generic_event_t *event;
   xcb_client_message_event_t *cm;
@@ -255,71 +246,3 @@ void VulkanSwapchain::renderLoop() {
   xcb_destroy_window(connection, window);
 }
 #endif
-
-void VulkanSwapchain::initSurface() {
-#if defined(_WIN32)
-  VkWin32SurfaceCreateInfoKHR surfaceCreateInfo = {};
-  surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-  surfaceCreateInfo.pNext = NULL;
-  surfaceCreateInfo.flags = 0;
-  surfaceCreateInfo.hinstance = windowInstance;
-  surfaceCreateInfo.hwnd = window;
-  VkResult result =
-      vkCreateWin32SurfaceKHR(instance, &surfaceCreateInfo, NULL, &surface);
-#elif defined(__linux__)
-  VkXcbSurfaceCreateInfoKHR surfaceCreateInfo = {};
-  surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
-  surfaceCreateInfo.pNext = NULL;
-  surfaceCreateInfo.flags = 0;
-  surfaceCreateInfo.connection = connection;
-  surfaceCreateInfo.window = window;
-  VkResult result =
-      vkCreateXcbSurfaceKHR(instance, &surfaceCreateInfo, NULL, &surface);
-#endif
-
-  assert(result == VK_SUCCESS);
-
-  uint32_t queueCount = 0;
-  vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueCount, NULL);
-
-  assert(queueCount >= 1);
-
-  std::vector<VkQueueFamilyProperties> queueProperties(queueCount);
-  vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueCount,
-                                           queueProperties.data());
-
-  queueIndex = UINT32_MAX;
-  std::vector<VkBool32> supportsPresenting(queueCount);
-
-  for (uint32_t i = 0; i < queueCount; i++) {
-    fpGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface,
-                                         &supportsPresenting[i]);
-    if ((queueProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) != 0) {
-      if (supportsPresenting[i] == VK_TRUE) {
-        queueIndex = i;
-        break;
-      }
-    }
-  }
-
-  assert(queueIndex != UINT32_MAX);
-
-  uint32_t formatCount = 0;
-  result = fpGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface,
-                                                &formatCount, NULL);
-
-  assert(result == VK_SUCCESS && formatCount >= 1);
-
-  std::vector<VkSurfaceFormatKHR> surfaceFormats(formatCount);
-  result = fpGetPhysicalDeviceSurfaceFormatsKHR(
-      physicalDevice, surface, &formatCount, surfaceFormats.data());
-
-  assert(result == VK_SUCCESS);
-
-  if (formatCount == 1 && surfaceFormats[0].format == VK_FORMAT_UNDEFINED)
-    colorFormat = VK_FORMAT_B8G8R8A8_UNORM;
-  else
-    colorFormat = surfaceFormats[0].format;
-
-  colorSpace = surfaceFormats[0].colorSpace;
-}
