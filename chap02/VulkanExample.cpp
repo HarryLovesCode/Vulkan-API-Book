@@ -13,7 +13,7 @@ void VulkanExample::initInstance() {
   appInfo.pEngineName = ENGINE_NAME;
   appInfo.apiVersion = VK_MAKE_VERSION(1, 0, 3);
 
-  std::vector<const char*> enabledExtensions = {VK_KHR_SURFACE_EXTENSION_NAME};
+  std::vector<const char *> enabledExtensions = {VK_KHR_SURFACE_EXTENSION_NAME};
 
 #if defined(_WIN32)
   enabledExtensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);

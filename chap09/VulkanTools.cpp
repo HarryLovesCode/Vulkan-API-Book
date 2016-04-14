@@ -1,6 +1,6 @@
 #include "VulkanTools.hpp"
 
-void VulkanTools::exitOnError(const char* msg) {
+void VulkanTools::exitOnError(const char *msg) {
 #ifdef _WIN32
   MessageBox(NULL, msg, ENGINE_NAME, MB_ICONERROR);
 #else
@@ -11,9 +11,9 @@ void VulkanTools::exitOnError(const char* msg) {
 }
 
 void VulkanTools::setImageLayout(VkCommandBuffer cmdBuffer, VkImage image,
-                                   VkImageAspectFlags aspects,
-                                   VkImageLayout oldLayout,
-                                   VkImageLayout newLayout) {
+                                 VkImageAspectFlags aspects,
+                                 VkImageLayout oldLayout,
+                                 VkImageLayout newLayout) {
   VkImageMemoryBarrier imageBarrier = {};
   imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
   imageBarrier.pNext = NULL;

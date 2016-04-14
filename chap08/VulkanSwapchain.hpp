@@ -1,12 +1,12 @@
 #ifndef VULKAN_SWAPCHAIN_HPP
 #define VULKAN_SWAPCHAIN_HPP
 
-#include <cassert>
-#include <cstring>
 #include <stdio.h>
 #include <stdlib.h>
-#include <vector>
 #include <vulkan/vulkan.h>
+#include <cassert>
+#include <cstring>
+#include <vector>
 
 #include "VulkanTools.hpp"
 
@@ -14,14 +14,16 @@
   {                                                                      \
     fp##entry = (PFN_vk##entry)vkGetInstanceProcAddr(inst, "vk" #entry); \
     if (!fp##entry)                                                      \
-      VulkanTools::exitOnError("vkGetInstanceProcAddr failed to find vk" #entry);     \
+      VulkanTools::exitOnError(                                          \
+          "vkGetInstanceProcAddr failed to find vk" #entry);             \
   }
 
 #define GET_DEVICE_PROC_ADDR(dev, entry)                              \
   {                                                                   \
     fp##entry = (PFN_vk##entry)vkGetDeviceProcAddr(dev, "vk" #entry); \
     if (!fp##entry)                                                   \
-      VulkanTools::exitOnError("vkGetDeviceProcAddr failed to find vk" #entry);    \
+      VulkanTools::exitOnError(                                       \
+          "vkGetDeviceProcAddr failed to find vk" #entry);            \
   }
 
 struct SwapChainBuffer {
@@ -57,7 +59,7 @@ class VulkanSwapchain {
 
  public:
   void init(VkInstance instance, VkPhysicalDevice physicalDevice,
-              VkDevice device) {
+            VkDevice device) {
     this->instance = instance;
     this->physicalDevice = physicalDevice;
     this->device = device;
@@ -77,7 +79,7 @@ class VulkanSwapchain {
 #if defined(_WIN32)
       HINSTANCE windowInstance, HWND window
 #elif defined(__linux__)
-      xcb_connection_t* connection, xcb_window_t window
+      xcb_connection_t *connection, xcb_window_t window
 #endif
       ) {
 #if defined(_WIN32)
@@ -149,11 +151,12 @@ class VulkanSwapchain {
 
   void create(VkCommandBuffer cmdBuffer) {
     VkSurfaceCapabilitiesKHR caps = {};
-    VkResult result =
-        fpGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &caps);
+    VkResult result = fpGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice,
+                                                                surface, &caps);
 
     if (result != VK_SUCCESS)
-      VulkanTools::exitOnError("Failed to get physical device surface capabilities");
+      VulkanTools::exitOnError(
+          "Failed to get physical device surface capabilities");
 
     VkExtent2D swapchainExtent = {};
 
@@ -212,7 +215,8 @@ class VulkanSwapchain {
     swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
     swapchainCreateInfo.presentMode = presentMode;
 
-    result = fpCreateSwapchainKHR(device, &swapchainCreateInfo, NULL, &swapchain);
+    result =
+        fpCreateSwapchainKHR(device, &swapchainCreateInfo, NULL, &swapchain);
 
     assert(result == VK_SUCCESS);
 
@@ -234,8 +238,8 @@ class VulkanSwapchain {
       imageCreateInfo.pNext = NULL;
       imageCreateInfo.format = colorFormat;
       imageCreateInfo.components = {
-          VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B,
-          VK_COMPONENT_SWIZZLE_A};
+          VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G,
+          VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A};
       imageCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
       imageCreateInfo.subresourceRange.baseMipLevel = 0;
       imageCreateInfo.subresourceRange.levelCount = 1;
@@ -245,8 +249,9 @@ class VulkanSwapchain {
       imageCreateInfo.flags = 0;
 
       buffers[i].image = images[i];
-      VulkanTools::setImageLayout(cmdBuffer, buffers[i].image, VK_IMAGE_ASPECT_COLOR_BIT,
-                     VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+      VulkanTools::setImageLayout(
+          cmdBuffer, buffers[i].image, VK_IMAGE_ASPECT_COLOR_BIT,
+          VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
       imageCreateInfo.image = buffers[i].image;
       result =
           vkCreateImageView(device, &imageCreateInfo, NULL, &buffers[i].view);

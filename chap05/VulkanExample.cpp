@@ -24,7 +24,7 @@ void VulkanExample::initInstance() {
   appInfo.pEngineName = ENGINE_NAME;
   appInfo.apiVersion = VK_MAKE_VERSION(1, 0, 3);
 
-  std::vector<const char*> enabledExtensions = {VK_KHR_SURFACE_EXTENSION_NAME};
+  std::vector<const char *> enabledExtensions = {VK_KHR_SURFACE_EXTENSION_NAME};
 
 #if defined(_WIN32)
   enabledExtensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
@@ -56,7 +56,6 @@ void VulkanExample::initInstance() {
         "continuing.");
   }
 }
-
 
 void VulkanExample::initDevices() {
   uint32_t deviceCount = 0;
@@ -152,7 +151,8 @@ void VulkanExample::initWindow(HINSTANCE hInstance) {
   wcex.lpszClassName = APPLICATION_NAME;
   wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
 
-  if (!RegisterClassEx(&wcex)) VulkanTools::exitOnError("Failed to register window");
+  if (!RegisterClassEx(&wcex))
+    VulkanTools::exitOnError("Failed to register window");
 
   windowInstance = hInstance;
   int screenWidth = GetSystemMetrics(SM_CXSCREEN);
@@ -160,9 +160,9 @@ void VulkanExample::initWindow(HINSTANCE hInstance) {
   int windowX = screenWidth / 2 - WINDOW_WIDTH / 2;
   int windowY = screenHeight / 2 - WINDOW_HEIGHT / 2;
   window = CreateWindow(APPLICATION_NAME, APPLICATION_NAME,
-    WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
-    windowX, windowY, WINDOW_WIDTH, WINDOW_HEIGHT, NULL, NULL,
-    windowInstance, NULL);
+                        WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
+                        windowX, windowY, WINDOW_WIDTH, WINDOW_HEIGHT, NULL,
+                        NULL, windowInstance, NULL);
 
   if (!window) VulkanTools::exitOnError("Failed to create window");
 

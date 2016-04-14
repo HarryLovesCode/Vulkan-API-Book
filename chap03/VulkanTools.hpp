@@ -10,7 +10,7 @@
 #define ENGINE_NAME "Vulkan Engine"
 
 namespace VulkanTools {
-  void exitOnError(const char* msg);
+void exitOnError(const char *msg);
 }
 
-#endif // VULKAN_TOOLS_HPP
+#endif  // VULKAN_TOOLS_HPP

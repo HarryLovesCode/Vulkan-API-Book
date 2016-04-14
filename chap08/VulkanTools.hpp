@@ -13,11 +13,10 @@
 #define WINDOW_HEIGHT 720
 
 namespace VulkanTools {
-  void exitOnError(const char* msg);
-  void setImageLayout(VkCommandBuffer cmdBuffer, VkImage image,
-                                     VkImageAspectFlags aspects,
-                                     VkImageLayout oldLayout,
-                                     VkImageLayout newLayout);
+void exitOnError(const char *msg);
+void setImageLayout(VkCommandBuffer cmdBuffer, VkImage image,
+                    VkImageAspectFlags aspects, VkImageLayout oldLayout,
+                    VkImageLayout newLayout);
 }
 
-#endif // VULKAN_TOOLS_HPP
+#endif  // VULKAN_TOOLS_HPP

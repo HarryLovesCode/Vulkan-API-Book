@@ -1,13 +1,12 @@
 #ifndef VULKAN_EXAMPLE_HPP
 #define VULKAN_EXAMPLE_HPP
 
-#include <cassert>
-#include <cstring>
 #include <stdio.h>
 #include <stdlib.h>
-#include <vector>
-
 #include <vulkan/vulkan.h>
+#include <cassert>
+#include <cstring>
+#include <vector>
 #if defined(_WIN32)
 #include <Windows.h>
 #elif defined(__linux__)

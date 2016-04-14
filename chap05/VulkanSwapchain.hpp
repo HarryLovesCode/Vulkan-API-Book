@@ -1,12 +1,12 @@
 #ifndef VULKAN_SWAPCHAIN_HPP
 #define VULKAN_SWAPCHAIN_HPP
 
-#include <cassert>
-#include <cstring>
 #include <stdio.h>
 #include <stdlib.h>
-#include <vector>
 #include <vulkan/vulkan.h>
+#include <cassert>
+#include <cstring>
+#include <vector>
 
 #include "VulkanTools.hpp"
 
@@ -14,14 +14,16 @@
   {                                                                      \
     fp##entry = (PFN_vk##entry)vkGetInstanceProcAddr(inst, "vk" #entry); \
     if (!fp##entry)                                                      \
-      VulkanTools::exitOnError("vkGetInstanceProcAddr failed to find vk" #entry);     \
+      VulkanTools::exitOnError(                                          \
+          "vkGetInstanceProcAddr failed to find vk" #entry);             \
   }
 
 #define GET_DEVICE_PROC_ADDR(dev, entry)                              \
   {                                                                   \
     fp##entry = (PFN_vk##entry)vkGetDeviceProcAddr(dev, "vk" #entry); \
     if (!fp##entry)                                                   \
-      VulkanTools::exitOnError("vkGetDeviceProcAddr failed to find vk" #entry);    \
+      VulkanTools::exitOnError(                                       \
+          "vkGetDeviceProcAddr failed to find vk" #entry);            \
   }
 
 class VulkanSwapchain {
@@ -48,7 +50,7 @@ class VulkanSwapchain {
 
  public:
   void init(VkInstance instance, VkPhysicalDevice physicalDevice,
-              VkDevice device) {
+            VkDevice device) {
     this->instance = instance;
     this->physicalDevice = physicalDevice;
     this->device = device;
@@ -68,7 +70,7 @@ class VulkanSwapchain {
 #if defined(_WIN32)
       HINSTANCE windowInstance, HWND window
 #elif defined(__linux__)
-      xcb_connection_t* connection, xcb_window_t window
+      xcb_connection_t *connection, xcb_window_t window
 #endif
       ) {
 #if defined(_WIN32)

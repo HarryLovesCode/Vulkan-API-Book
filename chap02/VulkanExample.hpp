@@ -3,14 +3,15 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <vector>
 #include <vulkan/vulkan.h>
+#include <vector>
 
 class VulkanExample {
  private:
   void initInstance();
 
   VkInstance instance;
+
  public:
   VulkanExample();
   virtual ~VulkanExample();
