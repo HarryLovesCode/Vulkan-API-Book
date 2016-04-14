@@ -1,18 +1,18 @@
-#include "VulkanSwapchain.hpp"
+#include "VulkanExample.hpp"
 
 #if defined(_WIN32)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
-                   LPSTR lpCmdLine, int nCmdShow) {
-  VulkanSwapchain ve = VulkanSwapchain();
+  LPSTR lpCmdLine, int nCmdShow) {
+  VulkanExample ve = VulkanExample();
   ve.initWindow(hInstance);
-  ve.initSurface();
+  ve.initSwapchain();
   ve.renderLoop();
 }
 #elif defined(__linux__)
 int main(int argc, char *argv[]) {
-  VulkanSwapchain ve = VulkanSwapchain();
+  VulkanExample ve = VulkanExample();
   ve.initWindow();
-  ve.initSurface();
+  ve.initSwapchain();
   ve.renderLoop();
 }
 #endif

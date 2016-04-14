@@ -39,12 +39,12 @@ class VulkanExample {
   VulkanExample();
   virtual ~VulkanExample();
 
-  void initSwapchain();
 #if defined(_WIN32)
   void initWindow(HINSTANCE hInstance);
 #elif defined(__linux__)
   void initWindow();
 #endif
+  void initSwapchain();
   void renderLoop();
 };
 

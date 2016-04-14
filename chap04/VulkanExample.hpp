@@ -16,15 +16,8 @@
 
 class VulkanExample {
  private:
-  void exitOnError(const char *msg);
   void initInstance();
   void initDevices();
-
-  const char *applicationName = "Vulkan Example";
-  const char *engineName = "Vulkan Engine";
-
-  const uint32_t windowWidth = 1280;
-  const uint32_t windowHeight = 720;
 
   VkInstance instance;
   VkPhysicalDevice physicalDevice;

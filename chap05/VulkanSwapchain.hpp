@@ -6,23 +6,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
-
 #include <vulkan/vulkan.h>
 
-#include "VulkanMisc.hpp"
+#include "VulkanTools.hpp"
 
 #define GET_INSTANCE_PROC_ADDR(inst, entry)                              \
   {                                                                      \
     fp##entry = (PFN_vk##entry)vkGetInstanceProcAddr(inst, "vk" #entry); \
     if (!fp##entry)                                                      \
-      exitOnError("vkGetInstanceProcAddr failed to find vk" #entry);     \
+      VulkanTools::exitOnError("vkGetInstanceProcAddr failed to find vk" #entry);     \
   }
 
 #define GET_DEVICE_PROC_ADDR(dev, entry)                              \
   {                                                                   \
     fp##entry = (PFN_vk##entry)vkGetDeviceProcAddr(dev, "vk" #entry); \
     if (!fp##entry)                                                   \
-      exitOnError("vkGetDeviceProcAddr failed to find vk" #entry);    \
+      VulkanTools::exitOnError("vkGetDeviceProcAddr failed to find vk" #entry);    \
   }
 
 class VulkanSwapchain {
@@ -48,7 +47,7 @@ class VulkanSwapchain {
   PFN_vkQueuePresentKHR fpQueuePresentKHR;
 
  public:
-  void create(VkInstance instance, VkPhysicalDevice physicalDevice,
+  void init(VkInstance instance, VkPhysicalDevice physicalDevice,
               VkDevice device) {
     this->instance = instance;
     this->physicalDevice = physicalDevice;
@@ -65,7 +64,7 @@ class VulkanSwapchain {
     GET_DEVICE_PROC_ADDR(device, QueuePresentKHR);
   }
 
-  void initSurface(
+  void createSurface(
 #if defined(_WIN32)
       HINSTANCE windowInstance, HWND window
 #elif defined(__linux__)

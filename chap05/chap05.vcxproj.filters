@@ -21,15 +21,18 @@
     <ClCompile Include="VulkanExample.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="VulkanTools.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VulkanExample.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VulkanMisc.hpp">
+    <ClInclude Include="VulkanSwapchain.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VulkanSwapchain.hpp">
+    <ClInclude Include="VulkanTools.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

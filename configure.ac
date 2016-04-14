@@ -12,7 +12,5 @@ AC_CONFIG_FILES([
  chap07/Makefile
  chap08/Makefile
  chap09/Makefile
- chap10/Makefile
 ])
 AC_OUTPUT
-

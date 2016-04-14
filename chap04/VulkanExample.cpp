@@ -1,4 +1,5 @@
 #include "VulkanExample.hpp"
+#include "VulkanTools.hpp"
 
 VulkanExample::VulkanExample() {
 #if defined(_WIN32)
@@ -6,7 +7,7 @@ VulkanExample::VulkanExample() {
   AttachConsole(GetCurrentProcessId());
   freopen("CON", "w", stdout);
   freopen("CON", "w", stderr);
-  SetConsoleTitle(TEXT(applicationName));
+  SetConsoleTitle(TEXT(APPLICATION_NAME));
 #endif
   initInstance();
   initDevices();
@@ -14,24 +15,15 @@ VulkanExample::VulkanExample() {
 
 VulkanExample::~VulkanExample() { vkDestroyInstance(instance, NULL); }
 
-void VulkanExample::exitOnError(const char *msg) {
-#if defined(_WIN32)
-  MessageBox(NULL, msg, applicationName, MB_ICONERROR);
-#elif defined(__linux__)
-  fputs(msg, stderr);
-#endif
-  exit(EXIT_FAILURE);
-}
-
 void VulkanExample::initInstance() {
   VkApplicationInfo appInfo = {};
   appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   appInfo.pNext = NULL;
-  appInfo.pApplicationName = applicationName;
-  appInfo.pEngineName = engineName;
+  appInfo.pApplicationName = APPLICATION_NAME;
+  appInfo.pEngineName = ENGINE_NAME;
   appInfo.apiVersion = VK_MAKE_VERSION(1, 0, 3);
 
-  std::vector<const char *> enabledExtensions = {VK_KHR_SURFACE_EXTENSION_NAME};
+  std::vector<const char*> enabledExtensions = {VK_KHR_SURFACE_EXTENSION_NAME};
 
 #if defined(_WIN32)
   enabledExtensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
@@ -52,12 +44,12 @@ void VulkanExample::initInstance() {
   VkResult res = vkCreateInstance(&createInfo, NULL, &instance);
 
   if (res == VK_ERROR_INCOMPATIBLE_DRIVER) {
-    exitOnError(
+    VulkanTools::exitOnError(
         "Cannot find a compatible Vulkan installable client "
         "driver (ICD). Please make sure your driver supports "
         "Vulkan before continuing. The call to vkCreateInstance failed.");
   } else if (res != VK_SUCCESS) {
-    exitOnError(
+    VulkanTools::exitOnError(
         "The call to vkCreateInstance failed. Please make sure "
         "you have a Vulkan installable client driver (ICD) before "
         "continuing.");
@@ -147,22 +139,22 @@ void VulkanExample::initWindow(HINSTANCE hInstance) {
   wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
   wcex.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
   wcex.lpszMenuName = NULL;
-  wcex.lpszClassName = applicationName;
+  wcex.lpszClassName = APPLICATION_NAME;
   wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
 
-  if (!RegisterClassEx(&wcex)) exitOnError("Failed to register window");
+  if (!RegisterClassEx(&wcex)) VulkanTools::exitOnError("Failed to register window");
 
   windowInstance = hInstance;
   int screenWidth = GetSystemMetrics(SM_CXSCREEN);
   int screenHeight = GetSystemMetrics(SM_CYSCREEN);
-  int windowX = screenWidth / 2 - windowWidth / 2;
-  int windowY = screenHeight / 2 - windowHeight / 2;
-  window = CreateWindow(applicationName, applicationName,
+  int windowX = screenWidth / 2 - WINDOW_WIDTH / 2;
+  int windowY = screenHeight / 2 - WINDOW_HEIGHT / 2;
+  window = CreateWindow(APPLICATION_NAME, APPLICATION_NAME,
                         WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
-                        windowX, windowY, windowWidth, windowHeight, NULL, NULL,
+                        windowX, windowY, WINDOW_WIDTH, WINDOW_HEIGHT, NULL, NULL,
                         windowInstance, NULL);
 
-  if (!window) exitOnError("Failed to create window");
+  if (!window) VulkanTools::exitOnError("Failed to create window");
 
   ShowWindow(window, SW_SHOW);
   SetForegroundWindow(window);
@@ -184,7 +176,7 @@ void VulkanExample::initWindow() {
   connection = xcb_connect(NULL, &screenp);
 
   if (xcb_connection_has_error(connection))
-    exitOnError("Failed to connect to X server using XCB.");
+    VulkanTools::exitOnError("Failed to connect to X server using XCB.");
 
   xcb_screen_iterator_t iter =
       xcb_setup_roots_iterator(xcb_get_setup(connection));

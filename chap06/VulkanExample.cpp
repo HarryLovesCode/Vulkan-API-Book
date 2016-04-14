@@ -1,5 +1,4 @@
 #include "VulkanExample.hpp"
-#include "VulkanTools.hpp"
 
 VulkanExample::VulkanExample() {
 #if defined(_WIN32)
@@ -14,7 +13,9 @@ VulkanExample::VulkanExample() {
   swapchain.init(instance, physicalDevice, device);
 }
 
-VulkanExample::~VulkanExample() { vkDestroyInstance(instance, NULL); }
+VulkanExample::~VulkanExample() {
+  vkDestroyInstance(instance, NULL);
+}
 
 void VulkanExample::initInstance() {
   VkApplicationInfo appInfo = {};
@@ -56,7 +57,6 @@ void VulkanExample::initInstance() {
         "continuing.");
   }
 }
-
 
 void VulkanExample::initDevices() {
   uint32_t deviceCount = 0;
@@ -116,7 +116,7 @@ void VulkanExample::initSwapchain() {
 #if defined(_WIN32)
   swapchain.createSurface(windowInstance, window);
 #elif defined(__linux__)
-  swapchain.initSurface(connection, window);
+  swapchain.createSurface(connection, window);
 #endif
 }
 
@@ -235,7 +235,8 @@ void VulkanExample::renderLoop() {
       case XCB_CLIENT_MESSAGE: {
         cm = (xcb_client_message_event_t *)event;
 
-        if (cm->data.data32[0] == wmDeleteWin) running = false;
+        if (cm->data.data32[0] == wmDeleteWin)
+          running = false;
 
         break;
       }

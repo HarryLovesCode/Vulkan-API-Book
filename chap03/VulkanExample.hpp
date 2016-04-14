@@ -5,12 +5,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
-
 #include <vulkan/vulkan.h>
 
 class VulkanExample {
  private:
-  void exitOnError(const char* msg);
   void initInstance();
   void initDevices();
 
@@ -20,7 +18,6 @@ class VulkanExample {
   VkInstance instance;
   VkPhysicalDevice physicalDevice;
   VkDevice device;
-
  public:
   VulkanExample();
   virtual ~VulkanExample();

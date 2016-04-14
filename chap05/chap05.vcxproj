@@ -156,11 +156,12 @@
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="VulkanExample.cpp" />
+    <ClCompile Include="VulkanTools.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VulkanExample.hpp" />
-    <ClInclude Include="VulkanMisc.hpp" />
     <ClInclude Include="VulkanSwapchain.hpp" />
+    <ClInclude Include="VulkanTools.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
