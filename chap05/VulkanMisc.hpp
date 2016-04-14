@@ -3,7 +3,7 @@
 
 static void exitOnError(const char *msg) {
 #if defined(_WIN32)
-  MessageBox(NULL, msg, applicationName, MB_ICONERROR);
+  MessageBox(NULL, msg, "Vulkan", MB_ICONERROR);
 #elif defined(__linux__)
   fputs(msg, stderr);
 #endif
