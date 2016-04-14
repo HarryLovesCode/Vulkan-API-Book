@@ -185,7 +185,7 @@ void VulkanExample::initWindow() {
   connection = xcb_connect(NULL, &screenp);
 
   if (xcb_connection_has_error(connection))
-    exitOnError("Failed to connect to X server using XCB.");
+    VulkanTools::exitOnError("Failed to connect to X server using XCB.");
 
   xcb_screen_iterator_t iter =
       xcb_setup_roots_iterator(xcb_get_setup(connection));
@@ -198,12 +198,12 @@ void VulkanExample::initWindow() {
   uint32_t valueList[] = {screen->black_pixel, 0};
 
   xcb_create_window(connection, XCB_COPY_FROM_PARENT, window, screen->root, 0,
-                    0, windowWidth, windowHeight, 0,
+                    0, WINDOW_WIDTH, WINDOW_HEIGHT, 0,
                     XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual,
                     eventMask, valueList);
   xcb_change_property(connection, XCB_PROP_MODE_REPLACE, window,
                       XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8,
-                      strlen(applicationName), applicationName);
+                      strlen(APPLICATION_NAME), APPLICATION_NAME);
 
   xcb_intern_atom_cookie_t wmDeleteCookie = xcb_intern_atom(
       connection, 0, strlen("WM_DELETE_WINDOW"), "WM_DELETE_WINDOW");
@@ -221,7 +221,6 @@ void VulkanExample::initWindow() {
   xcb_map_window(connection, window);
   xcb_flush(connection);
 }
-
 void VulkanExample::renderLoop() {
   bool running = true;
   xcb_generic_event_t *event;
