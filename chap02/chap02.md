@@ -5,30 +5,44 @@ Before we are able to start using Vulkan, we must first create an instance. A `V
 ```cpp
 #include <stdio.h>
 #include <stdlib.h>
-#include <vector>
-
 #include <vulkan/vulkan.h>
+#include <vector>
 ```
 
-We'll be storing all of our variables in a class we'll call `VulkanSwapchain` for now. The code will start out looking like:
+We'll be storing all of our variables in a class we'll call `VulkanExample` for now. The code will start out looking like:
 
 ```cpp
-class VulkanSwapchain {
+class VulkanExample {
  private:
-  void exitOnError(const char* msg);
   void initInstance();
-  
-  const char* applicationName = "Vulkan Example";
-  const char* engineName = "Vulkan Engine";
-  
   VkInstance instance;
  public:
-  VulkanSwapchain();
-  virtual ~VulkanSwapchain();
+  VulkanExample();
+  virtual ~VulkanExample();
 };
 ```
 
-In this chapter, we'll be focusing on the constructor and the `initInstance` method. 
+In this chapter, we'll be focusing on the constructor and the `initInstance` method. We'll also define a `VulkanTools` class which will contain an `exitOnError` method we'll write later in this chapter. Here are the headers we'll include:
+
+```cpp
+#include <stdio.h>
+#if defined(_WIN32)
+#include <Windows.h>
+#endif
+```
+
+Here is the `namespace` that will house our methods:
+
+```cpp
+#define APPLICATION_NAME "Vulkan Example"
+#define ENGINE_NAME "Vulkan Engine"
+
+namespace VulkanTools {
+void exitOnError(const char *msg);
+}
+```
+
+
 
 ## Application Information
 
@@ -156,18 +170,18 @@ You'll want to note two things. First, we're not going to use `pAllocator`. Inst
 **Usage for `vkCreateInstance`**:
 
 ```cpp
-VkResult res = vkCreateInstance(&createInfo, NULL, &instance);
+VkResult result = vkCreateInstance(&createInfo, NULL, &instance);
 ```
 
 After we've made the call, we should first check if our driver compatible. If it is not, we need to exit. We cannot recover. However, we should provide some sort of useful error. This error is extremely common in my experience. Second, we'll check if our call to `vkCreateInstance` successful. Again, if it was not, we need to exit. We cannot continue. These checks can be made with the following code:
 
 ```cpp
-if (res == VK_ERROR_INCOMPATIBLE_DRIVER) {
+if (result == VK_ERROR_INCOMPATIBLE_DRIVER) {
   exitOnError(
       "Cannot find a compatible Vulkan installable client "
       "driver (ICD). Please make sure your driver supports "
       "Vulkan before continuing. The call to vkCreateInstance failed.");
-} else if (res != VK_SUCCESS) {
+} else if (result != VK_SUCCESS) {
   exitOnError(
       "The call to vkCreateInstance failed. Please make sure "
       "you have a Vulkan installable client driver (ICD) before "
@@ -177,11 +191,19 @@ if (res == VK_ERROR_INCOMPATIBLE_DRIVER) {
 
 ## Termination on Error
 
-Our `exitOnError` method is simple at the moment. We'll make some minor changes to it when we start working with windows, but for now, this will fulfill our needs:
+Our `exitOnError` method is very simple. It will:
+
+- Display a pop-up for Windows users (less people run from the terminal / powershell)
+- Output to `stdout` for other platforms such as Linux
 
 ```cpp
-void VulkanSwapchain::exitOnError(const char* msg) {
-  fputs(msg, stderr);
+void VulkanTools::exitOnError(const char *msg) {
+#if defined(_WIN32)
+  MessageBox(NULL, msg, ENGINE_NAME, MB_ICONERROR);
+#else
+  printf(msg);
+  fflush(stdout);
+#endif
   exit(EXIT_FAILURE);
 }
 ```
@@ -191,7 +213,7 @@ void VulkanSwapchain::exitOnError(const char* msg) {
 Exiting should be graceful if possible. In the case that our destructor is called, we will destroy the instance we created. Afterwards, the program will exit. The destructor looks like this:
 
 ```cpp
-VulkanSwapchain::~VulkanSwapchain() {
-  vkDestroyInstance(instance, NULL); 
+VulkanExample::~VulkanExample() { 
+  vkDestroyInstance(instance, NULL);
 }
 ```
