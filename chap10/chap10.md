@@ -44,7 +44,7 @@ cmdPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 cmdPoolInfo.queueFamilyIndex = swapchain.queueIndex;
 cmdPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
-VkResult result = vkCreateCommandPool(device, &cmdPoolInfo, 0, &cmdPool);
+VkResult result = vkCreateCommandPool(device, &cmdPoolInfo, NULL, &cmdPool);
 
 assert(result == VK_SUCCESS);
 ```
