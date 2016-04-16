@@ -103,6 +103,58 @@ Now that we have done all the steps necessary to allocate a command buffer, we c
 
 **Definition for `vkAllocateCommandBuffers`**:
 
-**[Documentation]() for `vkAllocateCommandBuffers`**:
+```cpp
+VkResult vkAllocateCommandBuffers(
+  VkDevice                           device,
+  const VkCommandBufferAllocateInfo* pAllocateInfo,
+  VkCommandBuffer*                   pCommandBuffers);
+```
+
+**[Documentation](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#vkAllocateCommandBuffers) for `vkAllocateCommandBuffers`**:
+
+- `device` is the logical device that owns the command pool.
+- `pAllocateInfo` is a pointer to an instance of the VkCommandBufferAllocateInfo structure describing parameters of the allocation.
+- `pCommandBuffers` is a pointer to an array of `VkCommandBuffer` handles in which the resulting command buffer objects are returned. The array must be at least the length specified by the `commandBufferCount` member of `pAllocateInfo`. Each allocated command buffer begins in the initial state.
 
 **Usage for `vkAllocateCommandBuffers`**:
+
+Per usual, in addition to calling the method, we'll also verify it was successful.
+
+```cpp
+VkResult result = vkAllocateCommandBuffers(device, &cmdBufAllocInfo, 
+                                           &initialCmdBuffer);
+assert(result == VK_SUCCESS);
+```
+
+## Preparing Command Buffer for Recording
+
+Before we can start recording to our command buffer, we'll have to first create a `VkCommandBufferBeginInfo` object. 
+
+**Definition for `VkCommandBufferBeginInfo`**:
+
+```cpp
+typedef struct VkCommandBufferBeginInfo {
+    VkStructureType                       sType;
+    const void*                           pNext;
+    VkCommandBufferUsageFlags             flags;
+    const VkCommandBufferInheritanceInfo* pInheritanceInfo;
+} VkCommandBufferBeginInfo;
+```
+
+**[Documentation](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#commandbuffers-recording) for `VkCommandBufferBeginInfo`**:
+
+- `sType` is the type of this structure.
+- `pNext` is `NULL` or a pointer to an extension-specific structure.
+- `flags` is a combination of bitfield flags indicating usage behavior for the command buffer.
+- `pInheritanceInfo` is a pointer to a `VkCommandBufferInheritanceInfo` structure, which is used if `commandBuffer` is a secondary command buffer. If this is a primary command buffer, then this value is ignored.
+
+**Usage for `VkCommandBufferBeginInfo`**:
+
+```cpp
+VkCommandBufferBeginInfo cmdBufBeginInfo = {};
+cmdBufBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+cmdBufBeginInfo.flags = 0;
+cmdBufBeginInfo.pNext = NULL;
+```
+
+## Beginning Recording to Command Buffer
