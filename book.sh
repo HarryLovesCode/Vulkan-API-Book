@@ -16,6 +16,7 @@ pandoc book.md                  \
   chap07/chap07.md              \
   chap08/chap08.md              \
   chap09/chap09.md              \
+  chap10/chap10.md              \
 --toc                           \
 --epub-stylesheet book.css      \
 -o VulkanApiBook.epub
@@ -36,6 +37,7 @@ pandoc book.md                  \
   chap07/chap07.md              \
   chap08/chap08.md              \
   chap09/chap09.md              \
+  chap10/chap10.md              \
 --toc                           \
 --latex-engine=xelatex          \
 --variable mainfont="Roboto"    \
