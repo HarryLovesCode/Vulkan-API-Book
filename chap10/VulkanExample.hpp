@@ -21,7 +21,8 @@ class VulkanExample {
   void createInstance();
   void initDevices();
   void createCommandPool();
-  void createInitialCommandBuffer();
+  void createCommandBuffer();
+  void beginCommandBuffer();
 
   VkInstance instance;
   VkPhysicalDevice physicalDevice;
