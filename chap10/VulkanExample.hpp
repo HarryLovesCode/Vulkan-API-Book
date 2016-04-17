@@ -20,11 +20,17 @@ class VulkanExample {
  private:
   void createInstance();
   void initDevices();
+  void createCommandPool();
+  void createInitialCommandBuffer();
 
   VkInstance instance;
   VkPhysicalDevice physicalDevice;
   VkDevice device;
   VulkanSwapchain swapchain;
+  VkCommandPool cmdPool;
+  VkCommandBuffer initialCmdBuffer;
+
+  std::vector<VkCommandBuffer> drawBuffers;
 #if defined(_WIN32)
   HINSTANCE windowInstance;
   HWND window;

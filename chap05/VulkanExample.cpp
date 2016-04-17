@@ -9,14 +9,14 @@ VulkanExample::VulkanExample() {
   freopen("CON", "w", stderr);
   SetConsoleTitle(TEXT(APPLICATION_NAME));
 #endif
-  initInstance();
+  createInstance();
   initDevices();
   swapchain.init(instance, physicalDevice, device);
 }
 
 VulkanExample::~VulkanExample() { vkDestroyInstance(instance, NULL); }
 
-void VulkanExample::initInstance() {
+void VulkanExample::createInstance() {
   VkApplicationInfo appInfo = {};
   appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   appInfo.pNext = NULL;
@@ -135,7 +135,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
   return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
-void VulkanExample::initWindow(HINSTANCE hInstance) {
+void VulkanExample::createWindow(HINSTANCE hInstance) {
   WNDCLASSEX wcex;
 
   wcex.cbSize = sizeof(WNDCLASSEX);
@@ -181,7 +181,7 @@ void VulkanExample::renderLoop() {
 }
 
 #elif defined(__linux__)
-void VulkanExample::initWindow() {
+void VulkanExample::createWindow() {
   int screenp = 0;
   connection = xcb_connect(NULL, &screenp);
 

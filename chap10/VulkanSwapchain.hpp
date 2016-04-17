@@ -200,7 +200,7 @@ public:
 
     assert(caps.maxImageCount >= 1);
 
-    imageCount = caps.minImageCount + 1;
+    uint32_t imageCount = caps.minImageCount + 1;
 
     if (imageCount > caps.maxImageCount) imageCount = caps.maxImageCount;
 

@@ -15,7 +15,7 @@
 
 class VulkanExample {
  private:
-  void initInstance();
+  void createInstance();
   void initDevices();
 
   VkInstance instance;
@@ -36,9 +36,9 @@ class VulkanExample {
   virtual ~VulkanExample();
 
 #if defined(_WIN32)
-  void initWindow(HINSTANCE hInstance);
+  void createWindow(HINSTANCE hInstance);
 #elif defined(__linux__)
-  void initWindow();
+  void createWindow();
 #endif
   void renderLoop();
 };
