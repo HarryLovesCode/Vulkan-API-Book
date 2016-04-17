@@ -118,23 +118,25 @@ void VulkanExample::createCommandPool() {
   assert(result == VK_SUCCESS);
 }
 
-void VulkanExample::createInitialCommandBuffer() {
-  VkCommandBufferAllocateInfo cmdBufAllocInfo = {};
-  cmdBufAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-  cmdBufAllocInfo.pNext = NULL;
-  cmdBufAllocInfo.commandPool = cmdPool;
-  cmdBufAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-  cmdBufAllocInfo.commandBufferCount = 1;
+void VulkanExample::createCommandBuffer() {
+  VkCommandBufferAllocateInfo cmdInfo = {};
+  cmdInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+  cmdInfo.pNext = NULL;
+  cmdInfo.commandPool = cmdPool;
+  cmdInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+  cmdInfo.commandBufferCount = 1;
 
-  VkResult result = vkAllocateCommandBuffers(device, &cmdBufAllocInfo, &initialCmdBuffer);
+  VkResult result = vkAllocateCommandBuffers(device, &cmdInfo, &initialCmdBuffer);
   assert(result == VK_SUCCESS);
+}
 
-  VkCommandBufferBeginInfo cmdBufBeginInfo = {};
-  cmdBufBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-  cmdBufBeginInfo.flags = 0;
-  cmdBufBeginInfo.pNext = NULL;
-  
-  result = vkBeginCommandBuffer(initialCmdBuffer, &cmdBufBeginInfo);
+void VulkanExample::beginCommandBuffer() {
+  VkCommandBufferBeginInfo cmdInfo = {};
+  cmdInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+  cmdInfo.flags = 0;
+  cmdInfo.pNext = NULL;
+
+  VkResult result = vkBeginCommandBuffer(initialCmdBuffer, &cmdInfo);
   assert(result == VK_SUCCESS);
 }
 
