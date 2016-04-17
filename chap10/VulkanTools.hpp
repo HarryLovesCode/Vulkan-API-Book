@@ -2,10 +2,11 @@
 #define VULKAN_TOOLS_HPP
 
 #include <stdio.h>
+#include <stdlib.h>
 #if defined(_WIN32)
 #include <Windows.h>
 #endif
-#include <vulkan\vulkan.h>
+#include <vulkan/vulkan.h>
 
 #define APPLICATION_NAME "Vulkan Example"
 #define ENGINE_NAME "Vulkan Engine"
