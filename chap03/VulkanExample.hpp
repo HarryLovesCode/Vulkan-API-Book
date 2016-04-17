@@ -9,7 +9,7 @@
 
 class VulkanExample {
  private:
-  void initInstance();
+  void createInstance();
   void initDevices();
 
   const char *applicationName = "Vulkan Example";

@@ -8,7 +8,7 @@
 
 class VulkanExample {
  private:
-  void initInstance();
+  void createInstance();
 
   VkInstance instance;
 

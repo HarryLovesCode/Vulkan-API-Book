@@ -38,12 +38,6 @@ class VulkanSwapchain {
   VkPhysicalDevice physicalDevice;
   VkDevice device;
   VkSurfaceKHR surface;
-  VkFormat colorFormat;
-  VkColorSpaceKHR colorSpace;
-  uint32_t queueIndex;
-  VkSwapchainKHR swapchain;
-  std::vector<VkImage> images;
-  std::vector<SwapChainBuffer> buffers;
 
   PFN_vkGetPhysicalDeviceSurfaceSupportKHR fpGetPhysicalDeviceSurfaceSupportKHR;
   PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR
@@ -51,6 +45,7 @@ class VulkanSwapchain {
   PFN_vkGetPhysicalDeviceSurfaceFormatsKHR fpGetPhysicalDeviceSurfaceFormatsKHR;
   PFN_vkGetPhysicalDeviceSurfacePresentModesKHR
       fpGetPhysicalDeviceSurfacePresentModesKHR;
+
   PFN_vkCreateSwapchainKHR fpCreateSwapchainKHR;
   PFN_vkDestroySwapchainKHR fpDestroySwapchainKHR;
   PFN_vkGetSwapchainImagesKHR fpGetSwapchainImagesKHR;
@@ -58,6 +53,17 @@ class VulkanSwapchain {
   PFN_vkQueuePresentKHR fpQueuePresentKHR;
 
  public:
+   VkSwapchainKHR swapchain;
+
+   uint32_t imageCount;
+   uint32_t queueIndex;
+
+   VkFormat colorFormat;
+   VkColorSpaceKHR colorSpace;
+
+   std::vector<VkImage> images;
+   std::vector<SwapChainBuffer> buffers;
+
   void init(VkInstance instance, VkPhysicalDevice physicalDevice,
             VkDevice device) {
     this->instance = instance;
@@ -194,7 +200,7 @@ class VulkanSwapchain {
 
     assert(caps.maxImageCount >= 1);
 
-    uint32_t imageCount = caps.minImageCount + 1;
+    imageCount = caps.minImageCount + 1;
 
     if (imageCount > caps.maxImageCount) imageCount = caps.maxImageCount;
 

@@ -5,7 +5,6 @@ VulkanExample::VulkanExample() {
   AllocConsole();
   AttachConsole(GetCurrentProcessId());
   freopen("CON", "w", stdout);
-  freopen("CON", "w", stderr);
   SetConsoleTitle(TEXT(APPLICATION_NAME));
 #endif
   createInstance();
@@ -23,7 +22,7 @@ void VulkanExample::createInstance() {
   appInfo.pEngineName = ENGINE_NAME;
   appInfo.apiVersion = VK_MAKE_VERSION(1, 0, 3);
 
-  std::vector<const char *> enabledExtensions = {VK_KHR_SURFACE_EXTENSION_NAME};
+  std::vector<const char *> enabledExtensions = { VK_KHR_SURFACE_EXTENSION_NAME };
 
 #if defined(_WIN32)
   enabledExtensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
@@ -45,28 +44,27 @@ void VulkanExample::createInstance() {
 
   if (res == VK_ERROR_INCOMPATIBLE_DRIVER) {
     VulkanTools::exitOnError(
-        "Cannot find a compatible Vulkan installable client "
-        "driver (ICD). Please make sure your driver supports "
-        "Vulkan before continuing. The call to vkCreateInstance failed.");
+      "Cannot find a compatible Vulkan installable client "
+      "driver (ICD). Please make sure your driver supports "
+      "Vulkan before continuing. The call to vkCreateInstance failed.");
   } else if (res != VK_SUCCESS) {
     VulkanTools::exitOnError(
-        "The call to vkCreateInstance failed. Please make sure "
-        "you have a Vulkan installable client driver (ICD) before "
-        "continuing.");
+      "The call to vkCreateInstance failed. Please make sure "
+      "you have a Vulkan installable client driver (ICD) before "
+      "continuing.");
   }
 }
 
 void VulkanExample::initDevices() {
   uint32_t deviceCount = 0;
   VkResult result = vkEnumeratePhysicalDevices(instance, &deviceCount, NULL);
-
   assert(result == VK_SUCCESS);
   assert(deviceCount >= 1);
 
   std::vector<VkPhysicalDevice> physicalDevices(deviceCount);
+
   result = vkEnumeratePhysicalDevices(instance, &deviceCount,
                                       physicalDevices.data());
-
   assert(result == VK_SUCCESS);
 
   physicalDevice = physicalDevices[0];
@@ -93,7 +91,6 @@ void VulkanExample::initDevices() {
   deviceInfo.pEnabledFeatures = NULL;
 
   result = vkCreateDevice(physicalDevice, &deviceInfo, NULL, &device);
-
   assert(result == VK_SUCCESS);
 
   VkPhysicalDeviceProperties physicalProperties = {};
@@ -108,6 +105,37 @@ void VulkanExample::initDevices() {
             VK_VERSION_MINOR(physicalProperties.apiVersion),
             VK_VERSION_PATCH(physicalProperties.apiVersion));
   }
+}
+
+void VulkanExample::createCommandPool() {
+  VkCommandPoolCreateInfo cmdPoolInfo = {};
+  cmdPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+  cmdPoolInfo.pNext = NULL;
+  cmdPoolInfo.queueFamilyIndex = swapchain.queueIndex;
+  cmdPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+
+  VkResult result = vkCreateCommandPool(device, &cmdPoolInfo, NULL, &cmdPool);
+  assert(result == VK_SUCCESS);
+}
+
+void VulkanExample::createInitialCommandBuffer() {
+  VkCommandBufferAllocateInfo cmdBufAllocInfo = {};
+  cmdBufAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+  cmdBufAllocInfo.pNext = NULL;
+  cmdBufAllocInfo.commandPool = cmdPool;
+  cmdBufAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+  cmdBufAllocInfo.commandBufferCount = 1;
+
+  VkResult result = vkAllocateCommandBuffers(device, &cmdBufAllocInfo, &initialCmdBuffer);
+  assert(result == VK_SUCCESS);
+
+  VkCommandBufferBeginInfo cmdBufBeginInfo = {};
+  cmdBufBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+  cmdBufBeginInfo.flags = 0;
+  cmdBufBeginInfo.pNext = NULL;
+  
+  result = vkBeginCommandBuffer(initialCmdBuffer, &cmdBufBeginInfo);
+  assert(result == VK_SUCCESS);
 }
 
 void VulkanExample::initSwapchain() {
@@ -185,7 +213,7 @@ void VulkanExample::createWindow() {
   connection = xcb_connect(NULL, &screenp);
 
   if (xcb_connection_has_error(connection))
-    VulkanTools::exitOnError("Failed to connect to X server using XCB.");
+    exitOnError("Failed to connect to X server using XCB.");
 
   xcb_screen_iterator_t iter =
       xcb_setup_roots_iterator(xcb_get_setup(connection));
@@ -198,12 +226,12 @@ void VulkanExample::createWindow() {
   uint32_t valueList[] = {screen->black_pixel, 0};
 
   xcb_create_window(connection, XCB_COPY_FROM_PARENT, window, screen->root, 0,
-                    0, WINDOW_WIDTH, WINDOW_HEIGHT, 0,
+                    0, windowWidth, windowHeight, 0,
                     XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual,
                     eventMask, valueList);
   xcb_change_property(connection, XCB_PROP_MODE_REPLACE, window,
                       XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8,
-                      strlen(APPLICATION_NAME), APPLICATION_NAME);
+                      strlen(applicationName), applicationName);
 
   xcb_intern_atom_cookie_t wmDeleteCookie = xcb_intern_atom(
       connection, 0, strlen("WM_DELETE_WINDOW"), "WM_DELETE_WINDOW");

@@ -27,28 +27,34 @@
   }
 
 class VulkanSwapchain {
- private:
+private:
   VkInstance instance;
   VkPhysicalDevice physicalDevice;
   VkDevice device;
   VkSurfaceKHR surface;
-  VkFormat colorFormat;
-  VkColorSpaceKHR colorSpace;
-  uint32_t queueIndex;
 
   PFN_vkGetPhysicalDeviceSurfaceSupportKHR fpGetPhysicalDeviceSurfaceSupportKHR;
   PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR
-      fpGetPhysicalDeviceSurfaceCapabilitiesKHR;
+    fpGetPhysicalDeviceSurfaceCapabilitiesKHR;
   PFN_vkGetPhysicalDeviceSurfaceFormatsKHR fpGetPhysicalDeviceSurfaceFormatsKHR;
   PFN_vkGetPhysicalDeviceSurfacePresentModesKHR
-      fpGetPhysicalDeviceSurfacePresentModesKHR;
+    fpGetPhysicalDeviceSurfacePresentModesKHR;
+
   PFN_vkCreateSwapchainKHR fpCreateSwapchainKHR;
   PFN_vkDestroySwapchainKHR fpDestroySwapchainKHR;
   PFN_vkGetSwapchainImagesKHR fpGetSwapchainImagesKHR;
   PFN_vkAcquireNextImageKHR fpAcquireNextImageKHR;
   PFN_vkQueuePresentKHR fpQueuePresentKHR;
 
- public:
+public:
+  VkSwapchainKHR swapchain;
+
+  uint32_t imageCount;
+  uint32_t queueIndex;
+
+  VkFormat colorFormat;
+  VkColorSpaceKHR colorSpace;
+
   void init(VkInstance instance, VkPhysicalDevice physicalDevice,
             VkDevice device) {
     this->instance = instance;

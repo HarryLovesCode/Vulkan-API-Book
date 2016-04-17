@@ -3,7 +3,7 @@
 #include "VulkanTools.hpp"
 
 void VulkanTools::exitOnError(const char *msg) {
-#ifdef _WIN32
+#if defined(_WIN32)
   MessageBox(NULL, msg, ENGINE_NAME, MB_ICONERROR);
 #else
   printf(msg);

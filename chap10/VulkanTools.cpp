@@ -1,5 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "VulkanTools.hpp"
 
 void VulkanTools::exitOnError(const char *msg) {

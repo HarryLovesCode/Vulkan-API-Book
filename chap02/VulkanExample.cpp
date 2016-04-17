@@ -1,11 +1,11 @@
 #include "VulkanExample.hpp"
 #include "VulkanTools.hpp"
 
-VulkanExample::VulkanExample() { initInstance(); }
+VulkanExample::VulkanExample() { createInstance(); }
 
 VulkanExample::~VulkanExample() { vkDestroyInstance(instance, NULL); }
 
-void VulkanExample::initInstance() {
+void VulkanExample::createInstance() {
   VkApplicationInfo appInfo = {};
   appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   appInfo.pNext = NULL;
