@@ -30,7 +30,7 @@ You can find the repository on Github at [HarryLovesCode/Vulkan-API-Book](https:
 
 ## Reading the Book
 
-You can find the latest stable version [on the Github releases page](https://github.com/HarryLovesCode/Vulkan-API-Book/releases). Otherwise, you can read it on [Gitbook](https://harrylovescode.gitbooks.io/vulkan-api/content/). If you'd like to build it yourself, you will need `pandoc`, `xetex` (for Linux), and `latex-extras` installed.
+You can find the latest stable version [on the Github releases page](https://github.com/HarryLovesCode/Vulkan-API-Book/releases). Otherwise, you can read it on [Gitbook](https://harrylovescode.gitbooks.io/vulkan-api/content/). If you'd like to build it yourself, you will need `pandoc`, `xetex`, Roboto Fonts, Fira Mono fonts, Fira Sans fonts, and `latex-extras` installed.
 
 ## Building Code on Linux
 
