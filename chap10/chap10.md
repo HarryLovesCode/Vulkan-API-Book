@@ -57,7 +57,7 @@ For this section, we'll be adding a new variable to our `VulkanExample` class:
 VkCommandBuffer initialCmdBuffer;
 ```
 
-In addition to that, we'll also be writing the body of a new method:
+In addition to that, we'll also be writing the body of a new method for the next few sections:
 
 ```cpp
 void VulkanExample::createInitialCommandBuffer() {}
@@ -121,14 +121,14 @@ VkResult vkAllocateCommandBuffers(
 Per usual, in addition to calling the method, we'll also verify it was successful.
 
 ```cpp
-VkResult result = vkAllocateCommandBuffers(device, &cmdBufAllocInfo, 
+VkResult result = vkAllocateCommandBuffers(device, &cmdBufAllocInfo,
                                            &initialCmdBuffer);
 assert(result == VK_SUCCESS);
 ```
 
 ## Preparing Command Buffer for Recording
 
-Before we can start recording to our command buffer, we'll have to first create a `VkCommandBufferBeginInfo` object. 
+Before we can start recording to our command buffer, we'll have to first create a `VkCommandBufferBeginInfo` object.
 
 **Definition for `VkCommandBufferBeginInfo`**:
 
@@ -157,4 +157,26 @@ cmdBufBeginInfo.flags = 0;
 cmdBufBeginInfo.pNext = NULL;
 ```
 
-## Beginning Recording to Command Buffer
+## Begin Recording to a Command Buffer
+
+Now that we've allocated a command buffer and readied the information Vulkan needs to begin recording, we can call `vkBeginCommandBuffer`. This method will take a handle to our command buffer and put it in a recording state.
+
+**Definition for `vkBeginCommandBuffer`**:
+
+```cpp
+VkResult vkBeginCommandBuffer(
+  VkCommandBuffer                 commandBuffer,
+  const VkCommandBufferBeginInfo* pBeginInfo);
+```
+
+**[Documentation](https://www.khronos.org/registry/vulkan/specs/1.0/xhtml/vkspec.html#vkBeginCommandBuffer) for `vkBeginCommandBuffer`**:
+
+- `commandBuffer` is the handle of the command buffer which is to be put in the recording state.
+- `pBeginInfo` is an instance of the `VkCommandBufferBeginInfo` structure, which defines additional information about how the command buffer begins recording.
+
+**Usage for `vkBeginCommandBuffer`**:
+
+```cpp
+result = vkBeginCommandBuffer(initialCmdBuffer, &cmdBufBeginInfo);
+assert(result == VK_SUCCESS);
+```

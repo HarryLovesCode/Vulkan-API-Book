@@ -148,7 +148,7 @@ HWND window;
 In this section we'll be writing the body this method:
 
 ```cpp
-void initWindow(HINSTANCE hInstance) {}
+void createWindow(HINSTANCE hInstance) {}
 ```
 
 Don't worry about `hInstance` for now. It is passed from the `WinMain` method we'll write later on. To setup our window, we'll need to register it with Windows, but first, we need to create a `WNDCLASSEX` object to pass during registration.
@@ -349,7 +349,7 @@ switch (message) {
 For this section, we'll write the body of this method:
 
 ```cpp
-void VulkanSwapchain::renderLoop() {}
+void VulkanExample::renderLoop() {}
 ```
 
 We're calling it `renderLoop` because later we'll make calls to rendering functions within it. For now, however, we're going to:
@@ -374,7 +374,7 @@ while (GetMessage(&message, NULL, 0, 0)) {
 This is our application's new entry-point. We will **not** be using your typical `int main()` entry-point. This is because Windows requires GUI applications to enter at `WinMain`. We need to:
 
 - Create an instance of our class
-- Call our `initWindow` method
+- Call our `createWindow` method
 - Call our `renderLoop`
 
 **Definition for `WinMain`**:
@@ -401,7 +401,7 @@ int CALLBACK WinMain(
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
                    LPSTR lpCmdLine, int nCmdShow) {
   VulkanSwapchain ve = VulkanSwapchain();
-  ve.initWindow(hInstance);
+  ve.createWindow(hInstance);
   ve.renderLoop();
 }
 ```

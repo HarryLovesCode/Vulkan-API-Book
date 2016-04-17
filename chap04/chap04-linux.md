@@ -17,7 +17,7 @@ If you're targeting Windows as well, you should surround the include by the `#if
 For this chapter, we're going to be writing the contents of these two methods:
 
 ```cpp
-void initWindow() {}
+void createWindow() {}
 void renderLoop() {}
 ```
 
@@ -35,7 +35,7 @@ xcb_atom_t wmProtocols;
 xcb_atom_t wmDeleteWin;
 ```
 
-to our `VulkanSwapchain` class.
+to our `VulkanExample` class.
 
 ### Getting a Connection
 
@@ -326,7 +326,7 @@ xcb_change_property(connection, XCB_PROP_MODE_REPLACE, window,
 All we need to do now is write the contents of the `renderLoop` method. Again, I'm not going to be going too far into depth because this is just glue and we're focused on Vulkan here. Anyways, we'll be using the `xcb_wait_for_event` method to do just that: wait for events. In order to convert the server's response to a value we can check in a **switch case** block, we need to use the bitwise `AND` (`&`) operator with the value: `~0x80`. You can see what I'm talking about below:
 
 ```cpp
-void VulkanSwapchain::renderLoop() {
+void VulkanExample::renderLoop() {
   bool running = true;
   xcb_generic_event_t *event;
   xcb_client_message_event_t *cm;
