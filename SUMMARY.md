@@ -23,4 +23,5 @@
 * [Image Views](chap08/chap08.md)
 * [Acquiring, Presenting, Cleaning Up](chap09/chap09.md)
 * [Command Buffers and Command Pools](chap10/chap10.md)
+* Depth Buffers and Uniform Buffers
 
